@@ -1,3 +1,26 @@
+import { createClient } from "@supabase/supabase-js";
+
+// Supabase connection
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseKey = import.meta.env.VITE_SUPABASE_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+// Fetch words from DB
+async function fetchWords(num) {
+  const { data: words, error } = await supabase
+    .from("words")
+    .select("*")
+    .limit(num);
+
+  if (error) {
+    console.error("error fetching words:", error);
+    return [];
+  }
+
+  console.log(`Fetched ${words.length} words:`, words);
+  return words;
+}
+
 // Get the canvas and change its size
 const canvas = document.getElementById("game-canvas");
 canvas.width = 800;
@@ -24,7 +47,7 @@ const tiles = Array.from({ length: rows }, () =>
 
 let selectedTiles = 0;
 
-function drawBoard() {
+async function drawBoard(words) {
   for (let row = 0; row < rows; row++) {
     for (let col = 0; col < cols; col++) {
       const x = col * tileWidth;
@@ -35,9 +58,29 @@ function drawBoard() {
 
       ctx.fillStyle = tiles[row][col] ? "yellow" : "lightblue";
       ctx.fillRect(x, y, tileWidth, tileHeight);
+
+      const wordIndex = row * cols + col;
+
+      if (words[wordIndex]) {
+        ctx.fillStyle = "black";
+        ctx.font = "20px Arial";
+        ctx.fillText(words[wordIndex].word, x + 10, y + 30);
+      }
     }
   }
 }
+
+async function insertWord(word) {
+  const { error } = await supabase.from("words").insert([{ word }]);
+
+  if (error) {
+    console.error(`error inserting word:`, error);
+  } else {
+    console.log(`word "${word}" inserted successfully`);
+  }
+}
+
+const words = await fetchWords(rows * cols);
 
 canvas.addEventListener("click", (event) => {
   const rect = canvas.getBoundingClientRect();
@@ -61,7 +104,35 @@ canvas.addEventListener("click", (event) => {
     }
   }
 
-  drawBoard();
+  drawBoard(words);
 });
 
-drawBoard();
+// List of words to insert
+// const wordsToInsert = [
+//   "apple",
+//   "banana",
+//   "cherry",
+//   "date",
+//   "elderberry",
+//   "fig",
+//   "grape",
+//   "honeydew",
+//   "kiwi",
+//   "lemon",
+//   "mango",
+//   "nectarine",
+//   "orange",
+//   "papaya",
+//   "quince",
+//   "raspberry",
+//   "strawberry",
+//   "tangerine",
+//   "ugli",
+//   "watermelon",
+// ];
+
+// for (const word of wordsToInsert) {
+//   await insertWord(word);
+// }
+
+drawBoard(words);

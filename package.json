@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.4"
+  },
+  "devDependencies": {
+    "vite": "^6.2.4"
+  },
+  "scripts": {
+    "start": "vite"
+  }
+}
