@@ -1,5 +1,6 @@
-import { drawBoard, chooseWords, WORDS_IN_RIDDLE } from "./game.js";
-import { fetchRiddles } from "./supabase.js";
+import { drawBoard, getTilesForANewGame, WORDS_IN_RIDDLE } from "./game.js";
+
+const DEBUG = true;
 
 // Get the canvas and change its size
 const canvas = document.getElementById("game-canvas");
@@ -28,9 +29,13 @@ if (rows * cols != (WORDS_IN_RIDDLE * (WORDS_IN_RIDDLE + 1)) / 2 - 1) {
   throw new Error("rows/cols/groups don't match");
 }
 
-const completedGroups = Array.from({ length: WORDS_IN_RIDDLE }, () => false);
+const completedGroups = Array.from(
+  { length: WORDS_IN_RIDDLE - 1 },
+  () => false
+);
 
-let maxGroupUncompleted = 6;
+let maxGroupUncompleted = 6,
+  minGroupUncompleted = 2;
 
 // Divide the board into tiles
 
@@ -39,10 +44,9 @@ const tileWidth = canvas.width / cols,
 
 let selectedTiles = new Set();
 
-const riddles = await fetchRiddles(WORDS_IN_RIDDLE - 1);
-const tiles = chooseWords(riddles);
+const tiles = await getTilesForANewGame();
 
-drawBoard(ctx, tiles, selectedTiles, rows, cols, tileWidth, tileHeight);
+drawBoard(ctx, tiles, selectedTiles, rows, cols, tileWidth, tileHeight, DEBUG);
 
 canvas.addEventListener("click", (event) => {
   const rect = canvas.getBoundingClientRect();
@@ -58,7 +62,7 @@ canvas.addEventListener("click", (event) => {
 
   if (selectedTiles.has(tiles[i])) {
     selectedTiles.delete(tiles[i]);
-  } else {
+  } else if (!tiles[i].completed) {
     if (selectedTiles.size == maxGroupUncompleted) {
       console.log(`cannot choose more than ${maxGroupUncompleted} tiles`);
     } else {
@@ -66,11 +70,101 @@ canvas.addEventListener("click", (event) => {
     }
   }
 
-  drawBoard(ctx, tiles, selectedTiles, rows, cols, tileWidth, tileHeight);
+  drawBoard(
+    ctx,
+    tiles,
+    selectedTiles,
+    rows,
+    cols,
+    tileWidth,
+    tileHeight,
+    DEBUG
+  );
 });
+
+let won = false;
 
 const submitButton = document.getElementById("submit-button");
 
 submitButton.addEventListener("click", () => {
-  console.log("submit");
+  const numOfSelections = selectedTiles.size;
+
+  if (numOfSelections < minGroupUncompleted) {
+    console.error("not enogh selected");
+  } else if (completedGroups[numOfSelections - 1]) {
+    console.error("you alredy solved this group size");
+  } else {
+    // Count the number of tiles which their group size is the same as the selected number of tiles
+    let counter = 0;
+
+    for (const tile of selectedTiles) {
+      if (tile.groupSize === numOfSelections) {
+        counter++;
+      }
+    }
+
+    // Correct!
+    if (counter == numOfSelections) {
+      console.log("correct!");
+
+      for (const tile of selectedTiles) {
+        tile.completed = true;
+      }
+
+      selectedTiles.clear();
+
+      completedGroups[numOfSelections - 1] = true;
+
+      // The user won!
+      if (minGroupUncompleted === maxGroupUncompleted) {
+        console.log("WINNER!");
+        won = true;
+      } else if (numOfSelections == minGroupUncompleted) {
+        for (let i = numOfSelections; i < completedGroups.length; i++) {
+          if (!completedGroups[i]) {
+            minGroupUncompleted = i + 1;
+            break;
+          }
+        }
+      } else if (numOfSelections == maxGroupUncompleted) {
+        for (let i = numOfSelections - 1; i >= 0; i--) {
+          if (!completedGroups[i]) {
+            maxGroupUncompleted = i + 1;
+            break;
+          }
+        }
+      }
+
+      drawBoard(
+        ctx,
+        tiles,
+        selectedTiles,
+        rows,
+        cols,
+        tileWidth,
+        tileHeight,
+        DEBUG
+      );
+    } else if (2 * counter >= numOfSelections) {
+      console.log(`incorrect: ${counter}/${numOfSelections}`);
+    } else {
+      console.log(`incorrect`);
+    }
+  }
+});
+
+const resetButton = document.getElementById("reset-button");
+
+resetButton.addEventListener("click", () => {
+  selectedTiles.clear();
+  drawBoard(
+    ctx,
+    tiles,
+    selectedTiles,
+    rows,
+    cols,
+    tileWidth,
+    tileHeight,
+    DEBUG
+  );
 });

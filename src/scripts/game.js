@@ -1,4 +1,5 @@
 import { getRandomNums, shuffleArray } from "./utils.js";
+import { fetchRiddles } from "./supabase.js";
 
 export const WORDS_IN_RIDDLE = 6;
 
@@ -20,8 +21,17 @@ export function drawBoard(
   rows,
   cols,
   tileWidth,
-  tileHeight
+  tileHeight,
+  debug = false
 ) {
+  const colors = [
+    "lightcoral",
+    "lightgreen",
+    "lightpink",
+    "lightyellow",
+    "lightsalmon",
+  ];
+
   for (let row = 0; row < rows; row++) {
     for (let col = 0; col < cols; col++) {
       const x = col * tileWidth;
@@ -32,12 +42,20 @@ export function drawBoard(
       ctx.strokeRect(x, y, tileWidth, tileHeight);
 
       if (i < tiles.length) {
-        ctx.fillStyle = selectedTiles.has(tiles[i]) ? "yellow" : "lightblue";
+        if (tiles[i].completed) {
+          ctx.fillStyle = colors[tiles[i].groupSize - 2];
+        } else {
+          ctx.fillStyle = selectedTiles.has(tiles[i]) ? "yellow" : "lightblue";
+        }
         ctx.fillRect(x, y, tileWidth, tileHeight);
 
         ctx.fillStyle = "black";
         ctx.font = "20px Arial";
         ctx.fillText(tiles[i].word, x + 10, y + 30);
+
+        if (debug) {
+          ctx.fillText(`group ${tiles[i].groupSize}`, x + 10, y + 30 + 30);
+        }
       } else {
         ctx.fillStyle = "lightblue";
         ctx.fillRect(x, y, tileWidth, tileHeight);
@@ -54,15 +72,14 @@ export function drawBoard(
  */
 export function chooseWords(riddles, shuffle = true) {
   let words = [];
-  const wordsInRiddle = Object.keys(riddles[0]).length - 2; // exclude ID and riddle
 
   riddles.forEach((riddle, index) => {
     // 2, 3, ..., 6
-    const indices = getRandomNums(wordsInRiddle, index + 2);
+    const indices = getRandomNums(WORDS_IN_RIDDLE, index + 2);
 
     indices.forEach((i) => {
       words.push({
-        groupeSize: index + 2,
+        groupSize: index + 2,
         riddle: riddle["riddle"],
         word: riddle[`word_${i}`],
       });
@@ -74,4 +91,14 @@ export function chooseWords(riddles, shuffle = true) {
   }
 
   return words;
+}
+
+export async function getTilesForANewGame() {
+  const riddles = await fetchRiddles(WORDS_IN_RIDDLE - 1);
+  const tiles = chooseWords(riddles);
+
+  return Array.from(tiles, (tile) => {
+    tile.completed = false;
+    return tile;
+  });
 }
