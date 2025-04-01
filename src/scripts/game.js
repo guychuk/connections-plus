@@ -1,5 +1,6 @@
 import { getRandomNums, shuffleArray } from "./utils.js";
 import { fetchRiddles } from "./supabase.js";
+import { groupColors, font } from "../config/theme.json";
 
 export const WORDS_IN_RIDDLE = 6;
 
@@ -24,14 +25,6 @@ export function drawBoard(
   tileHeight,
   debug = false
 ) {
-  const colors = [
-    "lightcoral",
-    "lightgreen",
-    "lightpink",
-    "lightyellow",
-    "lightsalmon",
-  ];
-
   for (let row = 0; row < rows; row++) {
     for (let col = 0; col < cols; col++) {
       const x = col * tileWidth;
@@ -43,15 +36,18 @@ export function drawBoard(
 
       if (i < tiles.length) {
         if (tiles[i].completed) {
-          ctx.fillStyle = colors[tiles[i].groupSize - 2];
+          ctx.fillStyle = groupColors[tiles[i].groupSize - 2];
         } else {
           ctx.fillStyle = selectedTiles.has(tiles[i]) ? "yellow" : "lightblue";
         }
         ctx.fillRect(x, y, tileWidth, tileHeight);
 
         ctx.fillStyle = "black";
-        ctx.font = "20px Arial";
-        ctx.fillText(tiles[i].word, x + 10, y + 30);
+        ctx.font = font;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+
+        ctx.fillText(tiles[i].word, x + tileWidth / 2, y + tileHeight / 2);
 
         if (debug) {
           ctx.fillText(`group ${tiles[i].groupSize}`, x + 10, y + 30 + 30);

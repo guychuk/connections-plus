@@ -1,7 +1,7 @@
 import { drawBoard, getTilesForANewGame, WORDS_IN_RIDDLE } from "./game.js";
 import { shuffleArray } from "./utils.js";
 
-const DEBUG = true;
+const DEBUG = false;
 
 // Get the canvas and change its size
 const canvas = document.getElementById("game-canvas");
@@ -45,7 +45,7 @@ const tileWidth = canvas.width / cols,
 
 let selectedTiles = new Set();
 
-const tiles = await getTilesForANewGame();
+let tiles = await getTilesForANewGame();
 
 drawBoard(ctx, tiles, selectedTiles, rows, cols, tileWidth, tileHeight, DEBUG);
 
@@ -186,4 +186,25 @@ shuffleButton.addEventListener("click", () => {
       DEBUG
     );
   }
+});
+
+const newGameButton = document.getElementById("new-game-button");
+
+newGameButton.addEventListener("click", async () => {
+  selectedTiles.clear();
+
+  tiles = await getTilesForANewGame();
+
+  won = false;
+
+  drawBoard(
+    ctx,
+    tiles,
+    selectedTiles,
+    rows,
+    cols,
+    tileWidth,
+    tileHeight,
+    DEBUG
+  );
 });
