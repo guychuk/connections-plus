@@ -5,20 +5,25 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Fetch words from DB
-async function fetchWords(num) {
-  const { data: words, error } = await supabase
-    .from("words")
+/**
+ * Fetch riddles from the DB.
+ * @param {number} num umber of riddles to fetch.
+ * @returns an array of num riddles.
+ */
+async function fetchRiddles(num) {
+  const { data: riddles, error } = await supabase
+    .from("random_riddles")
     .select("*")
     .limit(num);
 
   if (error) {
-    console.error("error fetching words:", error);
+    console.error("error fetching riddles:", error);
     return [];
   }
 
-  console.log(`Fetched ${words.length} words:`, words);
-  return words;
+  console.log(`Fetched ${riddles.length} riddles`);
+
+  return riddles;
 }
 
 // Get the canvas and change its size
@@ -30,9 +35,13 @@ const ctx = canvas.getContext("2d");
 
 const rows = 4;
 const cols = 5;
-const groups = 6;
+const WORDS_IN_RIDDLE = 6;
 
-const completedGroups = Array.from({ length: groups }, () => false);
+if (rows * cols != (WORDS_IN_RIDDLE * (WORDS_IN_RIDDLE + 1)) / 2 - 1) {
+  throw new Error("rows/cols/groups don't match");
+}
+
+const completedGroups = Array.from({ length: WORDS_IN_RIDDLE }, () => false);
 
 let maxGroupUncompleted = 6;
 
@@ -47,7 +56,11 @@ const tiles = Array.from({ length: rows }, () =>
 
 let selectedTiles = 0;
 
-async function drawBoard(words) {
+/**
+ * Draw the board.
+ * @param words array of riddle-word pairs for the board.
+ */
+function drawBoard(words) {
   for (let row = 0; row < rows; row++) {
     for (let col = 0; col < cols; col++) {
       const x = col * tileWidth;
@@ -70,17 +83,65 @@ async function drawBoard(words) {
   }
 }
 
-async function insertWord(word) {
-  const { error } = await supabase.from("words").insert([{ word }]);
+/**
+ * Get k random distinct numbers in [1, n].
+ * @param {number} n number of options.
+ * @param {number} k number of choices (0 <= k <= n) [pass -1 for k=n which is the default].
+ * @returns an array with k random choices from [1, n].
+ */
+function getRandomNums(n, k = -1) {
+  let options = Array.from({ length: n }, (_, index) => index + 1);
+  let chosen = 0;
 
-  if (error) {
-    console.error(`error inserting word:`, error);
-  } else {
-    console.log(`word "${word}" inserted successfully`);
+  if (k < 0) {
+    k = n;
+  }
+
+  while (chosen < k) {
+    // Choose a random index
+    const index = Math.floor(Math.random() * (n - chosen)) + chosen;
+
+    // Swap the values
+    [options[chosen], options[index]] = [options[index], options[chosen]];
+
+    // Save the choice
+    chosen++;
+  }
+
+  return options.slice(0, k);
+}
+
+/**
+ *
+ * @param {array} array
+ */
+function shuffleArray(array) {
+  const perm = getRandomNums(array.length);
+
+  for (let i = 0; i < array.length; i++) {
+    [array[i], array[perm[i] - 1]] = [array[perm[i] - 1], array[i]];
   }
 }
 
-const words = await fetchWords(rows * cols);
+/**
+ * Get words from fetched riddles.
+ * @param riddles
+ * @returns array of riddle-word pairs for the board.
+ */
+function getWords(riddles) {
+  let words = [];
+
+  riddles.forEach((riddle, index) => {
+    // 2, 3, ..., 6
+    const indices = getRandomNums(WORDS_IN_RIDDLE, index + 2);
+
+    indices.forEach((i) => {
+      words.push({ riddle: riddle["riddle"], word: riddle[`word_${i}`] });
+    });
+  });
+
+  return words;
+}
 
 canvas.addEventListener("click", (event) => {
   const rect = canvas.getBoundingClientRect();
@@ -89,8 +150,6 @@ canvas.addEventListener("click", (event) => {
 
   const clickedCol = Math.floor(mouseX / tileWidth);
   const clickedRow = Math.floor(mouseY / tileHeight);
-
-  console.log(`clicked tile (${clickedRow}, ${clickedCol})`);
 
   if (tiles[clickedRow][clickedCol]) {
     tiles[clickedRow][clickedCol] = false;
@@ -107,32 +166,10 @@ canvas.addEventListener("click", (event) => {
   drawBoard(words);
 });
 
-// List of words to insert
-// const wordsToInsert = [
-//   "apple",
-//   "banana",
-//   "cherry",
-//   "date",
-//   "elderberry",
-//   "fig",
-//   "grape",
-//   "honeydew",
-//   "kiwi",
-//   "lemon",
-//   "mango",
-//   "nectarine",
-//   "orange",
-//   "papaya",
-//   "quince",
-//   "raspberry",
-//   "strawberry",
-//   "tangerine",
-//   "ugli",
-//   "watermelon",
-// ];
+const riddles = await fetchRiddles(WORDS_IN_RIDDLE - 1);
 
-// for (const word of wordsToInsert) {
-//   await insertWord(word);
-// }
+const words = getWords(riddles);
+
+shuffleArray(words);
 
 drawBoard(words);
