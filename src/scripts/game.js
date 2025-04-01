@@ -1,32 +1,47 @@
-import { getRandomNums } from "./utils.js";
-import { shuffleArray } from "./utils.js";
+import { getRandomNums, shuffleArray } from "./utils.js";
+
+export const WORDS_IN_RIDDLE = 6;
 
 /**
  * Draw the board.
  * @param {CanvasRenderingContext2D} ctx Canvas rendering context.
  * @param {Array} words array of riddle-word pairs for the board.
  * @param {Array} tiles 2D array of tile states.
+ * @param {Set} selectedTiles array of selected tiles.
+ * @param {number} rows number of rows.
+ * @param {number} cols number of columns.
  * @param {number} tileWidth Width of each tile.
  * @param {number} tileHeight Height of each tile.
  */
-export function drawBoard(ctx, tiles, tileWidth, tileHeight) {
-  const rows = tiles.length,
-    cols = tiles[0].length;
-
+export function drawBoard(
+  ctx,
+  tiles,
+  selectedTiles,
+  rows,
+  cols,
+  tileWidth,
+  tileHeight
+) {
   for (let row = 0; row < rows; row++) {
     for (let col = 0; col < cols; col++) {
       const x = col * tileWidth;
       const y = row * tileHeight;
+      const i = row * cols + col;
 
       ctx.strokeStyle = "black";
       ctx.strokeRect(x, y, tileWidth, tileHeight);
 
-      ctx.fillStyle = tiles[row][col].selected ? "yellow" : "lightblue";
-      ctx.fillRect(x, y, tileWidth, tileHeight);
+      if (i < tiles.length) {
+        ctx.fillStyle = selectedTiles.has(tiles[i]) ? "yellow" : "lightblue";
+        ctx.fillRect(x, y, tileWidth, tileHeight);
 
-      ctx.fillStyle = "black";
-      ctx.font = "20px Arial";
-      ctx.fillText(tiles[row][col].word, x + 10, y + 30);
+        ctx.fillStyle = "black";
+        ctx.font = "20px Arial";
+        ctx.fillText(tiles[i].word, x + 10, y + 30);
+      } else {
+        ctx.fillStyle = "lightblue";
+        ctx.fillRect(x, y, tileWidth, tileHeight);
+      }
     }
   }
 }
@@ -46,7 +61,11 @@ export function chooseWords(riddles, shuffle = true) {
     const indices = getRandomNums(wordsInRiddle, index + 2);
 
     indices.forEach((i) => {
-      words.push({ riddle: riddle["riddle"], word: riddle[`word_${i}`] });
+      words.push({
+        groupeSize: index + 2,
+        riddle: riddle["riddle"],
+        word: riddle[`word_${i}`],
+      });
     });
   });
 

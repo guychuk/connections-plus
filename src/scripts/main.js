@@ -1,17 +1,11 @@
+import { drawBoard, chooseWords, WORDS_IN_RIDDLE } from "./game.js";
 import { fetchRiddles } from "./supabase.js";
-import { drawBoard, chooseWords } from "./game.js";
 
 // Get the canvas and change its size
 const canvas = document.getElementById("game-canvas");
 const ctx = canvas.getContext("2d");
 
-const setCanvasDPI = (
-  canvas,
-  ctx,
-  width,
-  height,
-  dpi = window.devicePixelRatio
-) => {
+const setCanvasDPI = (canvas, width, height, dpi = window.devicePixelRatio) => {
   const scaledWidth = width * dpi;
   const scaledHeight = height * dpi;
 
@@ -25,11 +19,10 @@ const setCanvasDPI = (
 const canvasWidth = 800,
   canvasHeight = 600;
 
-setCanvasDPI(canvas, ctx, canvasWidth, canvasHeight);
+setCanvasDPI(canvas, canvasWidth, canvasHeight);
 
 const rows = 4,
   cols = 5;
-const WORDS_IN_RIDDLE = 6;
 
 if (rows * cols != (WORDS_IN_RIDDLE * (WORDS_IN_RIDDLE + 1)) / 2 - 1) {
   throw new Error("rows/cols/groups don't match");
@@ -44,19 +37,12 @@ let maxGroupUncompleted = 6;
 const tileWidth = canvas.width / cols,
   tileHeight = canvas.height / rows;
 
-let selectedTiles = 0;
+let selectedTiles = new Set();
 
 const riddles = await fetchRiddles(WORDS_IN_RIDDLE - 1);
+const tiles = chooseWords(riddles);
 
-const words = chooseWords(riddles);
-
-const tiles = Array.from({ length: rows }, (_, row) =>
-  Array.from({ length: cols }, (_, col) => {
-    const entry = words[row * cols + col];
-
-    return { riddle: entry.riddle, word: entry.word, selected: false };
-  })
-);
+drawBoard(ctx, tiles, selectedTiles, rows, cols, tileWidth, tileHeight);
 
 canvas.addEventListener("click", (event) => {
   const rect = canvas.getBoundingClientRect();
@@ -64,23 +50,27 @@ canvas.addEventListener("click", (event) => {
 
   const mouseX = (event.clientX - rect.left) * dpi;
   const mouseY = (event.clientY - rect.top) * dpi;
- 
+
   const clickedCol = Math.floor(mouseX / tileWidth);
   const clickedRow = Math.floor(mouseY / tileHeight);
 
-  if (tiles[clickedRow][clickedCol].selected) {
-    tiles[clickedRow][clickedCol].selected = false;
-    selectedTiles--;
+  const i = clickedRow * cols + clickedCol;
+
+  if (selectedTiles.has(tiles[i])) {
+    selectedTiles.delete(tiles[i]);
   } else {
-    if (selectedTiles == maxGroupUncompleted) {
+    if (selectedTiles.size == maxGroupUncompleted) {
       console.log(`cannot choose more than ${maxGroupUncompleted} tiles`);
     } else {
-      tiles[clickedRow][clickedCol].selected = true;
-      selectedTiles++;
+      selectedTiles.add(tiles[i]);
     }
   }
 
-  drawBoard(ctx, tiles, tileWidth, tileHeight);
+  drawBoard(ctx, tiles, selectedTiles, rows, cols, tileWidth, tileHeight);
 });
 
-drawBoard(ctx, tiles, tileWidth, tileHeight);
+const submitButton = document.getElementById("submit-button");
+
+submitButton.addEventListener("click", () => {
+  console.log("submit");
+});
