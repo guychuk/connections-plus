@@ -1,4 +1,5 @@
 import { drawBoard, getTilesForANewGame, WORDS_IN_RIDDLE } from "./game.js";
+import { shuffleArray } from "./utils.js";
 
 const DEBUG = true;
 
@@ -167,4 +168,22 @@ resetButton.addEventListener("click", () => {
     tileHeight,
     DEBUG
   );
+});
+
+const shuffleButton = document.getElementById("shuffle-button");
+
+shuffleButton.addEventListener("click", () => {
+  if (!won) {
+    shuffleArray(tiles);
+    drawBoard(
+      ctx,
+      tiles,
+      selectedTiles,
+      rows,
+      cols,
+      tileWidth,
+      tileHeight,
+      DEBUG
+    );
+  }
 });
