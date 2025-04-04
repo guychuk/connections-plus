@@ -1,4 +1,27 @@
 {
-  "groupColors": ["#FFB3BA", "#FFDFBA", "#FFFFBA", "#BAFFC9", "#BAE1FF"],
-  "font": "30px Helvetica"
+  "gameTheme": {
+    "tiles": {
+      "borderColor": "#000000",
+      "borderWidth": 2,
+      "color": {
+        "completed": ["#FFB3BA", "#FFDFBA", "#FFFFBA", "#BAFFC9", "#BAE1FF"],
+        "selected": "#FF0000",
+        "default": "#eeeeee"
+      },
+      "text": {
+        "color": "#000000",
+        "fontSize": 24,
+        "fontFamily": "Helvetica, Arial, sans-serif",
+        "align": "center",
+        "baseline": "middle"
+      }
+    },
+    "board": {
+      "borderColor": "#000000",
+      "borderWidth": 2,
+      "backgroundColor": "#FFFFFF",
+      "padding": 10,
+      "margin": 10
+    }
+  }
 }

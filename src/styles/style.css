@@ -8,8 +8,13 @@ body {
   height: 100vh;
 }
 
-#game-canvas {
-  border: 2px solid black;
+#canvas-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+canvas {
   background-color: white;
   display: block;
   margin: 20px auto;

@@ -1,3 +1,8 @@
+/**
+ * @file supabase.js
+ * @description This file contains the functions to connect to Supabase and fetch riddles from the database.
+ */
+
 import { createClient } from "@supabase/supabase-js";
 
 // Supabase connection
@@ -8,9 +13,10 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 /**
  * Fetch riddles from the DB.
  * @param {number} num umber of riddles to fetch.
+ * @param {boolean} debug whether to log debug information.
  * @returns an array of num riddles.
  */
-export async function fetchRiddles(num) {
+export async function fetchRiddles(num, debug = false) {
   const { data: riddles, error } = await supabase
     .from("random_riddles")
     .select("*")
@@ -21,7 +27,9 @@ export async function fetchRiddles(num) {
     return [];
   }
 
-  console.log(`Fetched ${riddles.length} riddles`);
+  if (debug) {
+    console.log(`Fetched ${riddles.length} riddles`);
+  }
 
   return riddles;
 }
