@@ -3,39 +3,37 @@
  * @description This file contains the complex event handlers for the game.
  */
 
-import { drawBoard } from "./gameUI.js";
-import { gameCanvas } from "../config/canvasConfig.json";
+import { drawBoard, getGameTileIndex } from "./gameUI.js";
 import { selectTile } from "./gameLogic.js";
 
 /**
  * Handles the click event on the canvas.
  * @param {MouseEvent} event - The click event.
  * @param {HTMLCanvasElement} canvas - The canvas element.
+ * @param {Object} tileSize - The size of each tile.
  * @param {Array} tiles - The tiles set.
  * @param {Set} selectedTiles - The set of selected tiles.
+ * @param {number} hoveredTile - The index of the hovered tile or -1 if none.
  * @param {Boolean} debug - The debug flag (default: false).
  */
-export function tapOnTile(event, canvas, tiles, selectedTiles, debug = false) {
+export function tapOnTile(
+  event,
+  canvas,
+  tileSize,
+  tiles,
+  selectedTiles,
+  hoveredTile,
+  debug = false
+) {
   // Calculate the mouse position in the canvas and the tile size
 
-  const rect = canvas.getBoundingClientRect();
-  const dpi = window.devicePixelRatio;
+  const tileIndex = getGameTileIndex(event, canvas, tileSize);
 
-  const mouseX = (event.clientX - rect.left) * dpi;
-  const mouseY = (event.clientY - rect.top) * dpi;
+  if (tileIndex !== -1) {
+    // Select the tile and redraw the board
 
-  const tileWidth = canvas.width / gameCanvas["cols"];
-  const tileHeight = canvas.height / gameCanvas["rows"];
+    selectTile(tileIndex, tiles, selectedTiles, debug);
 
-  // Calculate the clicked tile index
-
-  const clickedCol = Math.floor(mouseX / tileWidth);
-  const clickedRow = Math.floor(mouseY / tileHeight);
-  const tileIndex = clickedRow * gameCanvas["cols"] + clickedCol;
-
-  // Select the tile and redraw the board
-
-  selectTile(tileIndex, tiles, selectedTiles, debug);
-
-  drawBoard(canvas, tiles, selectedTiles, debug);
+    drawBoard(canvas, tileSize, tiles, selectedTiles, hoveredTile, debug);
+  }
 }

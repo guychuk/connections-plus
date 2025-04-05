@@ -4,7 +4,13 @@
  * @author guychuk
  */
 
-import { drawBoard, setCanvasDPI, drawSolution } from "./gameUI.js";
+import {
+  drawBoard,
+  setCanvasDPI,
+  drawSolution,
+  getGameTileIndex,
+  calculateGameTileSize,
+} from "./gameUI.js";
 import { shuffleArray } from "./utils.js";
 import { tapOnTile } from "./events.js";
 import {
@@ -42,19 +48,36 @@ const completedGroups = new Map();
 const selectedTiles = new Set();
 const prevSelections = new Set();
 
+const tileSize = calculateGameTileSize(gameCanvas);
+
+let hoveredTile = -1;
 let gameIsOver = false;
 let tiles = await getTilesForANewGame();
 
 /* Draw the board */
 
-drawBoard(gameCanvas, tiles, selectedTiles, DEBUG);
+drawBoard(gameCanvas, tileSize, tiles, selectedTiles, hoveredTile, DEBUG);
 
 drawSolution(solutionCanvas, completedGroups, DEBUG);
 
 gameCanvas.addEventListener("click", (event) => {
   if (!gameIsOver) {
-    tapOnTile(event, gameCanvas, tiles, selectedTiles, DEBUG);
+    tapOnTile(
+      event,
+      gameCanvas,
+      tileSize,
+      tiles,
+      selectedTiles,
+      hoveredTile,
+      DEBUG
+    );
   }
+});
+
+gameCanvas.addEventListener("mousemove", (event) => {
+  const hoveredTile = getGameTileIndex(event, gameCanvas, tileSize);
+
+  drawBoard(gameCanvas, tileSize, tiles, selectedTiles, hoveredTile, DEBUG);
 });
 
 /* Button events */
@@ -78,34 +101,32 @@ submitButton.addEventListener("click", () => {
     deselectButton.disabled = true;
   }
 
-  drawBoard(gameCanvas, tiles, selectedTiles, DEBUG);
+  drawBoard(gameCanvas, tileSize, tiles, selectedTiles, hoveredTile, DEBUG);
   drawSolution(solutionCanvas, completedGroups, DEBUG);
 });
 
 deselectButton.addEventListener("click", () => {
   selectedTiles.clear();
 
-  drawBoard(gameCanvas, tiles, selectedTiles, DEBUG);
+  drawBoard(gameCanvas, tileSize, tiles, selectedTiles, hoveredTile, DEBUG);
 });
 
 shuffleButton.addEventListener("click", () => {
   shuffleArray(tiles);
 
-  drawBoard(gameCanvas, tiles, selectedTiles, DEBUG);
+  drawBoard(gameCanvas, tileSize, tiles, selectedTiles, hoveredTile, DEBUG);
 });
 
 newGameButton.addEventListener("click", async () => {
   tiles = await newGame(selectedTiles, prevSelections, completedGroups);
 
   gameIsOver = false;
+  hoveredTile = -1;
+
   submitButton.disabled = false;
   shuffleButton.disabled = false;
   deselectButton.disabled = false;
 
-  completedGroups.clear();
-  selectedTiles.clear();
-  prevSelections.clear();
-
-  drawBoard(gameCanvas, tiles, selectedTiles, DEBUG);
+  drawBoard(gameCanvas, tileSize, tiles, selectedTiles, hoveredTile, DEBUG);
   drawSolution(solutionCanvas, completedGroups, DEBUG);
 });

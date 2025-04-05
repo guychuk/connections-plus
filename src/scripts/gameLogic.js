@@ -24,6 +24,9 @@ import { fetchRiddles } from "./supabase.js";
  * @param {Boolean} debug - The debug flag (default: false).
  */
 export function selectTile(tileIndex, tiles, selectedTiles, debug = false) {
+  if (tileIndex === -1) {
+    return;
+  }
   if (selectedTiles.has(tiles[tileIndex])) {
     selectedTiles.delete(tiles[tileIndex]);
   }

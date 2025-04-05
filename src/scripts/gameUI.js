@@ -30,14 +30,11 @@ export function setCanvasDPI(
 }
 
 /**
- * Draw the board.
+ * Calculate the tile size based on the canvas size and the number of rows and columns.
  * @param {HTMLCanvasElement} canvas HTML canvas element.
- * @param {Array} words array of riddle-word pairs for the board.
- * @param {Array} tiles 2D array of tile states.
- * @param {Set} selectedTiles array of selected tiles.
- * @param {Boolean} debug whether to show debug information (default: false).
+ * @return {Object} Object containing the tile width and height.
  */
-export function drawBoard(canvas, tiles, selectedTiles, debug = false) {
+export function calculateGameTileSize(canvas) {
   // Get the game canvas configuration and calculate the tile size
 
   const boardTheme = gameTheme["board"];
@@ -55,6 +52,85 @@ export function drawBoard(canvas, tiles, selectedTiles, debug = false) {
       (rows - 1) * boardTheme["padding"] -
       2 * boardTheme["margin"]) /
     rows;
+
+  return { tileWidth: tileWidth, tileHeight: tileHeight };
+}
+
+/**
+ * Get the tile index based on the mouse click position.
+ * @param {MouseEvent} event Mouse event containing the click position.
+ * @param {HTMLCanvasElement} canvas HTML canvas element.
+ * @param {Object} tileSize Object containing the tile width and height.
+ * @return {number} Tile index calculated from the mouse position or -1 if out of bounds.
+ */
+export function getGameTileIndex(event, canvas, tileSize) {
+  // Calculate the mouse position in the canvas and the tile size
+
+  const rect = canvas.getBoundingClientRect();
+  const dpi = window.devicePixelRatio;
+
+  const mouseX = (event.clientX - rect.left) * dpi;
+  const mouseY = (event.clientY - rect.top) * dpi;
+
+  // Calculate the clicked tile index
+
+  const margin = gameTheme["board"]["margin"];
+  const tileWidth = tileSize["tileWidth"];
+  const tileHeight = tileSize["tileHeight"];
+  const padding = gameTheme["board"]["padding"];
+
+  // If the mouse is on a tile in column c, then
+  // margin + c * (tileWidth + padding) <= mouseX < margin + c * (tileWidth + padding) + tileWidth
+
+  const lowerBoundCol = (mouseX - margin - tileWidth) / (tileWidth + padding);
+  const upperBoundCol = (mouseX - margin) / (tileWidth + padding);
+
+  if (Math.ceil(lowerBoundCol) !== Math.floor(upperBoundCol)) {
+    return -1; // Out of bounds
+  }
+
+  const clickedCol = Math.ceil(lowerBoundCol);
+
+  // Same logic for the row
+
+  const lowerBoundRow = (mouseY - margin - tileHeight) / (tileHeight + padding);
+  const upperBoundRow = (mouseY - margin) / (tileHeight + padding);
+
+  if (Math.ceil(lowerBoundRow) !== Math.floor(upperBoundRow)) {
+    return -1; // Out of bounds
+  }
+
+  const clickedRow = Math.ceil(lowerBoundRow);
+
+  return clickedRow * gameCanvas["cols"] + clickedCol;
+}
+
+/**
+ * Draw the board.
+ * @param {HTMLCanvasElement} canvas HTML canvas element.
+ * @param {Object} tileSize Object containing the tile width and height.
+ * @param {Array} tiles Array of tile objects.
+ * @param {Set} selectedTiles Set of selected tiles.
+ * @param {number} hoveredTile Index of the hovered tile or -1 if none.
+ * @param {Boolean} debug Whether to show debug information (default: false).
+ */
+export function drawBoard(
+  canvas,
+  tileSize,
+  tiles,
+  selectedTiles,
+  hoveredTile,
+  debug = false
+) {
+  // Get the game canvas configuration and calculate the tile size
+
+  const boardTheme = gameTheme["board"];
+
+  const rows = gameCanvas["rows"];
+  const cols = gameCanvas["cols"];
+
+  const tileWidth = tileSize["tileWidth"];
+  const tileHeight = tileSize["tileHeight"];
 
   const ctx = canvas.getContext("2d");
 
@@ -93,6 +169,8 @@ export function drawBoard(canvas, tiles, selectedTiles, debug = false) {
         ? tileColors["completed"]
         : selectedTiles.has(tile)
         ? tileColors["selected"]
+        : hoveredTile === tileIndex
+        ? tileColors["hovered"]
         : tileColors["default"];
 
       ctx.fillStyle = color;
