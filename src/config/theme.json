@@ -4,9 +4,10 @@
       "borderColor": "#000000",
       "borderWidth": 2,
       "color": {
-        "completed": "#FFB3BA",
-        "selected": "#FF0000",
-        "default": "#EEEEEE"
+        "completed": "#ADB5BD",
+        "selected": "#CED4DA",
+        "hovered": "#DEE2E6",
+        "default": "#E9ECEF"
       },
       "text": {
         "color": "#000000",
@@ -27,8 +28,8 @@
       "borderColor": "#000000",
       "borderWidth": 2,
       "color": {
-        "completed": ["#FFB3BA", "#FFDFBA", "#FFFFBA", "#BAFFC9", "#BAE1FF"],
-        "default": "#FFFFFF"
+        "completed": ["#F9C6C9", "#F7D9C4", "#FAEDCB", "#C9E4DE", "#C6DEF1"],
+        "default": "#E9ECEF"
       },
       "text": {
         "color": "#000000",
