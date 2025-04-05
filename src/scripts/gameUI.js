@@ -30,28 +30,34 @@ export function setCanvasDPI(
 }
 
 /**
- * Calculate the tile size based on the canvas size and the number of rows and columns.
+ * Calculate the tile size based on the canvas size.
  * @param {HTMLCanvasElement} canvas HTML canvas element.
+ * @param {string} side Side of the board ("game" or "solution").
  * @return {Object} Object containing the tile width and height.
  */
-export function calculateGameTileSize(canvas) {
-  // Get the game canvas configuration and calculate the tile size
+export function calculateTileSize(canvas, side) {
+  if (side !== "game" && side !== "solution") {
+    throw new Error("Invalid side: " + side);
+  }
 
-  const boardTheme = gameTheme["board"];
+  const canvasConfig = side === "solution" ? solutionCanvas : gameCanvas;
 
-  const rows = gameCanvas["rows"];
-  const cols = gameCanvas["cols"];
+  const rows =
+    side === "solution" ? canvasConfig["groups"].length : canvasConfig["rows"];
 
-  const tileWidth =
-    (canvas.width -
-      (cols - 1) * boardTheme["padding"] -
-      2 * boardTheme["margin"]) /
-    cols;
+  const cols =
+    side === "solution"
+      ? Math.max(...canvasConfig["groups"])
+      : canvasConfig["cols"];
+
+  const margin = canvasConfig["margin"];
+
+  const padding = canvasConfig["padding"];
+
+  const tileWidth = (canvas.width - (2 * margin + (cols - 1) * padding)) / cols;
+
   const tileHeight =
-    (canvas.height -
-      (rows - 1) * boardTheme["padding"] -
-      2 * boardTheme["margin"]) /
-    rows;
+    (canvas.height - (2 * margin + (rows - 1) * padding)) / rows;
 
   return { tileWidth: tileWidth, tileHeight: tileHeight };
 }
@@ -74,10 +80,11 @@ export function getGameTileIndex(event, canvas, tileSize) {
 
   // Calculate the clicked tile index
 
-  const margin = gameTheme["board"]["margin"];
+  const margin = gameCanvas["margin"];
+  const padding = gameCanvas["padding"];
+
   const tileWidth = tileSize["tileWidth"];
   const tileHeight = tileSize["tileHeight"];
-  const padding = gameTheme["board"]["padding"];
 
   // If the mouse is on a tile in column c, then
   // margin + c * (tileWidth + padding) <= mouseX < margin + c * (tileWidth + padding) + tileWidth
@@ -122,9 +129,9 @@ export function drawBoard(
   hoveredTile,
   debug = false
 ) {
-  // Get the game canvas configuration and calculate the tile size
+  const ctx = canvas.getContext("2d");
 
-  const boardTheme = gameTheme["board"];
+  // Get the board layout
 
   const rows = gameCanvas["rows"];
   const cols = gameCanvas["cols"];
@@ -132,7 +139,28 @@ export function drawBoard(
   const tileWidth = tileSize["tileWidth"];
   const tileHeight = tileSize["tileHeight"];
 
-  const ctx = canvas.getContext("2d");
+  const margin = gameCanvas["margin"];
+  const padding = gameCanvas["padding"];
+
+  // Get the board theme
+
+  const tilesTheme = gameTheme["tiles"];
+  const tileColors = tilesTheme["color"];
+  const textTheme = tilesTheme["text"];
+
+  // Functions to calculate the tile position and color
+
+  const getX = (col) => col * (tileWidth + padding) + margin;
+  const getY = (row) => row * (tileHeight + padding) + margin;
+
+  const getColor = (tileIndex) =>
+    tiles[tileIndex].completed
+      ? tileColors["completed"]
+      : selectedTiles.has(tiles[tileIndex])
+      ? tileColors["selected"]
+      : hoveredTile === tileIndex
+      ? tileColors["hovered"]
+      : tileColors["default"];
 
   // Clear the canvas and draw the board background
 
@@ -140,41 +168,23 @@ export function drawBoard(
 
   // Draw the tiles
 
-  const tilesTheme = gameTheme["tiles"];
-  const tileColors = tilesTheme["color"];
-  const textTheme = tilesTheme["text"];
-
   let tileIndex = 0;
 
-  for (let row = 0; row < rows && tileIndex < tiles.length; row++) {
-    for (
-      let col = 0;
-      col < cols && tileIndex < tiles.length;
-      col++, tileIndex++
-    ) {
-      const x =
-        col * tileWidth + col * boardTheme["padding"] + boardTheme["margin"];
-      const y =
-        row * tileHeight + row * boardTheme["padding"] + boardTheme["margin"];
+  for (let row = 0; row < rows; row++) {
+    for (let col = 0; col < cols; col++, tileIndex++) {
+      const tile = tiles[tileIndex];
+
+      const x = getX(col);
+      const y = getY(row);
+      const color = getColor(tileIndex);
 
       // Draw the tile border
       ctx.strokeStyle = tilesTheme["borderColor"];
       ctx.lineWidth = tilesTheme["borderWidth"];
       ctx.strokeRect(x, y, tileWidth, tileHeight);
 
-      const tile = tiles[tileIndex];
-
       // Set the fill color based on the tile state
-      const color = tile.completed
-        ? tileColors["completed"]
-        : selectedTiles.has(tile)
-        ? tileColors["selected"]
-        : hoveredTile === tileIndex
-        ? tileColors["hovered"]
-        : tileColors["default"];
-
       ctx.fillStyle = color;
-
       ctx.fillRect(x, y, tileWidth, tileHeight);
 
       // Draw the tile text
@@ -202,71 +212,73 @@ export function drawBoard(
  * @param {Map<number, Array>} completedGroups array of completed groups.
  * @param {Boolean} debug whether to show debug information (default: false).
  */
-export function drawSolution(canvas, completedGroups, debug = false) {
-  /* Get the game canvas configuration and calculate the tile size */
+export function drawSolution(canvas, tileSize, completedGroups, debug = false) {
+  const ctx = canvas.getContext("2d");
 
-  const boardTheme = solutionTheme["board"];
+  // Get the board layout
 
   const groups = solutionCanvas["groups"];
+  const maxGroup = Math.max(...groups);
 
-  const maxTileInARow = Math.max(...groups);
+  const margin = solutionCanvas["margin"];
+  const padding = solutionCanvas["padding"];
 
-  // The longest line has nargin on both sides,
-  // plus maxTileInRow tiles and (maxTileInRow - 1) paddings.
+  const align = solutionCanvas["align"];
 
-  const margin = boardTheme["margin"];
-  const padding = boardTheme["padding"];
+  const tileWidth = tileSize["tileWidth"];
+  const tileHeight = tileSize["tileHeight"];
 
-  const tileWidth =
-    (canvas.width - (2 * margin + (maxTileInARow - 1) * padding)) /
-    maxTileInARow;
+  // Get the board theme
+  const tilesTheme = solutionTheme["tiles"];
+  const tileColors = tilesTheme["color"];
+  const textTheme = tilesTheme["text"];
 
-  // Same logit for height, but with the number of groups
+  // Functions to calculate the tile position and color
+  const getX = (col, group) => {
+    if (align === "left") {
+      return margin + col * (tileWidth + padding);
+    } else if (align === "center") {
+      return (
+        margin +
+        col * (tileWidth + padding) +
+        ((maxGroup - group) * (tileWidth + padding)) / 2
+      );
+    } else {
+      throw Error("align must be left or center");
+    }
+  };
 
-  const tileHeight =
-    (canvas.height - (2 * margin + (groups.length - 1) * padding)) /
-    groups.length;
+  const getY = (row) => row * (tileHeight + padding) + margin;
 
-  const ctx = canvas.getContext("2d");
+  const getColor = (group) => tileColors["completed"][group - 2];
 
   // Clear the canvas and draw the board background
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  /* Draw the tiles */
-
-  const tilesTheme = solutionTheme["tiles"];
-  const tileColors = tilesTheme["color"];
-  const textTheme = tilesTheme["text"];
+  // Draw the tiles
 
   for (let row = 0; row < groups.length; row++) {
     const group = groups[row];
-    const riddles = completedGroups.get(group);
+    const riddleTiles = completedGroups.get(group);
 
     for (let col = 0; col < group; col++) {
-      // A row with T tiles has T tiles ans (T - 1) paddings and some margin
-      const x =
-        (canvas.width - (group * tileWidth + (group - 1) * padding)) / 2 +
-        col * tileWidth +
-        col * padding;
-
-      const y = margin + row * tileHeight + row * padding;
+      const x = getX(col, group);
+      const y = getY(row);
 
       // Draw the tile border
       ctx.strokeStyle = tilesTheme["borderColor"];
       ctx.lineWidth = tilesTheme["borderWidth"];
       ctx.strokeRect(x, y, tileWidth, tileHeight);
 
-      if (riddles) {
-        const tile = riddles[col];
+      // The user already solved the riddle, so we can draw the tile
+      if (riddleTiles) {
+        const tile = riddleTiles[col];
 
-        // Set the fill color based on the tile state
-        const color = tile.completed
-          ? tileColors["completed"][group - 2]
-          : tileColors["default"];
+        const color = getColor(group);
 
+        // Set the fill color based on the group
         ctx.fillStyle = color;
-
         ctx.fillRect(x, y, tileWidth, tileHeight);
 
         // Draw the tile text

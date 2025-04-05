@@ -18,9 +18,7 @@
       }
     },
     "board": {
-      "backgroundColor": "#FFFFFF",
-      "padding": 10,
-      "margin": 10
+      "backgroundColor": "#FFFFFF"
     }
   },
   "solutionTheme": {
@@ -28,8 +26,7 @@
       "borderColor": "#000000",
       "borderWidth": 2,
       "color": {
-        "completed": ["#F9C6C9", "#F7D9C4", "#FAEDCB", "#C9E4DE", "#C6DEF1"],
-        "default": "#E9ECEF"
+        "completed": ["#F9C6C9", "#F7D9C4", "#FAEDCB", "#C9E4DE", "#C6DEF1"]
       },
       "text": {
         "color": "#000000",
@@ -40,9 +37,7 @@
       }
     },
     "board": {
-      "backgroundColor": "#FFFFFF",
-      "padding": 10,
-      "margin": 10
+      "backgroundColor": "#FFFFFF"
     }
   }
 }

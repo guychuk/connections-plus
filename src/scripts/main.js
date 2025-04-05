@@ -9,7 +9,7 @@ import {
   setCanvasDPI,
   drawSolution,
   getGameTileIndex,
-  calculateGameTileSize,
+  calculateTileSize,
 } from "./gameUI.js";
 import { shuffleArray } from "./utils.js";
 import { tapOnTile } from "./events.js";
@@ -48,7 +48,8 @@ const completedGroups = new Map();
 const selectedTiles = new Set();
 const prevSelections = new Set();
 
-const tileSize = calculateGameTileSize(gameCanvas);
+const gameTileSize = calculateTileSize(gameCanvas, "game");
+const solutionTileSize = calculateTileSize(solutionCanvas, "solution");
 
 let hoveredTile = -1;
 let gameIsOver = false;
@@ -56,16 +57,16 @@ let tiles = await getTilesForANewGame();
 
 /* Draw the board */
 
-drawBoard(gameCanvas, tileSize, tiles, selectedTiles, hoveredTile, DEBUG);
+drawBoard(gameCanvas, gameTileSize, tiles, selectedTiles, hoveredTile, DEBUG);
 
-drawSolution(solutionCanvas, completedGroups, DEBUG);
+drawSolution(solutionCanvas, solutionTileSize, completedGroups, DEBUG);
 
 gameCanvas.addEventListener("click", (event) => {
   if (!gameIsOver) {
     tapOnTile(
       event,
       gameCanvas,
-      tileSize,
+      gameTileSize,
       tiles,
       selectedTiles,
       hoveredTile,
@@ -75,9 +76,9 @@ gameCanvas.addEventListener("click", (event) => {
 });
 
 gameCanvas.addEventListener("mousemove", (event) => {
-  const hoveredTile = getGameTileIndex(event, gameCanvas, tileSize);
+  const hoveredTile = getGameTileIndex(event, gameCanvas, gameTileSize);
 
-  drawBoard(gameCanvas, tileSize, tiles, selectedTiles, hoveredTile, DEBUG);
+  drawBoard(gameCanvas, gameTileSize, tiles, selectedTiles, hoveredTile, DEBUG);
 });
 
 /* Button events */
@@ -101,20 +102,20 @@ submitButton.addEventListener("click", () => {
     deselectButton.disabled = true;
   }
 
-  drawBoard(gameCanvas, tileSize, tiles, selectedTiles, hoveredTile, DEBUG);
-  drawSolution(solutionCanvas, completedGroups, DEBUG);
+  drawBoard(gameCanvas, gameTileSize, tiles, selectedTiles, hoveredTile, DEBUG);
+  drawSolution(solutionCanvas, solutionTileSize, completedGroups, DEBUG);
 });
 
 deselectButton.addEventListener("click", () => {
   selectedTiles.clear();
 
-  drawBoard(gameCanvas, tileSize, tiles, selectedTiles, hoveredTile, DEBUG);
+  drawBoard(gameCanvas, gameTileSize, tiles, selectedTiles, hoveredTile, DEBUG);
 });
 
 shuffleButton.addEventListener("click", () => {
   shuffleArray(tiles);
 
-  drawBoard(gameCanvas, tileSize, tiles, selectedTiles, hoveredTile, DEBUG);
+  drawBoard(gameCanvas, gameTileSize, tiles, selectedTiles, hoveredTile, DEBUG);
 });
 
 newGameButton.addEventListener("click", async () => {
@@ -127,6 +128,6 @@ newGameButton.addEventListener("click", async () => {
   shuffleButton.disabled = false;
   deselectButton.disabled = false;
 
-  drawBoard(gameCanvas, tileSize, tiles, selectedTiles, hoveredTile, DEBUG);
-  drawSolution(solutionCanvas, completedGroups, DEBUG);
+  drawBoard(gameCanvas, gameTileSize, tiles, selectedTiles, hoveredTile, DEBUG);
+  drawSolution(solutionCanvas, solutionTileSize, completedGroups, DEBUG);
 });
