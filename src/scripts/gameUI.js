@@ -89,11 +89,13 @@ export function drawBoard(canvas, tiles, selectedTiles, debug = false) {
       const tile = tiles[tileIndex];
 
       // Set the fill color based on the tile state
-      tile.completed
-        ? (ctx.fillStyle = tileColors["completed"][tile.groupSize - 2])
+      const color = tile.completed
+        ? tileColors["completed"]
         : selectedTiles.has(tile)
-        ? (ctx.fillStyle = tileColors["selected"])
-        : (ctx.fillStyle = tileColors["default"]);
+        ? tileColors["selected"]
+        : tileColors["default"];
+
+      ctx.fillStyle = color;
 
       ctx.fillRect(x, y, tileWidth, tileHeight);
 
@@ -116,7 +118,13 @@ export function drawBoard(canvas, tiles, selectedTiles, debug = false) {
   }
 }
 
-export function drawSolution(canvas, tiles, debug = false) {
+/**
+ * Draw on the solution board.
+ * @param {HTMLCanvasElement} canvas HTML canvas element.
+ * @param {Map<number, Array>} completedGroups array of completed groups.
+ * @param {Boolean} debug whether to show debug information (default: false).
+ */
+export function drawSolution(canvas, completedGroups, debug = false) {
   /* Get the game canvas configuration and calculate the tile size */
 
   const boardTheme = solutionTheme["board"];
@@ -154,12 +162,13 @@ export function drawSolution(canvas, tiles, debug = false) {
   const textTheme = tilesTheme["text"];
 
   for (let row = 0; row < groups.length; row++) {
-    for (let col = 0; col < groups[row]; col++) {
+    const group = groups[row];
+    const riddles = completedGroups.get(group);
+
+    for (let col = 0; col < group; col++) {
       // A row with T tiles has T tiles ans (T - 1) paddings and some margin
       const x =
-        (canvas.width -
-          (groups[row] * tileWidth + (groups[row] - 1) * padding)) /
-          2 +
+        (canvas.width - (group * tileWidth + (group - 1) * padding)) / 2 +
         col * tileWidth +
         col * padding;
 
@@ -169,6 +178,35 @@ export function drawSolution(canvas, tiles, debug = false) {
       ctx.strokeStyle = tilesTheme["borderColor"];
       ctx.lineWidth = tilesTheme["borderWidth"];
       ctx.strokeRect(x, y, tileWidth, tileHeight);
+
+      if (riddles) {
+        const tile = riddles[col];
+
+        // Set the fill color based on the tile state
+        const color = tile.completed
+          ? tileColors["completed"][group - 2]
+          : tileColors["default"];
+
+        ctx.fillStyle = color;
+
+        ctx.fillRect(x, y, tileWidth, tileHeight);
+
+        // Draw the tile text
+        ctx.fillStyle = textTheme["color"];
+        ctx.font = textTheme["fontSize"] + "px " + textTheme["fontFamily"];
+        ctx.textAlign = textTheme["align"];
+        ctx.textBaseline = textTheme["baseline"];
+
+        if (debug) {
+          ctx.fillText(
+            tile.word + ` (${tile.group})`,
+            x + tileWidth / 2,
+            y + tileHeight / 2
+          );
+        } else {
+          ctx.fillText(tile.word, x + tileWidth / 2, y + tileHeight / 2);
+        }
+      }
     }
   }
 }

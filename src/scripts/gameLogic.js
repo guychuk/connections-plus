@@ -44,7 +44,7 @@ export function selectTile(tileIndex, tiles, selectedTiles, debug = false) {
 /**
  * Check if the selected tiles are correct and update the game state accordingly.
  * @param {Set} selectedTiles - The set of selected tiles.
- * @param {Set} completedGroups - The set of completed groups.
+ * @param {Map<number, Array>} completedGroups - The set of completed groups.
  * @param {Set} prevSelections - The set of previous selections.
  * @param {Boolean} debug - The debug flag (default: false).
  * @return {Boolean} - Returns true if the game is over, false otherwise.
@@ -68,7 +68,7 @@ export function checkSelection(
     let counter = 0;
 
     for (const tile of selectedTiles) {
-      if (tile.groupSize === numOfSelections) {
+      if (tile.group === numOfSelections) {
         counter++;
       }
     }
@@ -83,9 +83,9 @@ export function checkSelection(
         tile.completed = true;
       }
 
-      selectedTiles.clear();
+      completedGroups.set(numOfSelections, [...selectedTiles]);
 
-      completedGroups.add(numOfSelections);
+      selectedTiles.clear();
 
       // The user figured out all riddles, the game is over
       if (completedGroups.size === gameConfig["groups"].length) {
@@ -165,7 +165,7 @@ export async function getTilesForANewGame() {
  * Initialize a new game.
  * @param {Set} selectedTiles - The set of selected tiles.
  * @param {Set} prevSelections - The set of previous selections.
- * @param {Set} completedGroups - The set of completed groups.
+ * @param {Map<number, Array>} completedGroups - The set of completed groups.
  * @return {Array} - Returns the new tiles for the game.
  * @async
  */

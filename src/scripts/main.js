@@ -38,7 +38,7 @@ assertGameConfig();
 
 // Game variables
 
-const completedGroups = new Set();
+const completedGroups = new Map();
 const selectedTiles = new Set();
 const prevSelections = new Set();
 
@@ -49,7 +49,7 @@ let tiles = await getTilesForANewGame();
 
 drawBoard(gameCanvas, tiles, selectedTiles, DEBUG);
 
-drawSolution(solutionCanvas, tiles, DEBUG);
+drawSolution(solutionCanvas, completedGroups, DEBUG);
 
 gameCanvas.addEventListener("click", (event) => {
   if (!gameIsOver) {
@@ -79,6 +79,7 @@ submitButton.addEventListener("click", () => {
   }
 
   drawBoard(gameCanvas, tiles, selectedTiles, DEBUG);
+  drawSolution(solutionCanvas, completedGroups, DEBUG);
 });
 
 deselectButton.addEventListener("click", () => {
@@ -101,5 +102,10 @@ newGameButton.addEventListener("click", async () => {
   shuffleButton.disabled = false;
   deselectButton.disabled = false;
 
+  completedGroups.clear();
+  selectedTiles.clear();
+  prevSelections.clear();
+
   drawBoard(gameCanvas, tiles, selectedTiles, DEBUG);
+  drawSolution(solutionCanvas, completedGroups, DEBUG);
 });

@@ -4,7 +4,7 @@
       "borderColor": "#000000",
       "borderWidth": 2,
       "color": {
-        "completed": ["#FFB3BA", "#FFDFBA", "#FFFFBA", "#BAFFC9", "#BAE1FF"],
+        "completed": "#FFB3BA",
         "selected": "#FF0000",
         "default": "#EEEEEE"
       },
