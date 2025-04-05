@@ -78,7 +78,19 @@ gameCanvas.addEventListener("click", (event) => {
 gameCanvas.addEventListener("mousemove", (event) => {
   const hoveredTile = getGameTileIndex(event, gameCanvas, gameTileSize);
 
-  drawBoard(gameCanvas, gameTileSize, tiles, selectedTiles, hoveredTile, DEBUG);
+  if (hoveredTile !== -1) {
+    gameCanvas.style.cursor = "pointer";
+    drawBoard(
+      gameCanvas,
+      gameTileSize,
+      tiles,
+      selectedTiles,
+      hoveredTile,
+      DEBUG
+    );
+  } else {
+    gameCanvas.style.cursor = "default";
+  }
 });
 
 /* Button events */
