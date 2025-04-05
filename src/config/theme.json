@@ -6,7 +6,7 @@
       "color": {
         "completed": ["#FFB3BA", "#FFDFBA", "#FFFFBA", "#BAFFC9", "#BAE1FF"],
         "selected": "#FF0000",
-        "default": "#eeeeee"
+        "default": "#EEEEEE"
       },
       "text": {
         "color": "#000000",
@@ -17,8 +17,28 @@
       }
     },
     "board": {
+      "backgroundColor": "#FFFFFF",
+      "padding": 10,
+      "margin": 10
+    }
+  },
+  "solutionTheme": {
+    "tiles": {
       "borderColor": "#000000",
       "borderWidth": 2,
+      "color": {
+        "completed": ["#FFB3BA", "#FFDFBA", "#FFFFBA", "#BAFFC9", "#BAE1FF"],
+        "default": "#FFFFFF"
+      },
+      "text": {
+        "color": "#000000",
+        "fontSize": 24,
+        "fontFamily": "Helvetica, Arial, sans-serif",
+        "align": "center",
+        "baseline": "middle"
+      }
+    },
+    "board": {
       "backgroundColor": "#FFFFFF",
       "padding": 10,
       "margin": 10

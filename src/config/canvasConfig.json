@@ -4,5 +4,10 @@
     "height": 600,
     "rows": 4,
     "cols": 5
+  },
+  "solutionCanvas": {
+    "width": 800,
+    "height": 600,
+    "groups": [6, 5, 4, 3, 2]
   }
 }

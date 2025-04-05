@@ -29,7 +29,7 @@ export function selectTile(tileIndex, tiles, selectedTiles, debug = false) {
   }
   // If the tile is not in an already completed group
   else if (!tiles[tileIndex].completed) {
-    const maxGroupSize = Math.max(...gameConfig["groupsSizes"]);
+    const maxGroupSize = Math.max(...gameConfig["groups"]);
 
     if (selectedTiles.size === maxGroupSize) {
       if (debug) {
@@ -57,7 +57,7 @@ export function checkSelection(
 ) {
   const numOfSelections = selectedTiles.size;
 
-  if (numOfSelections < Math.min(...gameConfig["groupsSizes"])) {
+  if (numOfSelections < Math.min(...gameConfig["groups"])) {
     console.error("not enogh selected");
   } else if (completedGroups.has(numOfSelections)) {
     console.error("you alredy solved this group size");
@@ -88,7 +88,7 @@ export function checkSelection(
       completedGroups.add(numOfSelections);
 
       // The user figured out all riddles, the game is over
-      if (completedGroups.size === gameConfig["groupsSizes"].length) {
+      if (completedGroups.size === gameConfig["groups"].length) {
         console.log("WINNER!");
         return true;
       }
@@ -120,17 +120,17 @@ export function checkSelection(
  */
 export function chooseWords(riddles, shuffle = true) {
   const words = [];
-  const groupSizes = gameConfig["groupsSizes"];
+  const groups = gameConfig["groups"];
   const wordsInRiddle = Object.keys(riddles[0]).length - 2; // Exclude the riddle/id fields
 
   riddles.forEach((riddle, index) => {
     // Get random indices for the words in the riddle
-    const indices = getRandomNums(wordsInRiddle, groupSizes[index]);
+    const indices = getRandomNums(wordsInRiddle, groups[index]);
 
     indices.forEach((i) => {
       // Add new fields to almost form a tile
       words.push({
-        groupSize: groupSizes[index],
+        group: groups[index],
         riddle: riddle["riddle"],
         word: riddle[`word_${i}`],
       });
@@ -150,7 +150,7 @@ export function chooseWords(riddles, shuffle = true) {
  * @async
  */
 export async function getTilesForANewGame() {
-  const riddles = await fetchRiddles(gameConfig["groupsSizes"].length);
+  const riddles = await fetchRiddles(gameConfig["groups"].length);
   const tiles = chooseWords(riddles);
 
   return Array.from(tiles, (tile, index) => {
@@ -184,10 +184,10 @@ export async function newGame(selectedTiles, prevSelections, completedGroups) {
  * @throws {Error} If the number of tiles does not match the sum of group sizes.
  */
 export function assertGameConfig() {
-  const groupSizes = gameConfig["groupsSizes"];
+  const groups = gameConfig["groups"];
 
   assert(
-    gameCanvas["rows"] * gameCanvas["cols"] === sum(groupSizes),
+    gameCanvas["rows"] * gameCanvas["cols"] === sum(groups),
     "wrong number of tiles"
   );
 }

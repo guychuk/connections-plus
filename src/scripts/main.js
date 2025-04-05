@@ -4,10 +4,13 @@
  * @author guychuk
  */
 
-import { drawBoard, setCanvasDPI } from "./gameUI.js";
+import { drawBoard, setCanvasDPI, drawSolution } from "./gameUI.js";
 import { shuffleArray } from "./utils.js";
 import { tapOnTile } from "./events.js";
-import { gameCanvas } from "../config/canvasConfig.json";
+import {
+  gameCanvas as gameCanvasConfig,
+  solutionCanvas as solutionCanvasConfig,
+} from "../config/canvasConfig.json";
 import {
   checkSelection,
   newGame,
@@ -17,11 +20,17 @@ import {
 
 const DEBUG = true;
 
-/* Set up the game canvas */
+/* Set up the canvases */
 
-const canvas = document.getElementById("game-canvas");
+const gameCanvas = document.getElementById("game-canvas");
+const solutionCanvas = document.getElementById("solution-canvas");
 
-setCanvasDPI(canvas, gameCanvas["width"], gameCanvas["height"]);
+setCanvasDPI(gameCanvas, gameCanvasConfig["width"], gameCanvasConfig["height"]);
+setCanvasDPI(
+  solutionCanvas,
+  solutionCanvasConfig["width"],
+  solutionCanvasConfig["height"]
+);
 
 assertGameConfig();
 
@@ -38,11 +47,13 @@ let tiles = await getTilesForANewGame();
 
 /* Draw the board */
 
-drawBoard(canvas, tiles, selectedTiles, DEBUG);
+drawBoard(gameCanvas, tiles, selectedTiles, DEBUG);
 
-canvas.addEventListener("click", (event) => {
+drawSolution(solutionCanvas, tiles, DEBUG);
+
+gameCanvas.addEventListener("click", (event) => {
   if (!gameIsOver) {
-    tapOnTile(event, canvas, tiles, selectedTiles, DEBUG);
+    tapOnTile(event, gameCanvas, tiles, selectedTiles, DEBUG);
   }
 });
 
@@ -67,19 +78,19 @@ submitButton.addEventListener("click", () => {
     deselectButton.disabled = true;
   }
 
-  drawBoard(canvas, tiles, selectedTiles, DEBUG);
+  drawBoard(gameCanvas, tiles, selectedTiles, DEBUG);
 });
 
 deselectButton.addEventListener("click", () => {
   selectedTiles.clear();
 
-  drawBoard(canvas, tiles, selectedTiles, DEBUG);
+  drawBoard(gameCanvas, tiles, selectedTiles, DEBUG);
 });
 
 shuffleButton.addEventListener("click", () => {
   shuffleArray(tiles);
 
-  drawBoard(canvas, tiles, selectedTiles, DEBUG);
+  drawBoard(gameCanvas, tiles, selectedTiles, DEBUG);
 });
 
 newGameButton.addEventListener("click", async () => {
@@ -90,5 +101,5 @@ newGameButton.addEventListener("click", async () => {
   shuffleButton.disabled = false;
   deselectButton.disabled = false;
 
-  drawBoard(canvas, tiles, selectedTiles, DEBUG);
+  drawBoard(gameCanvas, tiles, selectedTiles, DEBUG);
 });

@@ -3,8 +3,8 @@
  * @description This file contains the functions to draw the game board and the game UI elements.
  */
 
-import { gameTheme } from "../config/theme.json";
-import { gameCanvas } from "../config/canvasConfig.json";
+import { gameTheme, solutionTheme } from "../config/theme.json";
+import { gameCanvas, solutionCanvas } from "../config/canvasConfig.json";
 
 /**
  * Set the canvas DPI (dots per inch) for high-resolution displays.
@@ -61,11 +61,6 @@ export function drawBoard(canvas, tiles, selectedTiles, debug = false) {
   // Clear the canvas and draw the board background
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  // ctx.fillStyle = boardTheme["backgroundColor"];
-  // ctx.fillRect(0, 0, canvas.width, canvas.height);
-  // ctx.strokeStyle = boardTheme["borderColor"];
-  // ctx.lineWidth = boardTheme["borderWidth"];
-  // ctx.strokeRect(0, 0, canvas.width, canvas.height);
 
   // Draw the tiles
 
@@ -110,13 +105,70 @@ export function drawBoard(canvas, tiles, selectedTiles, debug = false) {
 
       if (debug) {
         ctx.fillText(
-          tile.word + ` (${tile.groupSize})`,
+          tile.word + ` (${tile.group})`,
           x + tileWidth / 2,
           y + tileHeight / 2
         );
       } else {
         ctx.fillText(tile.word, x + tileWidth / 2, y + tileHeight / 2);
       }
+    }
+  }
+}
+
+export function drawSolution(canvas, tiles, debug = false) {
+  /* Get the game canvas configuration and calculate the tile size */
+
+  const boardTheme = solutionTheme["board"];
+
+  const groups = solutionCanvas["groups"];
+
+  const maxTileInARow = Math.max(...groups);
+
+  // The longest line has nargin on both sides,
+  // plus maxTileInRow tiles and (maxTileInRow - 1) paddings.
+
+  const margin = boardTheme["margin"];
+  const padding = boardTheme["padding"];
+
+  const tileWidth =
+    (canvas.width - (2 * margin + (maxTileInARow - 1) * padding)) /
+    maxTileInARow;
+
+  // Same logit for height, but with the number of groups
+
+  const tileHeight =
+    (canvas.height - (2 * margin + (groups.length - 1) * padding)) /
+    groups.length;
+
+  const ctx = canvas.getContext("2d");
+
+  // Clear the canvas and draw the board background
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  /* Draw the tiles */
+
+  const tilesTheme = solutionTheme["tiles"];
+  const tileColors = tilesTheme["color"];
+  const textTheme = tilesTheme["text"];
+
+  for (let row = 0; row < groups.length; row++) {
+    for (let col = 0; col < groups[row]; col++) {
+      // A row with T tiles has T tiles ans (T - 1) paddings and some margin
+      const x =
+        (canvas.width -
+          (groups[row] * tileWidth + (groups[row] - 1) * padding)) /
+          2 +
+        col * tileWidth +
+        col * padding;
+
+      const y = margin + row * tileHeight + row * padding;
+
+      // Draw the tile border
+      ctx.strokeStyle = tilesTheme["borderColor"];
+      ctx.lineWidth = tilesTheme["borderWidth"];
+      ctx.strokeRect(x, y, tileWidth, tileHeight);
     }
   }
 }
