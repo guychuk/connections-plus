@@ -26,7 +26,8 @@
       "borderColor": "#000000",
       "borderWidth": 2,
       "color": {
-        "completed": ["#F9C6C9", "#F7D9C4", "#FAEDCB", "#C9E4DE", "#C6DEF1"]
+        "completed": ["#F9C6C9", "#F7D9C4", "#FAEDCB", "#C9E4DE", "#C6DEF1"],
+        "default": "#E9ECEF"
       },
       "text": {
         "color": "#000000",

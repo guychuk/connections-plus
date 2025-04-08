@@ -271,15 +271,17 @@ export function drawSolution(canvas, tileSize, completedGroups, debug = false) {
       ctx.lineWidth = tilesTheme["borderWidth"];
       ctx.strokeRect(x, y, tileWidth, tileHeight);
 
+      const color = riddleTiles
+        ? tileColors["completed"][group - 2]
+        : tileColors["default"];
+
+      // Set the fill color based on the group
+      ctx.fillStyle = color;
+      ctx.fillRect(x, y, tileWidth, tileHeight);
+
       // The user already solved the riddle, so we can draw the tile
       if (riddleTiles) {
         const tile = riddleTiles[col];
-
-        const color = getColor(group);
-
-        // Set the fill color based on the group
-        ctx.fillStyle = color;
-        ctx.fillRect(x, y, tileWidth, tileHeight);
 
         // Draw the tile text
         ctx.fillStyle = textTheme["color"];
