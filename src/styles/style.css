@@ -1,21 +1,36 @@
+:root {
+  font-family: Inter, sans-serif;
+  font-feature-settings: "liga" 1, "calt" 1; /* fix for Chrome */
+}
+@supports (font-variation-settings: normal) {
+  :root {
+    font-family: InterVariable, sans-serif;
+  }
+}
+
+/* Light theme (default) */
 body {
-  margin: 0;
-  font-family: Arial, Helvetica, sans-serif;
-  background-color: white;
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
-}
-
-#canvas-container {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-canvas {
+  margin: 0;
   background-color: white;
-  display: block;
-  margin: 20px auto;
+  color: black;
+  transition: background-color 0.5s, color 0.5s;
+}
+
+body.dark-theme {
+  background-color: black;
+  color: white;
+}
+
+#theme-toggle-button {
+  position: absolute;
+  top: 10px; /* Distance from top */
+  right: 10px; /* Distance from right */
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 24px;
 }
