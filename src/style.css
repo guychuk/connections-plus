@@ -1,3 +1,5 @@
+/* Use Inter font from Google Fonts */
+
 :root {
   font-family: Inter, sans-serif;
   font-feature-settings: "liga" 1, "calt" 1; /* fix for Chrome */
@@ -7,6 +9,8 @@
     font-family: InterVariable, sans-serif;
   }
 }
+
+/* Body styles */
 
 /* Light theme (default) */
 body {
@@ -24,6 +28,18 @@ body.dark-theme {
   background-color: black;
 }
 
+#game-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  gap: 20px;
+}
+
+/* Toggle theme button */
+
 #theme-toggle-button {
   position: absolute;
   top: 10px;
@@ -31,16 +47,44 @@ body.dark-theme {
   background-color: transparent;
   border: none;
   cursor: pointer;
-  font-size: 24px;
+  font-size: 36px;
 }
 
-#title {
-  color: black;
+#theme-toggle-button::before {
+  content: "🌙";
   transition: color 0.5s ease;
 }
 
-body.dark-theme #title {
+body.dark-theme #theme-toggle-button::before {
+  content: "☀️";
+  transition: color 0.5s ease;
+}
+
+@media (max-width: 768px) {
+  #theme-toggle-button {
+    font-size: 24px;
+  }
+}
+
+/* Header styles */
+
+#header {
+  color: black;
+  font-family: Inter, sans-serif;
+  text-align: center;
+  transition: color 0.5s ease;
+}
+
+body.dark-theme #header {
   color: white;
+}
+
+/* Controls styles */
+
+#controls {
+  display: flex;
+  justify-content: center;
+  max-width: 70vw;
 }
 
 #controls button {
@@ -54,15 +98,6 @@ body.dark-theme #title {
   border-radius: 7px;
   cursor: pointer;
   transition: background-color 0.5s ease, color 0.5s ease, border 0.5s ease;
-}
-
-/* change the buttons sizes on mobile devices */
-@media (max-width: 768px) {
-  #controls button {
-    font-size: 14px;
-    padding: 4px 8px;
-    margin: 2px;
-  }
 }
 
 #controls button:hover {
@@ -90,4 +125,79 @@ body.dark-theme #controls button:hover {
 body.dark-theme #controls button:active {
   background-color: lightcoral;
   transition: background-color 0.5s ease;
+}
+
+@media (max-width: 768px) {
+  #controls {
+    max-width: 90vw;
+  }
+
+  #controls button {
+    font-size: 14px;
+    padding: 4px 8px;
+    margin: 2px;
+  }
+}
+
+/* Board styles */
+
+#board {
+  position: relative;
+  width: 70vw;
+  height: 70vh;
+}
+
+.tile {
+  font-family: Inter, sans-serif;
+  font-size: 16px;
+  color: black;
+  background-color: white;
+  padding: 5px 10px;
+  margin: 3px;
+  border: 2px solid black;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: background-color 0.5s ease, color 0.5s ease, border 0.5s ease,
+    left 0.5s ease, top 0.5s ease;
+}
+
+.tile:hover {
+  background-color: lightsteelblue;
+  transition: background-color 0.5s ease;
+}
+
+.tile:active {
+  background-color: lightslategrey;
+  transition: background-color 0.5s ease;
+}
+
+body.dark-theme .tile {
+  color: white;
+  border: 2px solid white;
+  background-color: black;
+  transition: background-color 0.5s ease, color 0.5s ease, border 0.5s ease,
+    left 0.5s ease, top 0.5s ease;
+}
+
+body.dark-theme .tile:hover {
+  background-color: lightpink;
+  transition: background-color 0.5s ease;
+}
+
+body.dark-theme .tile:active {
+  background-color: lightcoral;
+  transition: background-color 0.5s ease;
+}
+
+@media (max-width: 768px) {
+  #board {
+    width: 90vw;
+    height: 50vh;
+  }
+
+  .tile {
+    font-size: 14px;
+    padding: 4px 8px;
+    margin: 2px;
+  }
 }
