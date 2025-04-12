@@ -56,6 +56,15 @@ body.dark-theme #title {
   transition: background-color 0.5s ease, color 0.5s ease, border 0.5s ease;
 }
 
+/* change the buttons sizes on mobile devices */
+@media (max-width: 768px) {
+  #controls button {
+    font-size: 14px;
+    padding: 4px 8px;
+    margin: 2px;
+  }
+}
+
 #controls button:hover {
   background-color: lightsteelblue;
   transition: background-color 0.5s ease;
