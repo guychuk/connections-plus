@@ -1,11 +1,10 @@
+import { setThemeButtonText } from "./ui";
+
 const themeToggleButton = document.getElementById("theme-toggle-button");
+
+setThemeButtonText(themeToggleButton);
 
 themeToggleButton.addEventListener("click", () => {
   document.body.classList.toggle("dark-theme");
-
-  if (document.body.classList.contains("dark-theme")) {
-    themeToggleButton.textContent = "☀️";
-  } else {
-    themeToggleButton.textContent = "🌙";
-  }
+  setThemeButtonText(themeToggleButton);
 });
