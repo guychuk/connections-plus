@@ -4,5 +4,3 @@ node_modules/
 data/
 dist/
 icons.pptx
-test/
-.pytest_cache/
