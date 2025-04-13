@@ -13,7 +13,7 @@ console.log("Supabase Key:", SUPABASE_KEY);
 
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const riddles = null;
+let riddles = null;
 
 (async () => {
   riddles = await fetchRiddles(supabaseClient, 10, true);
