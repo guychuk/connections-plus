@@ -1,6 +1,19 @@
 import { calculateTileSize, getPositionOnCanvas } from "./ui";
 import { containsDulpicates, shuffleArray } from "./utils";
 import config from "./config.json";
+import { createClient } from "@supabase/supabase-js";
+import { fetchRiddles } from "./supabase";
+
+// Supabase connection
+const SUPABASE_URL = import.meta.env.SUPABASE_URL;
+const SUPABASE_KEY = import.meta.env.SUPABASE_KEY;
+
+console.log("Supabase URL:", SUPABASE_URL);
+console.log("Supabase Key:", SUPABASE_KEY);
+
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const riddles = await fetchRiddles(supabaseClient, 10, true);
 
 // Set the theme togggle button functionality
 // and the initial text based on the current theme
