@@ -11,7 +11,12 @@ const SUPABASE_KEY = import.meta.env.SUPABASE_KEY;
 console.log("Supabase URL:", SUPABASE_URL);
 console.log("Supabase Key:", SUPABASE_KEY);
 
-const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabaseClient = null;
+
+(async () => {
+  const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
+  console.log("Supabase client created:", supabaseClient);
+})();
 
 const riddles = await fetchRiddles(supabaseClient, 10, true);
 
