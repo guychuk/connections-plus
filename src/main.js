@@ -5,8 +5,8 @@ import { createClient } from "@supabase/supabase-js";
 import { fetchRiddles } from "./supabase";
 
 // Supabase connection
-const SUPABASE_URL = import.meta.env.SUPABASE_URL;
-const SUPABASE_KEY = import.meta.env.SUPABASE_KEY;
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_KEY;
 
 console.log("Supabase URL:", SUPABASE_URL);
 console.log("Supabase Key:", SUPABASE_KEY);
