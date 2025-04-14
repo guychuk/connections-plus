@@ -122,8 +122,6 @@ newGameButton.addEventListener("click", async () => {
 
   const buttons = Array.from(document.querySelectorAll(".tile"));
 
-  tiles = await makeTiles(supabaseClient, GROUPS);
-
   for (let i = 0; i < NUM_TILES; i++) {
     buttons[i].textContent = tiles[i].term;
   }
