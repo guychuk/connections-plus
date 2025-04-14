@@ -145,6 +145,8 @@ body.dark-theme #controls button:active {
   position: relative;
   width: 70vw;
   height: 70vh;
+  row-gap: 10px;
+  column-gap: 10px;
 }
 
 .tile {

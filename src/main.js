@@ -1,17 +1,15 @@
-import { calculateTileSize, getPositionOnCanvas } from "./ui";
-import { containsDulpicates, shuffleArray } from "./utils";
-import config from "./config.json";
+import { shuffleBoard } from "./ui";
+import { containsDulpicates } from "./utils";
+import config from "./config/config.json";
 import { createClient } from "@supabase/supabase-js";
-import { makeTiles } from "./gameLogic";
+import { makeTiles, initializeGame } from "./gameLogic";
 
 // Supabase connection
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_KEY;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Set the theme togggle button functionality
-// and the initial text based on the current theme
-
+// Set the theme togggle button functionality and the initial text based on the current theme
 const themeToggleButton = document.getElementById("theme-toggle-button");
 themeToggleButton.addEventListener("click", () => {
   document.body.classList.toggle("dark-theme");
@@ -25,117 +23,51 @@ GROUPS.sort();
 
 if (containsDulpicates(GROUPS)) {
   throw new Error("Groups contain duplicates");
-} else {
-  const groupsParagraph = document.getElementById("subtitle");
-  groupsParagraph.textContent = `Group Sizes are ${GROUPS.join(", ")}`;
 }
 
-const NUM_TILES = GROUPS.reduce((acc, group) => acc + group, 0);
-const BOARD_ROWS = GROUPS.length;
-const BOARD_COLS = GROUPS[GROUPS.length - 1]; // The last group is the largest
+// Update subtitle to show the group sizes
+const groupsParagraph = document.getElementById("subtitle");
+groupsParagraph.textContent = `Group Sizes are ${GROUPS.join(", ")}`;
 
-/** Gap in pixels between tiles */
-const HORIZONTAL_GAP = 10;
-const VERTICAL_GAP = 10;
-
-// Populate the board with tiles
+// Initialize the game
 
 const board = document.getElementById("board");
+const boardCSS = getComputedStyle(board);
 
-const tileSize = calculateTileSize(
+/** The The horizontal gap between tiles. */
+const H_GAP = parseFloat(boardCSS.columnGap);
+
+/** The The vertical gap between tiles. */
+const V_GAP = parseFloat(boardCSS.rowGap);
+
+const result = await initializeGame(
+  supabaseClient,
+  GROUPS,
   board,
-  BOARD_ROWS,
-  BOARD_COLS,
-  HORIZONTAL_GAP,
-  VERTICAL_GAP
+  H_GAP,
+  V_GAP
 );
 
-// Create a 2D array of positions for the tiles
-// Always position the buttons in the first NUM_TILES positions
-
-const positions = Array.from({ length: BOARD_ROWS }, (_, row) =>
-  Array.from({ length: BOARD_COLS }, (_, col) => {
-    return {
-      row,
-      col,
-    };
-  })
-).flat();
-
-// Create the buttons and position them on the board
-
-let tiles = [];
-
-(async () => {
-  tiles = await makeTiles(supabaseClient, GROUPS);
-
-  shuffleArray(positions);
-
-  for (let i = 0; i < NUM_TILES; i++) {
-    const button = document.createElement("button");
-    const { x, y } = getPositionOnCanvas(
-      positions[i],
-      tileSize,
-      HORIZONTAL_GAP,
-      VERTICAL_GAP
-    );
-
-    button.classList.add("tile");
-    button.style.width = `${tileSize.width}px`;
-    button.style.height = `${tileSize.height}px`;
-    button.textContent = tiles[i].term;
-    button.style.position = "absolute";
-    button.style.left = `${x}px`;
-    button.style.top = `${y}px`;
-
-    board.appendChild(button);
-  }
-})();
+let tiles = result.tiles;
+const tileSize = result.tileSize;
+const positions = result.positions;
 
 // Add the shuffle button functionality
-
 const shuffleButton = document.getElementById("shuffle-button");
-
 shuffleButton.addEventListener("click", () => {
-  const buttons = Array.from(document.querySelectorAll(".tile"));
-
-  shuffleArray(positions);
-
-  buttons.forEach((button, i) => {
-    const { x, y } = getPositionOnCanvas(
-      positions[i],
-      tileSize,
-      HORIZONTAL_GAP,
-      VERTICAL_GAP
-    );
-    button.style.left = `${x}px`;
-    button.style.top = `${y}px`;
-  });
+  shuffleBoard(board, positions, tileSize, H_GAP, V_GAP);
 });
 
 // Add the new game button functionality
-
 const newGameButton = document.getElementById("new-game-button");
-
 newGameButton.addEventListener("click", async () => {
+  const buttons = Array.from(board.children);
+
   tiles = await makeTiles(supabaseClient, GROUPS);
 
-  const buttons = Array.from(document.querySelectorAll(".tile"));
-
-  for (let i = 0; i < NUM_TILES; i++) {
+  for (let i = 0; i < tiles.length; i++) {
     buttons[i].textContent = tiles[i].term;
   }
 
-  shuffleArray(positions);
-
-  buttons.forEach((button, i) => {
-    const { x, y } = getPositionOnCanvas(
-      positions[i],
-      tileSize,
-      HORIZONTAL_GAP,
-      VERTICAL_GAP
-    );
-    button.style.left = `${x}px`;
-    button.style.top = `${y}px`;
-  });
+  shuffleBoard(board, positions, tileSize, H_GAP, V_GAP);
 });
