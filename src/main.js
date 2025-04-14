@@ -40,34 +40,36 @@ const H_GAP = parseFloat(boardCSS.columnGap);
 /** The The vertical gap between tiles. */
 const V_GAP = parseFloat(boardCSS.rowGap);
 
-const result = await initializeGame(
-  supabaseClient,
-  GROUPS,
-  board,
-  H_GAP,
-  V_GAP
-);
+(async () => {
+  let result = await initializeGame(
+    supabaseClient,
+    GROUPS,
+    board,
+    H_GAP,
+    V_GAP
+  );
 
-let tiles = result.tiles;
-const tileSize = result.tileSize;
-const positions = result.positions;
+  let tiles = result.tiles;
+  const tileSize = result.tileSize;
+  const positions = result.positions;
 
-// Add the shuffle button functionality
-const shuffleButton = document.getElementById("shuffle-button");
-shuffleButton.addEventListener("click", () => {
-  shuffleBoard(board, positions, tileSize, H_GAP, V_GAP);
-});
+  // Add the shuffle button functionality
+  const shuffleButton = document.getElementById("shuffle-button");
+  shuffleButton.addEventListener("click", () => {
+    shuffleBoard(board, positions, tileSize, H_GAP, V_GAP);
+  });
 
-// Add the new game button functionality
-const newGameButton = document.getElementById("new-game-button");
-newGameButton.addEventListener("click", async () => {
-  const buttons = Array.from(board.children);
+  // Add the new game button functionality
+  const newGameButton = document.getElementById("new-game-button");
+  newGameButton.addEventListener("click", async () => {
+    const buttons = Array.from(board.children);
 
-  tiles = await makeTiles(supabaseClient, GROUPS);
+    tiles = await makeTiles(supabaseClient, GROUPS);
 
-  for (let i = 0; i < tiles.length; i++) {
-    buttons[i].textContent = tiles[i].term;
-  }
+    for (let i = 0; i < tiles.length; i++) {
+      buttons[i].textContent = tiles[i].term;
+    }
 
-  shuffleBoard(board, positions, tileSize, H_GAP, V_GAP);
-});
+    shuffleBoard(board, positions, tileSize, H_GAP, V_GAP);
+  });
+})();
