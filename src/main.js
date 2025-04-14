@@ -2,23 +2,12 @@ import { calculateTileSize, getPositionOnCanvas } from "./ui";
 import { containsDulpicates, shuffleArray } from "./utils";
 import config from "./config.json";
 import { createClient } from "@supabase/supabase-js";
-import { fetchRiddles } from "./supabase";
+import { makeTiles } from "./gameLogic";
 
 // Supabase connection
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_KEY;
-
-console.log("Supabase URL:", SUPABASE_URL);
-console.log("Supabase Key:", SUPABASE_KEY);
-
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
-
-let riddles = null;
-
-(async () => {
-  riddles = await fetchRiddles(supabaseClient, 10, true);
-  console.log("Riddles fetched:", riddles);
-})();
 
 // Set the theme togggle button functionality
 // and the initial text based on the current theme
@@ -75,27 +64,33 @@ const positions = Array.from({ length: BOARD_ROWS }, (_, row) =>
 
 // Create the buttons and position them on the board
 
-shuffleArray(positions);
+let tiles = [];
 
-for (let i = 0; i < NUM_TILES; i++) {
-  const button = document.createElement("button");
-  const { x, y } = getPositionOnCanvas(
-    positions[i],
-    tileSize,
-    HORIZONTAL_GAP,
-    VERTICAL_GAP
-  );
+(async () => {
+  tiles = await makeTiles(supabaseClient, GROUPS);
 
-  button.classList.add("tile");
-  button.style.width = `${tileSize.width}px`;
-  button.style.height = `${tileSize.height}px`;
-  button.textContent = i + 1;
-  button.style.position = "absolute";
-  button.style.left = `${x}px`;
-  button.style.top = `${y}px`;
+  shuffleArray(positions);
 
-  board.appendChild(button);
-}
+  for (let i = 0; i < NUM_TILES; i++) {
+    const button = document.createElement("button");
+    const { x, y } = getPositionOnCanvas(
+      positions[i],
+      tileSize,
+      HORIZONTAL_GAP,
+      VERTICAL_GAP
+    );
+
+    button.classList.add("tile");
+    button.style.width = `${tileSize.width}px`;
+    button.style.height = `${tileSize.height}px`;
+    button.textContent = tiles[i].term;
+    button.style.position = "absolute";
+    button.style.left = `${x}px`;
+    button.style.top = `${y}px`;
+
+    board.appendChild(button);
+  }
+})();
 
 // Add the shuffle button functionality
 
@@ -103,6 +98,35 @@ const shuffleButton = document.getElementById("shuffle-button");
 
 shuffleButton.addEventListener("click", () => {
   const buttons = Array.from(document.querySelectorAll(".tile"));
+
+  shuffleArray(positions);
+
+  buttons.forEach((button, i) => {
+    const { x, y } = getPositionOnCanvas(
+      positions[i],
+      tileSize,
+      HORIZONTAL_GAP,
+      VERTICAL_GAP
+    );
+    button.style.left = `${x}px`;
+    button.style.top = `${y}px`;
+  });
+});
+
+// Add the new game button functionality
+
+const newGameButton = document.getElementById("new-game-button");
+
+newGameButton.addEventListener("click", async () => {
+  tiles = await makeTiles(supabaseClient, GROUPS);
+
+  const buttons = Array.from(document.querySelectorAll(".tile"));
+
+  tiles = await makeTiles(supabaseClient, GROUPS);
+
+  for (let i = 0; i < NUM_TILES; i++) {
+    buttons[i].textContent = tiles[i].term;
+  }
 
   shuffleArray(positions);
 
