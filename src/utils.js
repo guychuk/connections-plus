@@ -47,3 +47,11 @@ export const containsDulpicates = (array) => {
   const set = new Set(array);
   return set.size !== array.length;
 };
+
+/**
+ * Calculate a hashing to a set of tiles.
+ * @param {Set} tiles a set of tiles.
+ */
+export const hashTilesSet = (tiles) => {
+  return JSON.stringify([...tiles].sort());
+};

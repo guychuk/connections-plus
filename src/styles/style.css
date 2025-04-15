@@ -110,6 +110,12 @@ body.dark-theme #header {
   transition: background-color 0.5s ease;
 }
 
+#controls button:disabled {
+  background-color: black;
+  cursor: not-allowed;
+  transition: background-color 0.5s ease;
+}
+
 body.dark-theme #controls button {
   color: white;
   border: 2px solid white;
@@ -124,6 +130,12 @@ body.dark-theme #controls button:hover {
 
 body.dark-theme #controls button:active {
   background-color: lightcoral;
+  transition: background-color 0.5s ease;
+}
+
+body.dark-theme #controls button:disabled {
+  background-color: black;
+  cursor: not-allowed;
   transition: background-color 0.5s ease;
 }
 
@@ -179,6 +191,46 @@ body.dark-theme #controls button:active {
     left 0.5s ease, top 0.5s ease;
 }
 
+.tile:disabled {
+  cursor: not-allowed;
+}
+
+.tile.completed-1 {
+  background-color: deeppink;
+  transition: background-color 0.5s ease, color 0.5s ease, border 0.5s ease,
+    left 0.5s ease, top 0.5s ease;
+}
+
+.tile.completed-2 {
+  background-color: deepskyblue;
+  transition: background-color 0.5s ease, color 0.5s ease, border 0.5s ease,
+    left 0.5s ease, top 0.5s ease;
+}
+
+.tile.completed-3 {
+  background-color: gold;
+  transition: background-color 0.5s ease, color 0.5s ease, border 0.5s ease,
+    left 0.5s ease, top 0.5s ease;
+}
+
+.tile.completed-4 {
+  background-color: green;
+  transition: background-color 0.5s ease, color 0.5s ease, border 0.5s ease,
+    left 0.5s ease, top 0.5s ease;
+}
+
+.tile.completed-5 {
+  background-color: red;
+  transition: background-color 0.5s ease, color 0.5s ease, border 0.5s ease,
+    left 0.5s ease, top 0.5s ease;
+}
+
+.tile.completed-6 {
+  background-color: blue;
+  transition: background-color 0.5s ease, color 0.5s ease, border 0.5s ease,
+    left 0.5s ease, top 0.5s ease;
+}
+
 body.dark-theme .tile {
   color: white;
   border: 2px solid white;
@@ -212,5 +264,125 @@ body.dark-theme .tile.selected {
     font-size: 14px;
     padding: 4px 8px;
     margin: 2px;
+  }
+}
+
+/* Toast styles */
+
+.toastify {
+  padding: 12px 20px;
+  color: #ffffff;
+  display: inline-block;
+  box-shadow: 0 3px 6px -1px rgba(0, 0, 0, 0.12),
+    0 10px 36px -4px rgba(77, 96, 232, 0.3);
+  position: fixed;
+  opacity: 0;
+  transition: all 0.5s cubic-bezier(0.215, 0.61, 0.355, 1);
+  cursor: pointer;
+  text-decoration: none;
+  max-width: calc(50% - 20px);
+  z-index: 2147483647;
+  font-family: Inter, sans-serif;
+}
+
+.toastify-invalid-choice {
+  background-color: lightgray;
+}
+
+body.dark-theme .toastify-invalid-choice {
+  background-color: darkgray;
+}
+
+.toastify-correct {
+  background-color: green;
+}
+
+body.dark-theme .toastify-correct {
+  background-color: darkgreen;
+}
+
+.toastify-incorrect {
+  background-color: red;
+}
+
+body.dark-theme .toastify-incorrect {
+  background-color: darkred;
+}
+
+.toastify-partial {
+  background-color: yellow;
+}
+
+body.dark-theme .toastify-partial {
+  background-color: darkgoldenrod;
+}
+
+.toastify-duplicate {
+  background-color: darkblue;
+}
+
+body.dark-theme .toastify-duplicate {
+  background-color: darkslateblue;
+}
+
+.toastify.on {
+  opacity: 1;
+}
+
+.toast-close {
+  background: transparent;
+  border: 0;
+  color: white;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 1em;
+  opacity: 0.4;
+  padding: 0 5px;
+}
+
+.toastify-right {
+  right: 15px;
+}
+
+.toastify-left {
+  left: 15px;
+}
+
+.toastify-top {
+  top: -150px;
+}
+
+.toastify-bottom {
+  bottom: -150px;
+}
+
+.toastify-rounded {
+  border-radius: 25px;
+}
+
+.toastify-avatar {
+  width: 1.5em;
+  height: 1.5em;
+  margin: -7px 5px;
+  border-radius: 2px;
+}
+
+.toastify-center {
+  margin-left: auto;
+  margin-right: auto;
+  left: 0;
+  right: 0;
+  max-width: fit-content;
+  max-width: -moz-fit-content;
+}
+
+@media only screen and (max-width: 360px) {
+  .toastify-right,
+  .toastify-left {
+    margin-left: auto;
+    margin-right: auto;
+    left: 0;
+    right: 0;
+    max-width: fit-content;
   }
 }
