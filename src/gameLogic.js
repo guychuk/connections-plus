@@ -128,7 +128,8 @@ export const resetGame = async (
 
   for (let tile of tiles) {
     buttons[i].textContent = tile.term;
-    buttons[i].classList.remove("selected");
+    buttons[i].className = "tile";
+    buttons[i].disabled = false;
     tile.button = buttons[i++];
   }
 
