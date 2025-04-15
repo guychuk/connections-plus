@@ -96,10 +96,12 @@ export const createButtons = (
     button.style.left = `${x}px`;
     button.style.top = `${y}px`;
 
+    console.log(x, y);
+
     tiles[i].button = button;
 
     button.addEventListener("click", () => {
-      if (selectedTiles.has(button)) {
+      if (selectedTiles.has(tiles[i])) {
         button.classList.remove("selected");
         selectedTiles.delete(tiles[i]);
       } else if (selectedTiles.size < maxSelections) {

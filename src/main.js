@@ -3,6 +3,7 @@ import { containsDulpicates } from "./utils";
 import config from "./config/config.json";
 import { createClient } from "@supabase/supabase-js";
 import { makeTiles, initializeGame } from "./gameLogic";
+import Toastify from "toastify-js";
 
 // Supabase connection
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
@@ -80,5 +81,24 @@ const V_GAP = parseFloat(boardCSS.rowGap);
       tile.button.classList.remove("selected");
     }
     selectedTiles.clear();
+  });
+
+  const submitButton = document.getElementById("submit-button");
+  submitButton.addEventListener("click", () => {
+    const group = selectedTiles.size;
+    const correctTiles = Array.from(selectedTiles).reduce(
+      (acc, tile) => (tile.groupSize === group ? acc + 1 : acc),
+      0
+    );
+
+    Toastify({
+      text: `You got ${correctTiles} out of ${group} correct!`,
+      duration: 3000,
+      gravity: "top",
+      position: "left",
+      stopOnFocus: true,
+    }).showToast();
+
+    console.log(group, correctTiles, selectedTiles);
   });
 })();
