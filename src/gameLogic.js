@@ -8,13 +8,16 @@ import { calculateTileSize, createButtons } from "./ui";
  * @param {string} term - The term of the tile.
  * @param {string} category - The category of the tile.
  * @param {number} groupSize - The group size of the tile.
+ * @param {HTMLButtonElement} button - The button element for the tile.
+ * @returns {Object} - The tile object.
  */
-const makeTile = (id, term, category, groupSize) => {
+const makeTile = (id, term, category, groupSize, button) => {
   return {
     id,
     term,
     category,
     groupSize,
+    button,
   };
 };
 
@@ -41,8 +44,9 @@ export const makeTiles = async (client, groups) => {
         makeTile(
           allTerms[i][j].id,
           allTerms[i][j].term,
-          categories[i].name,
-          groups[i]
+          categories[i].category,
+          groups[i],
+          null
         )
       );
     }
@@ -79,10 +83,10 @@ export const initializeGame = async (client, groups, board, hgap, vgap) => {
 
   shuffleArray(positions);
 
-  const selectedButtons = new Set();
+  const selectedTiles = new Set();
 
-  const selectedButtonsObj = {
-    selectedButtons,
+  const selectedTilesObj = {
+    selectedTiles,
     maxSelections: groups[groups.length - 1],
   };
 
@@ -93,8 +97,8 @@ export const initializeGame = async (client, groups, board, hgap, vgap) => {
     tileSize,
     hgap,
     vgap,
-    selectedButtonsObj
+    selectedTilesObj
   );
 
-  return { tiles, positions, tileSize, selectedButtons };
+  return { tiles, positions, tileSize, selectedTiles };
 };

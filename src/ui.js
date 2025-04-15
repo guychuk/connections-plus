@@ -71,7 +71,7 @@ export const shuffleBoard = (board, positions, tileSize, hgap, vgap) => {
  * @param {Object} tileSize - An object containing the height and width of the tile.
  * @param {number} hgap - The horizontal gap between tiles.
  * @param {number} vgap - The vertical gap between tiles.
- * @param {Object} selectedButtonsObj - An object containing the selected buttons set and the maximum number of selected buttons.
+ * @param {Object} selectedTilesObj - An object containing the selected buttons set and the maximum number of selected buttons.
  */
 export const createButtons = (
   board,
@@ -80,9 +80,9 @@ export const createButtons = (
   tileSize,
   hgap,
   vgap,
-  selectedButtonsObj
+  selectedTilesObj
 ) => {
-  const { selectedButtons, maxSelections } = selectedButtonsObj;
+  const { selectedTiles, maxSelections } = selectedTilesObj;
 
   for (let i = 0; i < tiles.length; i++) {
     const button = document.createElement("button");
@@ -96,15 +96,15 @@ export const createButtons = (
     button.style.left = `${x}px`;
     button.style.top = `${y}px`;
 
+    tiles[i].button = button;
+
     button.addEventListener("click", () => {
-      console.log("button clicked");
-      console.log(selectedButtons, maxSelections);
-      if (selectedButtons.has(button)) {
+      if (selectedTiles.has(button)) {
         button.classList.remove("selected");
-        selectedButtons.delete(button);
-      } else if (selectedButtons.size < maxSelections) {
+        selectedTiles.delete(tiles[i]);
+      } else if (selectedTiles.size < maxSelections) {
         button.classList.add("selected");
-        selectedButtons.add(button);
+        selectedTiles.add(tiles[i]);
       }
     });
 
