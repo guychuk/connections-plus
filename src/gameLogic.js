@@ -58,7 +58,7 @@ export const makeTiles = async (client, groups) => {
  * @param {HTMLCanvasElement} board - The board element.
  * @param {number} hgap - The horizontal gap between tiles.
  * @param {number} vgap - The vertical gap between tiles.
- * @returns {Object} An object containing the tiles, positions, and tile size.
+ * @returns {Object} An object containing the tiles, positions, tile size and selected buttons.
  */
 export const initializeGame = async (client, groups, board, hgap, vgap) => {
   const rows = groups.length;
@@ -79,7 +79,22 @@ export const initializeGame = async (client, groups, board, hgap, vgap) => {
 
   shuffleArray(positions);
 
-  createButtons(board, positions, tiles, tileSize, hgap, vgap);
+  const selectedButtons = new Set();
 
-  return { tiles, positions, tileSize };
+  const selectedButtonsObj = {
+    selectedButtons,
+    maxSelections: groups[groups.length - 1],
+  };
+
+  createButtons(
+    board,
+    positions,
+    tiles,
+    tileSize,
+    hgap,
+    vgap,
+    selectedButtonsObj
+  );
+
+  return { tiles, positions, tileSize, selectedButtons };
 };

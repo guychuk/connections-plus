@@ -52,6 +52,7 @@ const V_GAP = parseFloat(boardCSS.rowGap);
   let tiles = result.tiles;
   const tileSize = result.tileSize;
   const positions = result.positions;
+  const selectedButtons = result.selectedButtons;
 
   // Add the shuffle button functionality
   const shuffleButton = document.getElementById("shuffle-button");
@@ -71,5 +72,13 @@ const V_GAP = parseFloat(boardCSS.rowGap);
     }
 
     shuffleBoard(board, positions, tileSize, H_GAP, V_GAP);
+  });
+
+  const deselectButton = document.getElementById("deselect-all-button");
+  deselectButton.addEventListener("click", () => {
+    for (const button of selectedButtons) {
+      button.classList.remove("selected");
+    }
+    selectedButtons.clear();
   });
 })();

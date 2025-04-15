@@ -173,6 +173,11 @@ body.dark-theme #controls button:active {
   transition: background-color 0.5s ease;
 }
 
+.tile.selected {
+  background-color: greenyellow;
+  transition: background-color 0.5s ease;
+}
+
 body.dark-theme .tile {
   color: white;
   border: 2px solid white;
@@ -188,6 +193,11 @@ body.dark-theme .tile:hover {
 
 body.dark-theme .tile:active {
   background-color: lightcoral;
+  transition: background-color 0.5s ease;
+}
+
+body.dark-theme .tile.selected {
+  background-color: orange;
   transition: background-color 0.5s ease;
 }
 
