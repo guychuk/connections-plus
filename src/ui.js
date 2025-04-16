@@ -299,9 +299,20 @@ export const celebrate = (duration) => {
 
   var animationEnd = Date.now() + duration;
 
-  var defaults = { startVelocity: 30, spread: 360, ticks: 100, zIndex: 0 };
+  var defaults = {
+    startVelocity: 30,
+    spread: 360,
+    ticks: 100,
+    zIndex: 0,
+  };
 
-  var mobileDefaults = { startVelocity: 20, spread: 120, ticks: 60, zIndex: 0 };
+  var mobileDefaults = {
+    startVelocity: 20,
+    spread: 120,
+    ticks: 80,
+    zIndex: 0,
+    scalar: 0.5,
+  };
 
   var interval = setInterval(function () {
     var timeLeft = animationEnd - Date.now();
