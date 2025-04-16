@@ -27,6 +27,15 @@ export const getRandomNums = (n, k = -1) => {
 };
 
 /**
+ * Get a random number in [min, max).
+ * @param {number} min Minimum value.
+ * @param {number} max Maximum value.
+ * @returns {number} A random number in [min, max).
+ */
+export const randomNum = (min, max) =>
+  Math.floor(Math.random() * (max - min)) + min;
+
+/**
  * Shuffle an array in-place.
  * @param {Array} array An array to shuffle.
  */

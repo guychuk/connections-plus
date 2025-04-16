@@ -1,12 +1,15 @@
-import { shuffleArray, hashTilesSet } from "./utils.js";
+import { shuffleArray, hashTilesSet, randomNum } from "./utils.js";
 import {
   TOAST_DUPLICATE,
   TOAST_CORRECT,
   TOAST_INCORRECT,
+  TOAST_WINNER,
   makeTooFewToast,
   makeTooManyToast,
   makePartialToast,
 } from "./toasts.js";
+import confetti from "canvas-confetti";
+import { confettiDuration } from "./config/config.json";
 
 /**
  * Calculates the tile size based on the canvas size and the number of rows and columns.
@@ -285,4 +288,40 @@ export const repositionTiles = (
 
   // Now draw the rest
   shuffleBoard(remainngTiles, positions, tileSize, hgap, vgap);
+};
+
+/**
+ * Celebrate with confetti.
+ * @param {number} duration The duration of the celebration in milliseconds.
+ */
+export const celebrate = (duration) => {
+  var animationEnd = Date.now() + duration;
+
+  var defaults = { startVelocity: 30, spread: 360, ticks: 100, zIndex: 0 };
+
+  var interval = setInterval(function () {
+    var timeLeft = animationEnd - Date.now();
+
+    if (timeLeft <= 0) {
+      return clearInterval(interval);
+    }
+
+    var particleCount = 100 * (timeLeft / duration);
+
+    confetti({
+      ...defaults,
+      particleCount,
+      origin: { x: randomNum(0.1, 0.3), y: Math.random() - 0.2 },
+    });
+    confetti({
+      ...defaults,
+      particleCount,
+      origin: { x: randomNum(0.7, 0.9), y: Math.random() - 0.2 },
+    });
+  }, 250);
+};
+
+export const win = () => {
+  TOAST_WINNER.showToast();
+  celebrate(confettiDuration);
 };

@@ -74,3 +74,9 @@ export const TOAST_INCORRECT = makeToast(
   ["toastify-rounded", "toastify-incorrect"],
   "❌ That's not it..."
 );
+
+export const TOAST_WINNER = makeToast(
+  ["toastify-rounded", "toastify-winner"],
+  "🎉 You won!",
+  -1
+);

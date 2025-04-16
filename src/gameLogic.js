@@ -2,6 +2,7 @@ import { fetchCategories, fetchTerms } from "./supabase";
 import { shuffleArray, makePositions } from "./utils";
 import { calculateTileSize, createButtons, shuffleBoard } from "./ui";
 import { SupabaseClient } from "@supabase/supabase-js";
+import { TOAST_WINNER } from "./toasts";
 
 /**
  * Make a tile object.
@@ -111,6 +112,8 @@ export const resetGame = async (
   hgap,
   vgap
 ) => {
+  TOAST_WINNER.hideToast();
+
   const newTiles = await makeTiles(SupabaseClient, groups);
 
   const tilesSetArray = Array.from(tiles);
@@ -156,5 +159,3 @@ export const processNewCompletedGroup = (selectedTiles, groups, positions) => {
 
   return makePositions(rows, cols);
 };
-
-

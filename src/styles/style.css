@@ -266,6 +266,13 @@ body {
   box-shadow: 0 2px 8px rgba(133, 100, 4, 0.2);
 }
 
+.toastify-winner {
+  color: #4a0f66;
+  background-color: #f3e8ff;
+  border-color: #d6b3ff;
+  box-shadow: 0 2px 8px rgba(74, 15, 102, 0.2);
+}
+
 /* Dark Theme */
 
 body.dark-theme {
@@ -429,6 +436,13 @@ body.dark-theme .toastify-invalid-choice {
   color: #fff3cd;
   background-color: #5c4813;
   border-color: #856a1d;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-theme .toastify-winner {
+  color: #e9d8ff;
+  background-color: #2b183a;
+  border-color: #7e4eb8;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 

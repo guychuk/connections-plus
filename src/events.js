@@ -1,8 +1,7 @@
 import { submitToast, repositionTiles } from "./ui";
-import { makePositions } from "./utils";
 import { TOAST_ERROR } from "./toasts";
 import { processNewCompletedGroup } from "./gameLogic";
-
+import { win } from "./ui";
 /**
  * Event handler for the submit button.
  * @param {HTMLCanvasElement} board The board element containing the tiles.
@@ -81,6 +80,8 @@ export const clickSubmit = (
     setTimeout(() => {
       submitButton.disabled = false;
     }, toast.options.duration + 100);
+  } else {
+    win();
   }
 
   return positions;
