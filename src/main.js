@@ -1,4 +1,4 @@
-import { shuffleBoard } from "./ui";
+import { shuffleBoard, setThemeBasedOnPreference } from "./ui";
 import { containsDulpicates } from "./utils";
 import config from "./config/config.json";
 import { createClient } from "@supabase/supabase-js";
@@ -11,10 +11,21 @@ const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_KEY;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Set the theme togggle button functionality and the initial text based on the current theme
+
 const themeToggleButton = document.getElementById("theme-toggle-button");
 themeToggleButton.addEventListener("click", () => {
   document.body.classList.toggle("dark-theme");
 });
+
+// Set the theme based on the user's preference
+
+setThemeBasedOnPreference();
+
+window
+  .matchMedia("(prefers-color-scheme: dark)")
+  .addEventListener("change", () => {
+    setThemeBasedOnPreference();
+  });
 
 // Read game configuration
 
