@@ -1,4 +1,4 @@
-import { shuffleArray, hashTilesSet } from "./utils.js";
+import { shuffleArray, hashTilesSet, makePositions } from "./utils.js";
 import Toastify from "toastify-js";
 
 /**
@@ -43,23 +43,41 @@ const getPositionOnCanvas = (pos, tileSize, hgap, vgap) => {
   };
 };
 
+const getPositionOnCanvasCentered = (
+  pos,
+  group,
+  largestGroup,
+  tileSize,
+  hgap,
+  vgap
+) => {
+  const { x, y } = getPositionOnCanvas(pos, tileSize, hgap, vgap);
+  return {
+    x: x + ((tileSize.width + hgap) * (largestGroup - group)) / 2,
+    y,
+  };
+};
+
 /**
  * Shuffles the positions of the tiles on the board.
- * @param {HTMLCanvasElement} board - The board element containing the tiles.
+ * @param {Set} tiles - A set of tile objects.
  * @param {Array} positions - An array of positions to shuffle.
  * @param {Object} tileSize - An object containing the height and width of the tile.
  * @param {number} hgap - The horizontal gap between tiles.
  * @param {number} vgap - The vertical gap between tiles.
  */
-export const shuffleBoard = (buttons, positions, tileSize, hgap, vgap) => {
+export const shuffleBoard = (tiles, positions, tileSize, hgap, vgap) => {
   shuffleArray(positions);
 
-  buttons.forEach((button, i) => {
+  let i = 0;
+
+  for (let tile of tiles) {
     const { x, y } = getPositionOnCanvas(positions[i], tileSize, hgap, vgap);
 
-    button.style.left = `${x}px`;
-    button.style.top = `${y}px`;
-  });
+    tile.button.style.left = `${x}px`;
+    tile.button.style.top = `${y}px`;
+    i++;
+  }
 };
 
 /**
@@ -94,7 +112,7 @@ export const createButtons = (
     button.classList.add("tile");
     button.style.width = `${tileSize.width}px`;
     button.style.height = `${tileSize.height}px`;
-    button.textContent = tile.term;
+    button.textContent = tile.term + " " + tile.groupSize;
     button.style.position = "absolute";
     button.style.left = `${x}px`;
     button.style.top = `${y}px`;
@@ -204,20 +222,53 @@ export const submitToast = (selectedTiles, previousSubmissions, groups) => {
   return { toast, newlyCompletedGroup };
 };
 
-// /**
-//  * Redraws the board.
-//  * @param {Set} remainngTiles - The set of remaining tiles.
-//  * @param {Array} completedGroups - An array of completed groups.
-//  * @param {Array} positions - An array of positions for the tiles.
-//  * @param {Object} tileSize - An object containing the height and width of the tile.
-//  * @param {number} hgap - The horizontal gap between tiles.
-//  * @param {number} vgap - The vertical gap between tiles.
-//  */
-// export const redrawBoard = (
-//   remainngTiles,
-//   completedGroups,
-//   positions,
-//   tileSize,
-//   hgap,
-//   vgap
-// ) => {};
+/**
+ * Redraws the board.
+ * @param {Set} remainngTiles - The set of remaining tiles.
+ * @param {Array} completedGroups - An array of completed groups.
+ * @param {Array} groups - An array of group sizes in the game, sorted.
+ * @param {Array} positions - An array of positions for the tiles.
+ * @param {Object} tileSize - An object containing the height and width of the tile.
+ * @param {number} hgap - The horizontal gap between tiles.
+ * @param {number} vgap - The vertical gap between tiles.
+ */
+export const redrawBoard = (
+  remainngTiles,
+  completedGroups,
+  groups,
+  positions,
+  tileSize,
+  hgap,
+  vgap
+) => {
+  // Move the completed ones down
+
+  const rows = completedGroups.length;
+  const cols = groups[groups.length - 1];
+  let row = rows - 1;
+
+  for (let i = rows - 1; i >= 0; i--) {
+    const group = completedGroups[i].length;
+
+    if (group > 0) {
+      for (let col = 0; col < group; col++) {
+        const { x, y } = getPositionOnCanvasCentered(
+          { row, col },
+          group,
+          cols,
+          tileSize,
+          hgap,
+          vgap
+        );
+
+        completedGroups[i][col].button.style.left = `${x}px`;
+        completedGroups[i][col].button.style.top = `${y}px`;
+      }
+
+      row--;
+    }
+  }
+
+  // Now draw the rest
+  shuffleBoard(remainngTiles, positions, tileSize, hgap, vgap);
+};

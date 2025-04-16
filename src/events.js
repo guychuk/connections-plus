@@ -1,4 +1,5 @@
-import { submitToast } from "./ui";
+import { submitToast, redrawBoard } from "./ui";
+import { makePositions } from "./utils";
 
 /**
  * Event handler for the submit button.
@@ -8,6 +9,11 @@ import { submitToast } from "./ui";
  * @param {Array} completedGroups - An array of completed groups.
  * @param {Array} groups - An array of group sizes in the game, sorted.
  * @param {HTMLButtonElement} submitButton - The submit button.
+ * @param {Array} positions - An array of positions for the tiles.
+ * @param {Object} tileSize - An object containing the height and width of the tile.
+ * @param {number} hgap - The horizontal gap between tiles.
+ * @param {number} vgap - The vertical gap between tiles.
+ * @returns {Array} An array of positions for the tiles.
  */
 export const clickSubmit = (
   remainngTiles,
@@ -15,7 +21,11 @@ export const clickSubmit = (
   previousSubmissions,
   completedGroups,
   groups,
-  submitButton
+  submitButton,
+  positions,
+  tileSize,
+  hgap,
+  vgap
 ) => {
   const { toast, newlyCompletedGroup } = submitToast(
     selectedTiles,
@@ -43,13 +53,29 @@ export const clickSubmit = (
     }
 
     selectedTiles.clear();
-  }
 
-  console.log(completedGroups);
+    // Update free positions
+    const cols = groups[groups.length - 1];
+    const rows = positions.length / cols - 1;
+
+    positions = makePositions(rows, cols);
+
+    redrawBoard(
+      remainngTiles,
+      completedGroups,
+      groups,
+      positions,
+      tileSize,
+      hgap,
+      vgap
+    );
+  }
 
   // When pressing the button fast enough, the toasts get stuck.
   submitButton.disabled = true;
   setTimeout(() => {
     submitButton.disabled = false;
   }, 2000);
+
+  return positions;
 };

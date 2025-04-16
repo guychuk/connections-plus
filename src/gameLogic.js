@@ -1,5 +1,5 @@
 import { fetchCategories, fetchTerms } from "./supabase";
-import { shuffleArray } from "./utils";
+import { shuffleArray, makePositions } from "./utils";
 import { calculateTileSize, createButtons, shuffleBoard } from "./ui";
 
 /**
@@ -27,7 +27,7 @@ const makeTile = (id, term, category, groupSize, groupIndex, button) => {
  * Create tiles for a new game.
  * @param {*} client supabase client.
  * @param {Array} groups array of group sizes.
- * @returns {Set} array of tiles.
+ * @returns {Set} set of tiles.
  */
 export const makeTiles = async (client, groups) => {
   const categories = await fetchCategories(client, groups.length);
@@ -73,14 +73,7 @@ export const initializeGame = async (client, groups, board, hgap, vgap) => {
 
   const tileSize = calculateTileSize(board, rows, cols, hgap, vgap);
 
-  const positions = Array.from({ length: rows }, (_, row) =>
-    Array.from({ length: cols }, (_, col) => {
-      return {
-        row,
-        col,
-      };
-    })
-  ).flat();
+  const positions = makePositions(rows, cols);
 
   const tiles = await makeTiles(client, groups);
 
@@ -105,35 +98,42 @@ export const initializeGame = async (client, groups, board, hgap, vgap) => {
 /**
  * Reset the game board with new tiles.
  * @param {Object} SupabaseClient - The Supabase client.
- * @param {Array} groups - An array of group sizes.
  * @param {Array} buttons - An array of button elements.
- * @param {Array} positions - An array of positions for the tiles.
+ * @param {Set} tiles - The set of tiles.
  * @param {Object} tileSize - An object containing the height and width of the tile.
  * @param {number} hgap - The horizontal gap between tiles.
  * @param {number} vgap - The vertical gap between tiles.
- * @returns {Array} An array of (new) tile objects.
+ * @returns {Set} A set of (new) tile objects.
  */
 export const resetGame = async (
   SupabaseClient,
   groups,
-  buttons,
-  positions,
+  tiles,
   tileSize,
   hgap,
   vgap
 ) => {
-  const tiles = await makeTiles(SupabaseClient, groups);
+  const newTiles = await makeTiles(SupabaseClient, groups);
 
-  let i = 0;
+  const tilesSetArray = Array.from(tiles);
+  const newTilesArray = Array.from(newTiles);
 
-  for (let tile of tiles) {
-    buttons[i].textContent = tile.term;
-    buttons[i].className = "tile";
-    buttons[i].disabled = false;
-    tile.button = buttons[i++];
+  for (let i = 0; i < tilesSetArray.length; i++) {
+    tilesSetArray[i].id = newTilesArray[i].id;
+    tilesSetArray[i].term = newTilesArray[i].term;
+    tilesSetArray[i].category = newTilesArray[i].category;
+    tilesSetArray[i].groupSize = newTilesArray[i].groupSize;
+    tilesSetArray[i].groupIndex = newTilesArray[i].groupIndex;
+
+    tilesSetArray[i].button.textContent =
+      tilesSetArray[i].term + " " + tilesSetArray[i].groupSize;
+    tilesSetArray[i].button.className = "tile";
+    tilesSetArray[i].button.disabled = false;
   }
 
-  shuffleBoard(buttons, positions, tileSize, hgap, vgap);
+  const positions = makePositions(groups.length, groups[groups.length - 1]);
 
-  return tiles;
+  shuffleBoard(tiles, positions, tileSize, hgap, vgap);
+
+  return { tiles, positions };
 };

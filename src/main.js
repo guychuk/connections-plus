@@ -50,10 +50,11 @@ const V_GAP = parseFloat(boardCSS.rowGap);
     V_GAP
   );
 
-  let remainngTiles = result.tiles;
+  let allTiles = result.tiles;
+  let remainngTiles = new Set(allTiles);
+  let positions = result.positions;
   const buttons = result.buttons;
   const tileSize = result.tileSize;
-  const positions = result.positions;
   const selectedTiles = result.selectedTiles;
 
   const previousSubmissions = new Set();
@@ -62,7 +63,7 @@ const V_GAP = parseFloat(boardCSS.rowGap);
   // Add the shuffle button functionality
   const shuffleButton = document.getElementById("shuffle-button");
   shuffleButton.addEventListener("click", () => {
-    shuffleBoard(buttons, positions, tileSize, H_GAP, V_GAP);
+    shuffleBoard(remainngTiles, positions, tileSize, H_GAP, V_GAP);
   });
 
   // Add the new game button functionality
@@ -70,17 +71,22 @@ const V_GAP = parseFloat(boardCSS.rowGap);
   newGameButton.addEventListener("click", async () => {
     previousSubmissions.clear();
     selectedTiles.clear();
-    completedGroups.length = 0;
 
-    remainngTiles = resetGame(
+    for (let i = 0; i < completedGroups.length; i++) {
+      completedGroups[i].length = 0;
+    }
+
+    const result = await resetGame(
       supabaseClient,
       GROUPS,
-      buttons,
-      positions,
+      allTiles,
       tileSize,
       H_GAP,
       V_GAP
     );
+
+    remainngTiles = new Set(result.tiles);
+    positions = result.positions;
   });
 
   const deselectButton = document.getElementById("deselect-all-button");
@@ -92,14 +98,18 @@ const V_GAP = parseFloat(boardCSS.rowGap);
   });
 
   const submitButton = document.getElementById("submit-button");
-  submitButton.addEventListener("click", () =>
-    clickSubmit(
+  submitButton.addEventListener("click", () => {
+    positions = clickSubmit(
       remainngTiles,
       selectedTiles,
       previousSubmissions,
       completedGroups,
       GROUPS,
-      submitButton
-    )
-  );
+      submitButton,
+      positions,
+      tileSize,
+      H_GAP,
+      V_GAP
+    );
+  });
 })();

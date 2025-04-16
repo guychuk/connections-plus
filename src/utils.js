@@ -55,3 +55,20 @@ export const containsDulpicates = (array) => {
 export const hashTilesSet = (tiles) => {
   return JSON.stringify([...tiles].sort());
 };
+
+/**
+ * Create an array of positions.
+ * @param {number} rows - The number of rows.
+ * @param {number} cols - The number of columns.
+ * @returns {Array} - An array of positions.
+ */
+export const makePositions = (rows, cols) => {
+  return Array.from({ length: rows }, (_, row) =>
+    Array.from({ length: cols }, (_, col) => {
+      return {
+        row,
+        col,
+      };
+    })
+  ).flat();
+};
