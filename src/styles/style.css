@@ -61,39 +61,6 @@
   font-family: Inter, sans-serif;
 }
 
-/* Mobile */
-
-@media (max-width: 768px) {
-  #theme-toggle-button {
-    font-size: 24px;
-  }
-}
-
-@media (max-width: 768px) {
-  #controls {
-    max-width: 90vw;
-  }
-
-  #controls button {
-    font-size: 14px;
-    padding: 4px 8px;
-    margin: 2px;
-  }
-}
-
-@media (max-width: 768px) {
-  #board {
-    width: 90vw;
-    height: 50vh;
-  }
-
-  .tile {
-    font-size: 14px;
-    padding: 4px 8px;
-    margin: 2px;
-  }
-}
-
 /* Light Theme */
 
 body {
@@ -121,7 +88,11 @@ body {
 
 #controls button {
   font-family: Inter, sans-serif;
-  font-size: 16px;
+  font-size: 1em;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+  hyphens: auto;
   color: #333333;
   background-color: #e0e0e0;
   padding: 5px 10px;
@@ -151,7 +122,11 @@ body {
 
 .tile {
   font-family: Inter, sans-serif;
-  font-size: 16px;
+  font-size: 1em;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+  hyphens: auto;
   color: #333333;
   background-color: #ffffff;
   padding: 5px 10px;
@@ -518,5 +493,38 @@ body.dark-theme .toastify-invalid-choice {
     left: 0;
     right: 0;
     max-width: fit-content;
+  }
+}
+
+/* Mobile */
+
+@media (max-width: 768px) {
+  #theme-toggle-button {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  #controls {
+    max-width: 90vw;
+  }
+
+  #controls button {
+    font-size: 0.6em;
+    padding: 4px 8px;
+    margin: 2px;
+  }
+}
+
+@media (max-width: 768px) {
+  #board {
+    width: 90vw;
+    height: 50vh;
+  }
+
+  .tile {
+    font-size: 0.6em;
+    padding: 4px 8px;
+    margin: 2px;
   }
 }
