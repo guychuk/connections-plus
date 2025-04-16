@@ -338,7 +338,26 @@ export const celebrate = (duration) => {
   }, 250);
 };
 
+/**
+ * Show the win toast and celebrate with confetti.
+ */
 export const win = () => {
   TOAST_WINNER.showToast();
   celebrate(confettiDuration);
+};
+
+/**
+ * Set the theme based on the user's preference.
+ */
+export const setThemeBasedOnPreference = () => {
+  const prefersDarkScheme = window.matchMedia(
+    "(prefers-color-scheme: dark)"
+  ).matches;
+
+  // Apply dark theme if preferred
+  if (prefersDarkScheme) {
+    document.body.classList.add("dark-theme");
+  } else {
+    document.body.classList.remove("dark-theme");
+  }
 };
