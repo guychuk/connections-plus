@@ -1,14 +1,21 @@
-import { shuffleArray, hashTilesSet, makePositions } from "./utils.js";
-import Toastify from "toastify-js";
+import { shuffleArray, hashTilesSet } from "./utils.js";
+import {
+  TOAST_DUPLICATE,
+  TOAST_CORRECT,
+  TOAST_INCORRECT,
+  makeTooFewToast,
+  makeTooManyToast,
+  makePartialToast,
+} from "./toasts.js";
 
 /**
  * Calculates the tile size based on the canvas size and the number of rows and columns.
- * @param {HTMLCanvasElement} canvas
- * @param {number} rows - Number of rows in the grid.
- * @param {number} cols - Number of columns in the grid.
- * @param {number} hgap - Horizontal gap between tiles.
- * @param {number} vgap - Vertical gap between tiles.
- * @returns {Object} - An object containing the tile height and width.
+ * @param {HTMLCanvasElement} canvas The canvas element.
+ * @param {number} rows Number of rows in the grid.
+ * @param {number} cols Number of columns in the grid.
+ * @param {number} hgap Horizontal gap between tiles.
+ * @param {number} vgap Vertical gap between tiles.
+ * @returns {Object} An object containing the tile height and width.
  */
 export const calculateTileSize = (canvas, rows, cols, hgap, vgap) => {
   const boardWidth = canvas.clientWidth;
@@ -17,32 +24,38 @@ export const calculateTileSize = (canvas, rows, cols, hgap, vgap) => {
   const vgaps = vgap * (rows - 1);
   const hgaps = hgap * (cols - 1);
 
-  const tileHeight = Math.floor((boardHeight - vgaps) / rows);
-  const tileWidth = Math.floor((boardWidth - hgaps) / cols);
-
   return {
-    height: tileHeight,
-    width: tileWidth,
+    height: Math.floor((boardHeight - vgaps) / rows),
+    width: Math.floor((boardWidth - hgaps) / cols),
   };
 };
 
 /**
  * Calculates the position of a tile on the canvas based on its row and column indices.
- * @param {Object} pos - An object containing the row and column indices of the tile.
- * @param {Object} tileSize - An object containing the height and width of the tile.
- * @param {number} hgap - Horizontal gap between tiles.
- * @param {number} vgap - Vertical gap between tiles.
- * @returns {Object} - An object containing the x and y coordinates of the tile on the canvas.
+ * @param {Object} pos An object containing the row and column indices of the tile.
+ * @param {Object} tileSize An object containing the height and width of the tile.
+ * @param {number} hgap Horizontal gap between tiles.
+ * @param {number} vgap Vertical gap between tiles.
+ * @returns {Object} An object containing the x and y coordinates of the tile on the canvas.
  */
 const getPositionOnCanvas = (pos, tileSize, hgap, vgap) => {
-  const x = pos.col * (tileSize.width + hgap);
-  const y = pos.row * (tileSize.height + vgap);
   return {
-    x,
-    y,
+    x: pos.col * (tileSize.width + hgap),
+    y: pos.row * (tileSize.height + vgap),
   };
 };
 
+/**
+ * Calculates the position of a tile on the canvas based on its row and column indices,
+ * placing it in the center of the board (not on the left).
+ * @param {Object} pos An object containing the row and column indices of the tile.
+ * @param {number} group The group size of the tile.
+ * @param {number} largestGroup The largest group size in the game.
+ * @param {Object} tileSize An object containing the height and width of the tile.
+ * @param {number} hgap Horizontal gap between tiles.
+ * @param {number} vgap Vertical gap between tiles.
+ * @returns {Object} An object containing the x and y coordinates of the tile on the canvas.
+ */
 const getPositionOnCanvasCentered = (
   pos,
   group,
@@ -52,7 +65,10 @@ const getPositionOnCanvasCentered = (
   vgap
 ) => {
   const { x, y } = getPositionOnCanvas(pos, tileSize, hgap, vgap);
+
   return {
+    // If the group is a and the largest one is b, then the row "misses" (b - a) tiles and gaps.
+    // We want to put everything in the middle, so we need to add half of it to the x value.
     x: x + ((tileSize.width + hgap) * (largestGroup - group)) / 2,
     y,
   };
@@ -60,11 +76,11 @@ const getPositionOnCanvasCentered = (
 
 /**
  * Shuffles the positions of the tiles on the board.
- * @param {Set} tiles - A set of tile objects.
- * @param {Array} positions - An array of positions to shuffle.
- * @param {Object} tileSize - An object containing the height and width of the tile.
- * @param {number} hgap - The horizontal gap between tiles.
- * @param {number} vgap - The vertical gap between tiles.
+ * @param {Set} tiles A set of tile objects.
+ * @param {Array} positions An array of positions to shuffle.
+ * @param {Object} tileSize An object containing the height and width of the tile.
+ * @param {number} hgap The horizontal gap between tiles.
+ * @param {number} vgap The vertical gap between tiles.
  */
 export const shuffleBoard = (tiles, positions, tileSize, hgap, vgap) => {
   shuffleArray(positions);
@@ -81,16 +97,15 @@ export const shuffleBoard = (tiles, positions, tileSize, hgap, vgap) => {
 };
 
 /**
- * Creates buttons for the tiles and positions them on the board.
- * @param {HTMLCanvasElement} board - The board element containing the tiles.
- * @param {Array} positions - An array of positions for the tiles.
- * @param {Set} tiles - A set of tile objects.
- * @param {Object} tileSize - An object containing the height and width of the tile.
- * @param {number} hgap - The horizontal gap between tiles.
- * @param {number} vgap - The vertical gap between tiles.
- * @param {Set} selectedTiles - A set of selected tiles.
- * @param {number} maxSelections - The maximum number of tiles that can be selected.
- * @returns {Array} - An array of button elements.
+ * Creates buttons for the tiles and put them on the board.
+ * @param {HTMLCanvasElement} board The board element containing the tiles.
+ * @param {Array} positions An array of positions for the tiles.
+ * @param {Set} tiles A set of tile objects.
+ * @param {Object} tileSize An object containing the height and width of the tile.
+ * @param {number} hgap The horizontal gap between tiles.
+ * @param {number} vgap The vertical gap between tiles.
+ * @param {Set} selectedTiles A set of selected tiles.
+ * @param {number} maxSelections The maximum number of tiles that can be selected.
  */
 export const createButtons = (
   board,
@@ -102,7 +117,6 @@ export const createButtons = (
   selectedTiles,
   maxSelections
 ) => {
-  const buttons = [];
   let i = 0;
 
   for (const tile of tiles) {
@@ -112,7 +126,7 @@ export const createButtons = (
     button.classList.add("tile");
     button.style.width = `${tileSize.width}px`;
     button.style.height = `${tileSize.height}px`;
-    button.textContent = tile.term + " " + tile.groupSize;
+    button.textContent = tile.term + " " + tile.groupSize; // TODO: remove the group size
     button.style.position = "absolute";
     button.style.left = `${x}px`;
     button.style.top = `${y}px`;
@@ -129,39 +143,16 @@ export const createButtons = (
       }
     });
 
-    buttons.push(button);
     board.appendChild(button);
   }
-
-  return buttons;
-};
-
-/**
- * Creates a Toastify message.
- * @param {Array} classes - An array of classes to apply to the Toastify message.
- * @param {string} text - The text to display in the Toastify message.
- * @param {number} duration - The time the toast is on the screen in ms.
- * @returns {Object} - A Toastify message object.
- */
-export const makeToast = (classes, text, duration = 2000) => {
-  const classesString = classes.join(" ");
-
-  return Toastify({
-    text: text,
-    duration: duration,
-    gravity: "top",
-    position: "left",
-    stopOnFocus: true,
-    className: classesString,
-  });
 };
 
 /**
  * Creates a Toastify message for submitting a set of tiles.
- * @param {Set} selectedTiles - The set of currently selected tiles.
- * @param {Set} previousSubmissions - The set of previously submitted tiles.
- * @param {Array} groups - An array of group sizes in the game, sorted.
- * @returns {Object} - A Toastify message object and the newly completed group.
+ * @param {Set} selectedTiles The set of currently selected tiles.
+ * @param {Set} previousSubmissions The set of previously submitted tiles.
+ * @param {Array} groups An array of group sizes in the game, sorted.
+ * @returns {Object} A Toastify message object and the newly completed group.
  */
 export const submitToast = (selectedTiles, previousSubmissions, groups) => {
   const group = selectedTiles.size;
@@ -171,25 +162,14 @@ export const submitToast = (selectedTiles, previousSubmissions, groups) => {
   let newlyCompletedGroup = null;
 
   if (group < groups[0]) {
-    toast = makeToast(
-      ["toastify-rounded", "toastify-invalid-choice"],
-      `🚫 You need to select at least ${groups[0]} tiles to submit`
-    );
+    toast = makeTooFewToast(groups[0]);
   } else if (group > groups[groups.length - 1]) {
-    toast = makeToast(
-      ["toastify-rounded", "toastify-invalid-choice"],
-      `🚫 You need to select at most ${
-        groups[groups.length - 1]
-      } tiles to submit`
-    );
+    toast = makeTooManyToast(groups[groups.length - 1]);
   } else {
     const selectedTilesHashed = hashTilesSet(selectedTiles);
 
     if (previousSubmissions.has(selectedTilesHashed)) {
-      toast = makeToast(
-        ["toastify-rounded", "toastify-duplicate"],
-        `🚫 You already submitted that`
-      );
+      toast = TOAST_DUPLICATE;
     } else {
       previousSubmissions.add(selectedTilesHashed);
 
@@ -200,21 +180,12 @@ export const submitToast = (selectedTiles, previousSubmissions, groups) => {
 
       if (correctTiles === group) {
         newlyCompletedGroup = [...selectedTiles];
-        toast = makeToast(
-          ["toastify-rounded", "toastify-correct"],
-          `🎉 You got it!`
-        );
+        toast = TOAST_CORRECT;
       } else if (2 * correctTiles >= group) {
         // ? Maybe give other info (largest group of common categoty, or something else)
-        toast = makeToast(
-          ["toastify-rounded", "toastify-partial"],
-          `🚀 ${correctTiles} out of ${group} correct!`
-        );
+        toast = makePartialToast(correctTiles, group);
       } else {
-        toast = makeToast(
-          ["toastify-rounded", "toastify-incorrect"],
-          `❌ That's not it...`
-        );
+        toast = TOAST_INCORRECT;
       }
     }
   }
@@ -223,16 +194,16 @@ export const submitToast = (selectedTiles, previousSubmissions, groups) => {
 };
 
 /**
- * Redraws the board.
- * @param {Set} remainngTiles - The set of remaining tiles.
- * @param {Array} completedGroups - An array of completed groups.
- * @param {Array} groups - An array of group sizes in the game, sorted.
- * @param {Array} positions - An array of positions for the tiles.
- * @param {Object} tileSize - An object containing the height and width of the tile.
- * @param {number} hgap - The horizontal gap between tiles.
- * @param {number} vgap - The vertical gap between tiles.
+ * Reposition the tiles on the board.
+ * @param {Set} remainngTiles The set of remaining tiles.
+ * @param {Array} completedGroups An array of completed groups.
+ * @param {Array} groups An array of group sizes in the game, sorted.
+ * @param {Array} positions An array of positions for the tiles.
+ * @param {Object} tileSize An object containing the height and width of the tile.
+ * @param {number} hgap The horizontal gap between tiles.
+ * @param {number} vgap The vertical gap between tiles.
  */
-export const redrawBoard = (
+export const repositionTiles = (
   remainngTiles,
   completedGroups,
   groups,
@@ -243,13 +214,16 @@ export const redrawBoard = (
 ) => {
   // Move the completed ones down
 
-  const rows = completedGroups.length;
+  const rows = groups.length;
   const cols = groups[groups.length - 1];
+
   let row = rows - 1;
 
+  // Reverse order so the larger groups are drawn first, at the bottom
   for (let i = rows - 1; i >= 0; i--) {
     const group = completedGroups[i].length;
 
+    // The player completed this group
     if (group > 0) {
       for (let col = 0; col < group; col++) {
         const { x, y } = getPositionOnCanvasCentered(

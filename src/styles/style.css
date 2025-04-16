@@ -285,6 +285,10 @@ body.dark-theme .tile.selected {
   font-family: Inter, sans-serif;
 }
 
+.toastify-error {
+  background-color: red;
+}
+
 .toastify-invalid-choice {
   background-color: lightgray;
 }
@@ -303,6 +307,10 @@ body.dark-theme .toastify-correct {
 
 .toastify-incorrect {
   background-color: red;
+}
+
+body.dark-theme .toastify-error {
+  background-color: darkred;
 }
 
 body.dark-theme .toastify-incorrect {

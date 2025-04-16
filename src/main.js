@@ -53,7 +53,7 @@ const V_GAP = parseFloat(boardCSS.rowGap);
   let allTiles = result.tiles;
   let remainngTiles = new Set(allTiles);
   let positions = result.positions;
-  const buttons = result.buttons;
+
   const tileSize = result.tileSize;
   const selectedTiles = result.selectedTiles;
 
@@ -76,7 +76,7 @@ const V_GAP = parseFloat(boardCSS.rowGap);
       completedGroups[i].length = 0;
     }
 
-    const result = await resetGame(
+    positions = await resetGame(
       supabaseClient,
       GROUPS,
       allTiles,
@@ -85,8 +85,7 @@ const V_GAP = parseFloat(boardCSS.rowGap);
       V_GAP
     );
 
-    remainngTiles = new Set(result.tiles);
-    positions = result.positions;
+    remainngTiles = new Set(allTiles);
   });
 
   const deselectButton = document.getElementById("deselect-all-button");

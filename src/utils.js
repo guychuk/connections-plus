@@ -1,8 +1,8 @@
 /**
  * Get k random distinct numbers in [1, n].
- * @param {number} n number of options.
- * @param {number} k number of choices (0 <= k <= n) [pass -1 for k=n which is the default].
- * @returns an array with k random choices from [1, n].
+ * @param {number} n Number of options.
+ * @param {number} k Number of choices (0 <= k <= n) [pass -1 for k=n which is the default].
+ * @returns {Array} An array with k random choices from [1, n].
  */
 export const getRandomNums = (n, k = -1) => {
   let options = Array.from({ length: n }, (_, index) => index + 1);
@@ -28,7 +28,7 @@ export const getRandomNums = (n, k = -1) => {
 
 /**
  * Shuffle an array in-place.
- * @param {array} array
+ * @param {Array} array An array to shuffle.
  */
 export const shuffleArray = (array) => {
   const perm = getRandomNums(array.length);
@@ -40,8 +40,8 @@ export const shuffleArray = (array) => {
 
 /**
  * Check if an array contains duplicates.
- * @param {Array} array
- * @returns {boolean} - True if the array contains duplicates, false otherwise.
+ * @param {Array} array The array to check.
+ * @returns {boolean} True if the array contains duplicates, false otherwise.
  */
 export const containsDulpicates = (array) => {
   const set = new Set(array);
@@ -50,17 +50,18 @@ export const containsDulpicates = (array) => {
 
 /**
  * Calculate a hashing to a set of tiles.
- * @param {Set} tiles a set of tiles.
+ * @param {Set} tiles A set of tiles.
+ * @returns {string} A string representation of the set of tiles.
  */
 export const hashTilesSet = (tiles) => {
   return JSON.stringify([...tiles].sort());
 };
 
 /**
- * Create an array of positions.
- * @param {number} rows - The number of rows.
- * @param {number} cols - The number of columns.
- * @returns {Array} - An array of positions.
+ * Create an array of positions for a rows x cols grid.
+ * @param {number} rows The number of rows.
+ * @param {number} cols The number of columns.
+ * @returns {Array} An array of positions.
  */
 export const makePositions = (rows, cols) => {
   return Array.from({ length: rows }, (_, row) =>

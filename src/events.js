@@ -1,18 +1,18 @@
-import { submitToast, redrawBoard } from "./ui";
+import { submitToast, repositionTiles } from "./ui";
 import { makePositions } from "./utils";
 
 /**
  * Event handler for the submit button.
- * @param {Set} remainngTiles - The set of remaining tiles.
- * @param {Set} selectedTiles - The set of currently selected tiles.
- * @param {Set} previousSubmissions - The set of previously submitted tiles.
- * @param {Array} completedGroups - An array of completed groups.
- * @param {Array} groups - An array of group sizes in the game, sorted.
- * @param {HTMLButtonElement} submitButton - The submit button.
- * @param {Array} positions - An array of positions for the tiles.
- * @param {Object} tileSize - An object containing the height and width of the tile.
- * @param {number} hgap - The horizontal gap between tiles.
- * @param {number} vgap - The vertical gap between tiles.
+ * @param {Set} remainngTiles The set of remaining tiles.
+ * @param {Set} selectedTiles The set of currently selected tiles.
+ * @param {Set} previousSubmissions The set of previously submitted tiles.
+ * @param {Array} completedGroups An array of completed groups.
+ * @param {Array} groups An array of group sizes in the game, sorted.
+ * @param {HTMLButtonElement} submitButton The submit button.
+ * @param {Array} positions An array of positions for the tiles.
+ * @param {Object} tileSize An object containing the height and width of the tile.
+ * @param {number} hgap The horizontal gap between tiles.
+ * @param {number} vgap The vertical gap between tiles.
  * @returns {Array} An array of positions for the tiles.
  */
 export const clickSubmit = (
@@ -33,6 +33,7 @@ export const clickSubmit = (
     groups
   );
 
+  // Should never happen
   if (toast === null) {
     console.error("Toast is null");
     return;
@@ -44,7 +45,7 @@ export const clickSubmit = (
     const groupIndex = newlyCompletedGroup[0].groupIndex;
     completedGroups[groupIndex] = newlyCompletedGroup;
 
-    // also remove them from tiles
+    // Remove them from tiles
     for (let tile of selectedTiles) {
       remainngTiles.delete(tile);
       tile.button.classList.remove("selected");
@@ -60,7 +61,7 @@ export const clickSubmit = (
 
     positions = makePositions(rows, cols);
 
-    redrawBoard(
+    repositionTiles(
       remainngTiles,
       completedGroups,
       groups,
@@ -75,7 +76,7 @@ export const clickSubmit = (
   submitButton.disabled = true;
   setTimeout(() => {
     submitButton.disabled = false;
-  }, 2000);
+  }, toast.options.duration + 100);
 
   return positions;
 };
