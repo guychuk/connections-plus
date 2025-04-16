@@ -1,4 +1,4 @@
-import { TOAST_ERROR } from "./toasts";
+import { TOAST_ERROR } from "../components/toasts";
 
 /**
  * Fetch categories from the DB.

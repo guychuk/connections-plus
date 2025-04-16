@@ -1,8 +1,12 @@
-import { fetchCategories, fetchTerms } from "./supabase";
-import { shuffleArray, makePositions } from "./utils";
-import { calculateTileSize, createButtons, shuffleBoard } from "./ui";
+import { fetchCategories, fetchTerms } from "../services/supabase";
+import { shuffleArray, makePositions } from "../core/utils";
+import {
+  calculateTileSize,
+  createButtons,
+  shuffleBoard,
+} from "../components/ui";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { TOAST_WINNER } from "./toasts";
+import { TOAST_WINNER } from "../components/toasts";
 
 /**
  * Make a tile object.

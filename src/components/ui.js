@@ -1,4 +1,4 @@
-import { shuffleArray, hashTilesSet, randomNum } from "./utils.js";
+import { shuffleArray, hashTilesSet, randomNum } from "../core/utils.js";
 import {
   TOAST_DUPLICATE,
   TOAST_CORRECT,
@@ -9,7 +9,7 @@ import {
   makePartialToast,
 } from "./toasts.js";
 import confetti from "canvas-confetti";
-import { confettiDuration } from "./config/config.json";
+import { confettiDuration } from "../config/config.json";
 
 /**
  * Calculates the tile size based on the canvas size and the number of rows and columns.

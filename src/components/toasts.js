@@ -1,5 +1,5 @@
 import Toastify from "toastify-js";
-import { toastsDuration as TOAST_DURATION } from "./config/config.json";
+import { toastsDuration as TOAST_DURATION } from "../config/config.json";
 
 /**
  * Creates a Toastify message.

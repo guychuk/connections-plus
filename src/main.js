@@ -1,9 +1,9 @@
-import { shuffleBoard, setThemeBasedOnPreference } from "./ui";
-import { containsDulpicates } from "./utils";
+import { shuffleBoard, setThemeBasedOnPreference } from "./components/ui";
+import { containsDulpicates } from "./core/utils";
 import config from "./config/config.json";
 import { createClient } from "@supabase/supabase-js";
-import { initializeGame, resetGame } from "./gameLogic";
-import { clickSubmit } from "./events";
+import { initializeGame, resetGame } from "./core/gameLogic";
+import { clickSubmit } from "./events/events";
 
 // Supabase connection
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;

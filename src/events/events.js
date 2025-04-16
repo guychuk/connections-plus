@@ -1,7 +1,7 @@
-import { submitToast, repositionTiles } from "./ui";
-import { TOAST_ERROR } from "./toasts";
-import { processNewCompletedGroup } from "./gameLogic";
-import { win } from "./ui";
+import { submitToast, repositionTiles } from "../components/ui";
+import { TOAST_ERROR } from "../components/toasts";
+import { processNewCompletedGroup } from "../core/gameLogic";
+import { win } from "../components/ui";
 /**
  * Event handler for the submit button.
  * @param {HTMLCanvasElement} board The board element containing the tiles.
