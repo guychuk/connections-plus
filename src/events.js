@@ -1,5 +1,7 @@
 import { submitToast, repositionTiles } from "./ui";
 import { makePositions } from "./utils";
+import { TOAST_ERROR } from "./toasts";
+import { processNewCompletedGroup } from "./gameLogic";
 
 /**
  * Event handler for the submit button.
@@ -36,6 +38,7 @@ export const clickSubmit = (
   // Should never happen
   if (toast === null) {
     console.error("Toast is null");
+    TOAST_ERROR.showToast();
     return;
   }
 
@@ -53,13 +56,8 @@ export const clickSubmit = (
       tile.button.disabled = true;
     }
 
-    selectedTiles.clear();
-
     // Update free positions
-    const cols = groups[groups.length - 1];
-    const rows = positions.length / cols - 1;
-
-    positions = makePositions(rows, cols);
+    positions = processNewCompletedGroup(selectedTiles, groups, positions);
 
     repositionTiles(
       remainngTiles,

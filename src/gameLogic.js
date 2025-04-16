@@ -140,3 +140,20 @@ export const resetGame = async (
 
   return positions;
 };
+
+/**
+ * Process the new completed group and return the new positions array.
+ * @param {Set} selectedTiles The set of selected tiles.
+ * @param {Array} groups An array of group sizes in the game, sorted.
+ * @param {Array} positions An array of positions for the tiles.
+ * @returns {Array} An array of positions for the tiles.
+ */
+export const processNewCompletedGroup = (selectedTiles, groups, positions) => {
+  selectedTiles.clear();
+
+  // Update free positions
+  const cols = groups[groups.length - 1];
+  const rows = positions.length / cols - 1;
+
+  return makePositions(rows, cols);
+};
