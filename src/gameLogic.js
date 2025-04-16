@@ -126,8 +126,7 @@ export const resetGame = async (
     tilesSetArray[i].groupIndex = newTilesArray[i].groupIndex;
 
     // The buton tied to the tile stays the same, it's just the text that changes
-    tilesSetArray[i].button.textContent =
-      tilesSetArray[i].term + " " + tilesSetArray[i].groupSize;
+    tilesSetArray[i].button.textContent = tilesSetArray[i].term;
     tilesSetArray[i].button.className = "tile";
     tilesSetArray[i].button.disabled = false;
   }
@@ -157,3 +156,5 @@ export const processNewCompletedGroup = (selectedTiles, groups, positions) => {
 
   return makePositions(rows, cols);
 };
+
+

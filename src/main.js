@@ -58,7 +58,10 @@ const V_GAP = parseFloat(boardCSS.rowGap);
   const selectedTiles = result.selectedTiles;
 
   const previousSubmissions = new Set();
-  const completedGroups = Array.from({ length: GROUPS.length }, () => []);
+  const completedGroups = Array.from({ length: GROUPS.length }, () => ({
+    tiles: [],
+    button: null,
+  }));
 
   // Add the shuffle button functionality
   const shuffleButton = document.getElementById("shuffle-button");
@@ -69,11 +72,24 @@ const V_GAP = parseFloat(boardCSS.rowGap);
   // Add the new game button functionality
   const newGameButton = document.getElementById("new-game-button");
   newGameButton.addEventListener("click", async () => {
+    submitButton.disabled = true;
+    shuffleButton.disabled = true;
+    deselectButton.disabled = true;
+
     previousSubmissions.clear();
     selectedTiles.clear();
 
     for (let i = 0; i < completedGroups.length; i++) {
-      completedGroups[i].length = 0;
+      completedGroups[i].tiles.length = 0;
+
+      if (completedGroups[i].button) {
+        completedGroups[i].button.classList.add("hidden");
+
+        setTimeout(() => {
+          completedGroups[i].button.remove();
+          completedGroups[i].button = null;
+        }, 500);
+      }
     }
 
     positions = await resetGame(
@@ -86,6 +102,10 @@ const V_GAP = parseFloat(boardCSS.rowGap);
     );
 
     remainngTiles = new Set(allTiles);
+
+    submitButton.disabled = false;
+    shuffleButton.disabled = false;
+    deselectButton.disabled = false;
   });
 
   const deselectButton = document.getElementById("deselect-all-button");
@@ -99,6 +119,7 @@ const V_GAP = parseFloat(boardCSS.rowGap);
   const submitButton = document.getElementById("submit-button");
   submitButton.addEventListener("click", () => {
     positions = clickSubmit(
+      board,
       remainngTiles,
       selectedTiles,
       previousSubmissions,
@@ -110,5 +131,11 @@ const V_GAP = parseFloat(boardCSS.rowGap);
       H_GAP,
       V_GAP
     );
+
+    if (remainngTiles.size === 0) {
+      submitButton.disabled = true;
+      shuffleButton.disabled = true;
+      deselectButton.disabled = true;
+    }
   });
 })();

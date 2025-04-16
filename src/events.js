@@ -5,6 +5,7 @@ import { processNewCompletedGroup } from "./gameLogic";
 
 /**
  * Event handler for the submit button.
+ * @param {HTMLCanvasElement} board The board element containing the tiles.
  * @param {Set} remainngTiles The set of remaining tiles.
  * @param {Set} selectedTiles The set of currently selected tiles.
  * @param {Set} previousSubmissions The set of previously submitted tiles.
@@ -18,6 +19,7 @@ import { processNewCompletedGroup } from "./gameLogic";
  * @returns {Array} An array of positions for the tiles.
  */
 export const clickSubmit = (
+  board,
   remainngTiles,
   selectedTiles,
   previousSubmissions,
@@ -46,12 +48,13 @@ export const clickSubmit = (
 
   if (newlyCompletedGroup !== null) {
     const groupIndex = newlyCompletedGroup[0].groupIndex;
-    completedGroups[groupIndex] = newlyCompletedGroup;
+    completedGroups[groupIndex].tiles = newlyCompletedGroup;
 
     // Remove them from tiles
     for (let tile of selectedTiles) {
       remainngTiles.delete(tile);
       tile.button.classList.remove("selected");
+      tile.button.classList.add("hidden");
       tile.button.classList.add(`completed-${groupIndex + 1}`);
       tile.button.disabled = true;
     }
@@ -60,6 +63,7 @@ export const clickSubmit = (
     positions = processNewCompletedGroup(selectedTiles, groups, positions);
 
     repositionTiles(
+      board,
       remainngTiles,
       completedGroups,
       groups,
@@ -72,9 +76,12 @@ export const clickSubmit = (
 
   // When pressing the button fast enough, the toasts get stuck.
   submitButton.disabled = true;
-  setTimeout(() => {
-    submitButton.disabled = false;
-  }, toast.options.duration + 100);
+
+  if (remainngTiles.size > 0) {
+    setTimeout(() => {
+      submitButton.disabled = false;
+    }, toast.options.duration + 100);
+  }
 
   return positions;
 };
