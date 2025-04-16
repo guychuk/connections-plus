@@ -295,9 +295,13 @@ export const repositionTiles = (
  * @param {number} duration The duration of the celebration in milliseconds.
  */
 export const celebrate = (duration) => {
+  const isMobile = window.innerWidth <= 768;
+
   var animationEnd = Date.now() + duration;
 
   var defaults = { startVelocity: 30, spread: 360, ticks: 100, zIndex: 0 };
+
+  var mobileDefaults = { startVelocity: 20, spread: 120, ticks: 60, zIndex: 0 };
 
   var interval = setInterval(function () {
     var timeLeft = animationEnd - Date.now();
@@ -308,13 +312,15 @@ export const celebrate = (duration) => {
 
     var particleCount = 100 * (timeLeft / duration);
 
+    const confettiDefaults = isMobile ? mobileDefaults : defaults;
+
     confetti({
-      ...defaults,
+      ...confettiDefaults,
       particleCount,
       origin: { x: randomNum(0.1, 0.3), y: Math.random() - 0.2 },
     });
     confetti({
-      ...defaults,
+      ...confettiDefaults,
       particleCount,
       origin: { x: randomNum(0.7, 0.9), y: Math.random() - 0.2 },
     });
