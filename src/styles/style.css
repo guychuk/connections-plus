@@ -160,7 +160,7 @@ body {
   border-radius: 7px;
   cursor: pointer;
   transition: background-color 0.5s ease, color 0.5s ease, border 0.5s ease,
-    left 0.5s ease, top 0.5s ease;
+    left 0.5s ease, top 0.5s ease, opacity 0.5s ease;
 }
 
 .tile:hover {
@@ -180,12 +180,17 @@ body {
   cursor: not-allowed;
 }
 
+.tile.hidden {
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
 .tile.completed-1 {
   background-color: #ffebee;
   border: 2px solid #ef9a9a;
   color: #c62828;
   transition: background-color 0.5s ease, color 0.5s ease, border 0.5s ease,
-    left 0.5s ease, top 0.5s ease;
+    left 0.5s ease, top 0.5s ease, opacity 0.5s ease;
 }
 
 .tile.completed-2 {
@@ -193,7 +198,7 @@ body {
   border: 2px solid #ce93d8;
   color: #7b1fa2;
   transition: background-color 0.5s ease, color 0.5s ease, border 0.5s ease,
-    left 0.5s ease, top 0.5s ease;
+    left 0.5s ease, top 0.5s ease, opacity 0.5s ease;
 }
 
 .tile.completed-3 {
@@ -201,7 +206,7 @@ body {
   border: 2px solid #90caf9;
   color: #1565c0;
   transition: background-color 0.5s ease, color 0.5s ease, border 0.5s ease,
-    left 0.5s ease, top 0.5s ease;
+    left 0.5s ease, top 0.5s ease, opacity 0.5s ease;
 }
 
 .tile.completed-4 {
@@ -209,7 +214,7 @@ body {
   border: 2px solid #a5d6a7;
   color: #2e7d32;
   transition: background-color 0.5s ease, color 0.5s ease, border 0.5s ease,
-    left 0.5s ease, top 0.5s ease;
+    left 0.5s ease, top 0.5s ease, opacity 0.5s ease;
 }
 
 .tile.completed-5 {
@@ -217,7 +222,7 @@ body {
   border: 2px solid #ffe082;
   color: #ff8f00;
   transition: background-color 0.5s ease, color 0.5s ease, border 0.5s ease,
-    left 0.5s ease, top 0.5s ease;
+    left 0.5s ease, top 0.5s ease, opacity 0.5s ease;
 }
 
 .tile.completed-6 {
@@ -225,7 +230,7 @@ body {
   border: 2px solid #80cbc4;
   color: #00796b;
   transition: background-color 0.5s ease, color 0.5s ease, border 0.5s ease,
-    left 0.5s ease, top 0.5s ease;
+    left 0.5s ease, top 0.5s ease, opacity 0.5s ease;
 }
 
 .tile.completed-7 {
@@ -233,7 +238,7 @@ body {
   border: 2px solid #f48fb1;
   color: #c2185b;
   transition: background-color 0.5s ease, color 0.5s ease, border 0.5s ease,
-    left 0.5s ease, top 0.5s ease;
+    left 0.5s ease, top 0.5s ease, opacity 0.5s ease;
 }
 
 .tile.completed-8 {
@@ -241,7 +246,7 @@ body {
   border: 2px solid #9fa8da;
   color: #303f9f;
   transition: background-color 0.5s ease, color 0.5s ease, border 0.5s ease,
-    left 0.5s ease, top 0.5s ease;
+    left 0.5s ease, top 0.5s ease, opacity 0.5s ease;
 }
 
 .toastify-error {
@@ -351,7 +356,7 @@ body.dark-theme .tile.completed-1 {
   border: 2px solid #9e2a2a;
   color: #ef9a9a;
   transition: background-color 0.5s ease, color 0.5s ease, border 0.5s ease,
-    left 0.5s ease, top 0.5s ease;
+    left 0.5s ease, top 0.5s ease, opacity 0.5s ease;
 }
 
 body.dark-theme .tile.completed-2 {
@@ -359,7 +364,7 @@ body.dark-theme .tile.completed-2 {
   border: 2px solid #7d3c98;
   color: #d1a7e0;
   transition: background-color 0.5s ease, color 0.5s ease, border 0.5s ease,
-    left 0.5s ease, top 0.5s ease;
+    left 0.5s ease, top 0.5s ease, opacity 0.5s ease;
 }
 
 body.dark-theme .tile.completed-3 {
@@ -367,7 +372,7 @@ body.dark-theme .tile.completed-3 {
   border: 2px solid #2e6da4;
   color: #90caf9;
   transition: background-color 0.5s ease, color 0.5s ease, border 0.5s ease,
-    left 0.5s ease, top 0.5s ease;
+    left 0.5s ease, top 0.5s ease, opacity 0.5s ease;
 }
 
 body.dark-theme .tile.completed-4 {
@@ -375,7 +380,7 @@ body.dark-theme .tile.completed-4 {
   border: 2px solid #357a38;
   color: #a5d6a7;
   transition: background-color 0.5s ease, color 0.5s ease, border 0.5s ease,
-    left 0.5s ease, top 0.5s ease;
+    left 0.5s ease, top 0.5s ease, opacity 0.5s ease;
 }
 
 body.dark-theme .tile.completed-5 {
@@ -383,7 +388,7 @@ body.dark-theme .tile.completed-5 {
   border: 2px solid #8d6e63;
   color: #ffe082;
   transition: background-color 0.5s ease, color 0.5s ease, border 0.5s ease,
-    left 0.5s ease, top 0.5s ease;
+    left 0.5s ease, top 0.5s ease, opacity 0.5s ease;
 }
 
 body.dark-theme .tile.completed-6 {
@@ -391,7 +396,7 @@ body.dark-theme .tile.completed-6 {
   border: 2px solid #26756f;
   color: #80cbc4;
   transition: background-color 0.5s ease, color 0.5s ease, border 0.5s ease,
-    left 0.5s ease, top 0.5s ease;
+    left 0.5s ease, top 0.5s ease, opacity 0.5s ease;
 }
 
 body.dark-theme .tile.completed-7 {
@@ -399,7 +404,7 @@ body.dark-theme .tile.completed-7 {
   border: 2px solid #913063;
   color: #f48fb1;
   transition: background-color 0.5s ease, color 0.5s ease, border 0.5s ease,
-    left 0.5s ease, top 0.5s ease;
+    left 0.5s ease, top 0.5s ease, opacity 0.5s ease;
 }
 
 body.dark-theme .tile.completed-8 {
@@ -407,7 +412,7 @@ body.dark-theme .tile.completed-8 {
   border: 2px solid #303f9f;
   color: #9fa8da;
   transition: background-color 0.5s ease, color 0.5s ease, border 0.5s ease,
-    left 0.5s ease, top 0.5s ease;
+    left 0.5s ease, top 0.5s ease, opacity 0.5s ease;
 }
 
 body.dark-theme .toastify-error {

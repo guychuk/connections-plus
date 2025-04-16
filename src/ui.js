@@ -126,7 +126,7 @@ export const createButtons = (
     button.classList.add("tile");
     button.style.width = `${tileSize.width}px`;
     button.style.height = `${tileSize.height}px`;
-    button.textContent = tile.term + " " + tile.groupSize; // TODO: remove the group size
+    button.textContent = tile.term;
     button.style.position = "absolute";
     button.style.left = `${x}px`;
     button.style.top = `${y}px`;
@@ -195,6 +195,7 @@ export const submitToast = (selectedTiles, previousSubmissions, groups) => {
 
 /**
  * Reposition the tiles on the board.
+ * @param {HTMLCanvasElement} board The board element containing the tiles.
  * @param {Set} remainngTiles The set of remaining tiles.
  * @param {Array} completedGroups An array of completed groups.
  * @param {Array} groups An array of group sizes in the game, sorted.
@@ -204,6 +205,7 @@ export const submitToast = (selectedTiles, previousSubmissions, groups) => {
  * @param {number} vgap The vertical gap between tiles.
  */
 export const repositionTiles = (
+  board,
   remainngTiles,
   completedGroups,
   groups,
@@ -221,10 +223,16 @@ export const repositionTiles = (
 
   // Reverse order so the larger groups are drawn first, at the bottom
   for (let i = rows - 1; i >= 0; i--) {
-    const group = completedGroups[i].length;
+    const tiles = completedGroups[i].tiles;
+    const group = tiles.length;
+
+    let button = completedGroups[i].button;
 
     // The player completed this group
     if (group > 0) {
+      const categoty = tiles[0].category;
+      const terms = [];
+
       for (let col = 0; col < group; col++) {
         const { x, y } = getPositionOnCanvasCentered(
           { row, col },
@@ -235,9 +243,41 @@ export const repositionTiles = (
           vgap
         );
 
-        completedGroups[i][col].button.style.left = `${x}px`;
-        completedGroups[i][col].button.style.top = `${y}px`;
+        tiles[col].button.style.left = `${x}px`;
+        tiles[col].button.style.top = `${y}px`;
+
+        terms.push(tiles[col].term);
       }
+
+      const firstPos = getPositionOnCanvasCentered(
+        { row, col: 0 },
+        group,
+        cols,
+        tileSize,
+        hgap,
+        vgap
+      );
+
+      if (button === null) {
+        completedGroups[i].button = document.createElement("button");
+        button = completedGroups[i].button;
+
+        button.classList.add("tile");
+        button.classList.add(`completed-${i + 1}`);
+
+        button.style.width = `${group * (tileSize.width + hgap) - hgap}px`;
+        button.style.height = `${tileSize.height}px`;
+        button.style.position = "absolute";
+        button.style.left = `${firstPos.x}px`;
+
+        button.innerHTML = `<strong>${categoty}</strong><br>${terms.join(
+          ", "
+        )}`;
+
+        board.appendChild(button);
+      }
+
+      button.style.top = `${firstPos.y}px`;
 
       row--;
     }
