@@ -156,3 +156,5 @@ export const processNewCompletedGroup = (selectedTiles, groups, positions) => {
 
   return makePositions(rows, cols);
 };
+
+

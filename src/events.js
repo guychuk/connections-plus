@@ -76,9 +76,12 @@ export const clickSubmit = (
 
   // When pressing the button fast enough, the toasts get stuck.
   submitButton.disabled = true;
-  setTimeout(() => {
-    submitButton.disabled = false;
-  }, toast.options.duration + 100);
+
+  if (remainngTiles.size > 0) {
+    setTimeout(() => {
+      submitButton.disabled = false;
+    }, toast.options.duration + 100);
+  }
 
   return positions;
 };

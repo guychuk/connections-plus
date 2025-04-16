@@ -72,6 +72,10 @@ const V_GAP = parseFloat(boardCSS.rowGap);
   // Add the new game button functionality
   const newGameButton = document.getElementById("new-game-button");
   newGameButton.addEventListener("click", async () => {
+    submitButton.disabled = true;
+    shuffleButton.disabled = true;
+    deselectButton.disabled = true;
+
     previousSubmissions.clear();
     selectedTiles.clear();
 
@@ -98,6 +102,10 @@ const V_GAP = parseFloat(boardCSS.rowGap);
     );
 
     remainngTiles = new Set(allTiles);
+
+    submitButton.disabled = false;
+    shuffleButton.disabled = false;
+    deselectButton.disabled = false;
   });
 
   const deselectButton = document.getElementById("deselect-all-button");
@@ -123,5 +131,11 @@ const V_GAP = parseFloat(boardCSS.rowGap);
       H_GAP,
       V_GAP
     );
+
+    if (remainngTiles.size === 0) {
+      submitButton.disabled = true;
+      shuffleButton.disabled = true;
+      deselectButton.disabled = true;
+    }
   });
 })();
