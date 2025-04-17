@@ -43,6 +43,25 @@ groupsParagraph.textContent = `Group Sizes are ${GROUPS.join(", ")}`;
 
 // Initialize the game
 
+const difficultyButton = document.getElementById("difficulty-button");
+difficultyButton.addEventListener("click", () => {
+  const currentDifficulty = difficultyButton.classList[0];
+
+  if (currentDifficulty === "easy") {
+    difficultyButton.classList.remove("easy");
+    difficultyButton.classList.add("medium");
+    difficultyButton.textContent = "Medium 🐤";
+  } else if (currentDifficulty === "medium") {
+    difficultyButton.classList.remove("medium");
+    difficultyButton.classList.add("hard");
+    difficultyButton.textContent = "Hard 🐔";
+  } else {
+    difficultyButton.classList.remove("hard");
+    difficultyButton.classList.add("easy");
+    difficultyButton.textContent = "Easy 🥚";
+  }
+});
+
 const board = document.getElementById("board");
 const boardCSS = getComputedStyle(board);
 
