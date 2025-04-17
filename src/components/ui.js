@@ -184,7 +184,7 @@ export const submitToast = (selectedTiles, previousSubmissions, groups) => {
       if (correctTiles === group) {
         newlyCompletedGroup = [...selectedTiles];
         toast = TOAST_CORRECT;
-      } else if (2 * correctTiles >= group) {
+      } else if (2 * correctTiles > group) {
         // ? Maybe give other info (largest group of common categoty, or something else)
         toast = makePartialToast(correctTiles, group);
       } else {

@@ -1,6 +1,7 @@
 .env
 steps.txt
 node_modules/
-data/data.txt
+data/*
+!data/populate_db.py
 dist/
 icons.pptx

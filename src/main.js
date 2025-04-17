@@ -105,6 +105,7 @@ const V_GAP = parseFloat(boardCSS.rowGap);
 
     positions = await resetGame(
       supabaseClient,
+      remainngTiles.size === 0,
       GROUPS,
       allTiles,
       tileSize,

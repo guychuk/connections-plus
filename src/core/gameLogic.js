@@ -101,6 +101,7 @@ export const initializeGame = async (client, groups, board, hgap, vgap) => {
 /**
  * Reset the game board with new tiles.
  * @param {SupabaseClient} SupabaseClient The Supabase client.
+ * @param {boolean} afterWin True if the game was won, false otherwise.
  * @param {Array} groups An array of group sizes.
  * @param {Set} tiles The set of tiles.
  * @param {Object} tileSize An object containing the height and width of the tile.
@@ -110,13 +111,16 @@ export const initializeGame = async (client, groups, board, hgap, vgap) => {
  */
 export const resetGame = async (
   SupabaseClient,
+  afterWin,
   groups,
   tiles,
   tileSize,
   hgap,
   vgap
 ) => {
-  TOAST_WINNER.hideToast();
+  if (afterWin) {
+    TOAST_WINNER.hideToast();
+  }
 
   const newTiles = await makeTiles(SupabaseClient, groups);
 
