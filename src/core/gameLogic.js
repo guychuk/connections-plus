@@ -73,7 +73,7 @@ export const getNewTiles = async (client, groups, difficulty) => {
 
   var iterations = 0;
 
-  while (!success && iterations < 1) {
+  while (!success && iterations < 20) {
     const tags = (await getTags(client, numTags)).map((tag) => tag.tag);
 
     let i = groups.length;
