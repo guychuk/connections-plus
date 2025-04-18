@@ -82,3 +82,12 @@ export const makePositions = (rows, cols) => {
     })
   ).flat();
 };
+
+/**
+ * Return c random elements from arr without replacement.
+ * @param {Array} arr The array to select from.
+ * @param {number} c The number of elements to select.
+ * @returns {Array} An array of c random elements from arr.
+ */
+export const randomChoices = (arr, c) =>
+  getRandomNums(arr.length, c).map((i) => arr[i - 1]);

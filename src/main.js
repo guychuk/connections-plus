@@ -1,9 +1,16 @@
-import { shuffleBoard, setThemeBasedOnPreference } from "./components/ui";
+import {
+  shuffleBoard,
+  setThemeBasedOnPreference,
+  getDifficultyButtonText,
+  disableButtons,
+  enableButtons,
+  clearBanners,
+} from "./components/ui";
 import { containsDulpicates } from "./core/utils";
 import config from "./config/config.json";
 import { createClient } from "@supabase/supabase-js";
-import { initializeGame, resetGame } from "./core/gameLogic";
-import { clickSubmit } from "./events/events";
+import { initializeGame, resetGame, resetGameState } from "./core/gameLogic";
+import { clickSubmit, clickDifficulty } from "./events/events";
 
 // Supabase connection
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
@@ -43,25 +50,6 @@ groupsParagraph.textContent = `Group Sizes are ${GROUPS.join(", ")}`;
 
 // Initialize the game
 
-const difficultyButton = document.getElementById("difficulty-button");
-difficultyButton.addEventListener("click", () => {
-  const currentDifficulty = difficultyButton.classList[0];
-
-  if (currentDifficulty === "easy") {
-    difficultyButton.classList.remove("easy");
-    difficultyButton.classList.add("medium");
-    difficultyButton.textContent = "Medium 🐤";
-  } else if (currentDifficulty === "medium") {
-    difficultyButton.classList.remove("medium");
-    difficultyButton.classList.add("hard");
-    difficultyButton.textContent = "Hard 🐔";
-  } else {
-    difficultyButton.classList.remove("hard");
-    difficultyButton.classList.add("easy");
-    difficultyButton.textContent = "Easy 🥚";
-  }
-});
-
 const board = document.getElementById("board");
 const boardCSS = getComputedStyle(board);
 
@@ -72,8 +60,15 @@ const H_GAP = parseFloat(boardCSS.columnGap);
 const V_GAP = parseFloat(boardCSS.rowGap);
 
 (async () => {
+  const difficultyButton = document.getElementById("difficulty-button");
+  difficultyButton.dataset.difficulty = "easy";
+  difficultyButton.textContent = getDifficultyButtonText(
+    difficultyButton.dataset.difficulty
+  );
+
   let result = await initializeGame(
     supabaseClient,
+    difficultyButton,
     GROUPS,
     board,
     H_GAP,
@@ -102,28 +97,20 @@ const V_GAP = parseFloat(boardCSS.rowGap);
   // Add the new game button functionality
   const newGameButton = document.getElementById("new-game-button");
   newGameButton.addEventListener("click", async () => {
-    submitButton.disabled = true;
-    shuffleButton.disabled = true;
-    deselectButton.disabled = true;
+    disableButtons([
+      shuffleButton,
+      submitButton,
+      deselectButton,
+      difficultyButton,
+      newGameButton,
+    ]);
 
-    previousSubmissions.clear();
-    selectedTiles.clear();
-
-    for (let i = 0; i < completedGroups.length; i++) {
-      completedGroups[i].tiles.length = 0;
-
-      if (completedGroups[i].button) {
-        completedGroups[i].button.classList.add("hidden");
-
-        setTimeout(() => {
-          completedGroups[i].button.remove();
-          completedGroups[i].button = null;
-        }, 500);
-      }
-    }
+    clearBanners(completedGroups);
+    resetGameState(previousSubmissions, selectedTiles, completedGroups);
 
     positions = await resetGame(
       supabaseClient,
+      difficultyButton,
       remainngTiles.size === 0,
       GROUPS,
       allTiles,
@@ -134,9 +121,13 @@ const V_GAP = parseFloat(boardCSS.rowGap);
 
     remainngTiles = new Set(allTiles);
 
-    submitButton.disabled = false;
-    shuffleButton.disabled = false;
-    deselectButton.disabled = false;
+    enableButtons([
+      shuffleButton,
+      submitButton,
+      deselectButton,
+      difficultyButton,
+      newGameButton,
+    ]);
   });
 
   const deselectButton = document.getElementById("deselect-all-button");
@@ -148,15 +139,15 @@ const V_GAP = parseFloat(boardCSS.rowGap);
   });
 
   const submitButton = document.getElementById("submit-button");
-  submitButton.addEventListener("click", () => {
+  submitButton.addEventListener("click", (event) => {
     positions = clickSubmit(
+      event,
       board,
       remainngTiles,
       selectedTiles,
       previousSubmissions,
       completedGroups,
       GROUPS,
-      submitButton,
       positions,
       tileSize,
       H_GAP,
@@ -164,9 +155,18 @@ const V_GAP = parseFloat(boardCSS.rowGap);
     );
 
     if (remainngTiles.size === 0) {
-      submitButton.disabled = true;
-      shuffleButton.disabled = true;
-      deselectButton.disabled = true;
+      enableButtons([
+        shuffleButton,
+        submitButton,
+        deselectButton,
+        difficultyButton,
+      ]);
     }
+  });
+
+  // Add the difficulty button functionality and set the initial difficulty to easy
+  difficultyButton.addEventListener("click", (event) => {
+    clickDifficulty(event);
+    newGameButton.click();
   });
 })();

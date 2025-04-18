@@ -1,45 +1,35 @@
-import { TOAST_ERROR } from "../components/toasts";
+export const getTags = async (client, numTags) => {
+  let { data, error } = await client.rpc("get_random_distinct_tags", {
+    n: numTags,
+  });
 
-/**
- * Fetch categories from the DB.
- * @param {number} num Number of categories to fetch.
- * @returns {Array} An array of num categories or an empty array if an error occurs.
- */
-export const fetchCategories = async (client, num) => {
-  const { data: categories, error } = await client
-    .from("random_categories")
-    .select("*")
-    .limit(num);
-
-  if (error) {
-    console.error("Error fetching categories:", error);
-    TOAST_ERROR.showToast();
-
-    return [];
-  }
-
-  return categories;
+  return error ? [] : data;
 };
 
-/**
- * Fetch terms from the DB.
- * @param {number} categoryId The category ID.
- * @param {number} num Number of terms to fetch.
- * @returns {Array} An array of num terms or an empty array if an error occurs.
- */
-export const fetchTerms = async (client, categoryId, num, debug = false) => {
-  const { data: terms, error } = await client
-    .from("random_terms")
+export const getCategories = async (client, tags, minTerms) => {
+  let { data, error } = await client.rpc("get_categories", {
+    tag_filter: tags,
+    min_terms: minTerms,
+  });
+
+  return error ? [] : data;
+};
+
+export const getCategoryName = async (client, categoryID) => {
+  let { data, error } = await client
+    .from("categories")
     .select("*")
-    .eq("category_id", categoryId)
+    .eq("id", categoryID);
+
+  return error ? "" : data[0].category;
+};
+
+export const getTerms = async (client, categoryID, num) => {
+  let { data, error } = await client
+    .from("terms")
+    .select("*")
+    .eq("category_id", categoryID)
     .limit(num);
 
-  if (error) {
-    console.error("Error fetching terms:", error);
-    TOAST_ERROR.showToast();
-
-    return [];
-  }
-
-  return terms;
+  return error ? [] : data;
 };
