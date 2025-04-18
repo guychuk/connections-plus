@@ -3,6 +3,9 @@
 :root {
   font-family: Inter, sans-serif;
   font-feature-settings: "liga" 1, "calt" 1; /* fix for Chrome */
+  --animation-speed-tile-movement: 1s;
+  --animation-speed-color-change: 0.5s;
+  --animation-speed-emoji-spin: 0.6s;
 }
 @supports (font-variation-settings: normal) {
   :root {
@@ -53,7 +56,8 @@
     0 10px 36px -4px rgba(77, 96, 232, 0.3);
   position: fixed;
   opacity: 0;
-  transition: all 0.5s cubic-bezier(0.215, 0.61, 0.355, 1);
+  transition: all var(--animation-speed-color-change)
+    cubic-bezier(0.215, 0.61, 0.355, 1);
   cursor: pointer;
   text-decoration: none;
   max-width: calc(50% - 20px);
@@ -71,24 +75,84 @@ body {
   height: 100vh;
   margin: 0;
   background-color: #f2f2f2;
-  transition: background-color 0.5s ease;
+  transition: background-color var(--animation-speed-color-change) ease;
 }
 
 #theme-toggle-button::before {
   content: "🌙";
-  transition: color 0.5s ease;
+  transition: color var(--animation-speed-color-change) ease;
 }
 
 #header {
   color: #393939;
   font-family: Inter, sans-serif;
   text-align: center;
-  transition: color 0.5s ease;
+  transition: color var(--animation-speed-color-change) ease;
+}
+
+#error-screen {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  font-family: Inter, sans-serif;
+  background: #8b0000; /* Light Red */
+  color: #f0f0f0; /* Dark Text */
+  transition: background-color var(--animation-speed-color-change) ease;
+}
+
+#error-message {
+  font-size: 3rem;
+}
+
+#error-message-refresh {
+  font-size: 1rem;
+}
+
+#error-emoji {
+  font-size: 15rem; /* Set large size */
+  animation: pulse 1s infinite; /* Apply pulse animation */
+  margin-top: 10px;
+  cursor: pointer;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2); /* Scale up the emoji */
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+#error-emoji.spin,
+body.dark-theme #error-emoji.spin {
+  animation: spin var(--animation-speed-emoji-spin) linear forwards;
+}
+
+body.dark-theme #error-screen {
+  background: #4b0000; /* Dark Red */
+  transition: background-color var(--animation-speed-color-change) ease;
 }
 
 #controls button {
   font-family: Inter, sans-serif;
   font-size: 1em;
+  width: 7vw;
   word-wrap: break-word;
   overflow-wrap: break-word;
   white-space: normal;
@@ -100,24 +164,63 @@ body {
   border: 2px solid #cccccc;
   border-radius: 7px;
   cursor: pointer;
-  transition: background-color 0.5s ease, color 0.5s ease, border 0.5s ease;
+  transition: background-color var(--animation-speed-color-change) ease,
+    color var(--animation-speed-color-change) ease,
+    border var(--animation-speed-color-change) ease;
 }
 
 #controls button:hover {
   background-color: #ebebeb;
-  transition: background-color 0.5s ease;
+  transition: background-color var(--animation-speed-color-change) ease;
 }
 
 #controls button:active {
   background-color: #d0d0d0;
-  transition: background-color 0.5s ease;
+  transition: background-color var(--animation-speed-color-change) ease;
 }
 
 #controls button:disabled {
   background-color: #f0f0f0;
   color: #aaaaaa;
   cursor: not-allowed;
-  transition: background-color 0.5s ease, color 0.5s ease;
+  transition: background-color var(--animation-speed-color-change) ease,
+    color var(--animation-speed-color-change) ease;
+}
+
+#difficulty-button[data-difficulty="easy"] {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+#difficulty-button[data-difficulty="medium"] {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+#difficulty-button[data-difficulty="hard"] {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+#difficulty-button[data-difficulty="easy"]:hover {
+  background-color: #c3e6cb;
+}
+#difficulty-button[data-difficulty="easy"]:active {
+  background-color: #a8d5b1;
+}
+
+#difficulty-button[data-difficulty="medium"]:hover {
+  background-color: #ffe8a1;
+}
+#difficulty-button[data-difficulty="medium"]:active {
+  background-color: #ffdd80;
+}
+
+#difficulty-button[data-difficulty="hard"]:hover {
+  background-color: #f1b0b7;
+}
+#difficulty-button[data-difficulty="hard"]:active {
+  background-color: #e07c84;
 }
 
 .tile {
@@ -134,21 +237,28 @@ body {
   border: 2px solid #d9d9d9;
   border-radius: 7px;
   cursor: pointer;
-  transition: background-color 0.5s ease, color 0.5s ease, border 0.5s ease,
-    left 0.5s ease, top 0.5s ease, opacity 0.5s ease;
+  transition: background-color var(--animation-speed-color-change) ease,
+    color var(--animation-speed-color-change) ease,
+    border var(--animation-speed-color-change) ease,
+    left var(--animation-speed-tile-movement) ease,
+    top var(--animation-speed-tile-movement) ease,
+    opacity var(--animation-speed-color-change) ease;
 }
 
 .tile:hover {
   background-color: #f0f0f0;
-  transition: background-color 0.5s ease;
+  transition: background-color var(--animation-speed-color-change) ease;
 }
 
 .tile:active,
 .tile.tile.selected {
   background-color: #e0e0e0;
   border: 3px solid #bdbdbd;
-  transition: background-color 0.5s ease, color 0.5s ease, border 0.5s ease,
-    left 0.5s ease, top 0.5s ease;
+  transition: background-color var(--animation-speed-color-change) ease,
+    color var(--animation-speed-color-change) ease,
+    border var(--animation-speed-color-change) ease,
+    left var(--animation-speed-tile-movement) ease,
+    top var(--animation-speed-tile-movement) ease;
 }
 
 .tile:disabled {
@@ -157,71 +267,103 @@ body {
 
 .tile.hidden {
   opacity: 0;
-  transition: opacity 0.5s ease;
+  transition: opacity var(--animation-speed-color-change) ease;
 }
 
 .tile.completed-1 {
   background-color: #ffebee;
   border: 2px solid #ef9a9a;
   color: #c62828;
-  transition: background-color 0.5s ease, color 0.5s ease, border 0.5s ease,
-    left 0.5s ease, top 0.5s ease, opacity 0.5s ease;
+  transition: background-color var(--animation-speed-color-change) ease,
+    color var(--animation-speed-color-change) ease,
+    border var(--animation-speed-color-change) ease,
+    left var(--animation-speed-tile-movement) ease,
+    top var(--animation-speed-tile-movement) ease,
+    opacity var(--animation-speed-color-change) ease;
 }
 
 .tile.completed-2 {
   background-color: #f3e5f5;
   border: 2px solid #ce93d8;
   color: #7b1fa2;
-  transition: background-color 0.5s ease, color 0.5s ease, border 0.5s ease,
-    left 0.5s ease, top 0.5s ease, opacity 0.5s ease;
+  transition: background-color var(--animation-speed-color-change) ease,
+    color var(--animation-speed-color-change) ease,
+    border var(--animation-speed-color-change) ease,
+    left var(--animation-speed-tile-movement) ease,
+    top var(--animation-speed-tile-movement) ease,
+    opacity var(--animation-speed-color-change) ease;
 }
 
 .tile.completed-3 {
   background-color: #e3f2fd;
   border: 2px solid #90caf9;
   color: #1565c0;
-  transition: background-color 0.5s ease, color 0.5s ease, border 0.5s ease,
-    left 0.5s ease, top 0.5s ease, opacity 0.5s ease;
+  transition: background-color var(--animation-speed-color-change) ease,
+    color var(--animation-speed-color-change) ease,
+    border var(--animation-speed-color-change) ease,
+    left var(--animation-speed-tile-movement) ease,
+    top var(--animation-speed-tile-movement) ease,
+    opacity var(--animation-speed-color-change) ease;
 }
 
 .tile.completed-4 {
   background-color: #e8f5e9;
   border: 2px solid #a5d6a7;
   color: #2e7d32;
-  transition: background-color 0.5s ease, color 0.5s ease, border 0.5s ease,
-    left 0.5s ease, top 0.5s ease, opacity 0.5s ease;
+  transition: background-color var(--animation-speed-color-change) ease,
+    color var(--animation-speed-color-change) ease,
+    border var(--animation-speed-color-change) ease,
+    left var(--animation-speed-tile-movement) ease,
+    top var(--animation-speed-tile-movement) ease,
+    opacity var(--animation-speed-color-change) ease;
 }
 
 .tile.completed-5 {
   background-color: #fff8e1;
   border: 2px solid #ffe082;
   color: #ff8f00;
-  transition: background-color 0.5s ease, color 0.5s ease, border 0.5s ease,
-    left 0.5s ease, top 0.5s ease, opacity 0.5s ease;
+  transition: background-color var(--animation-speed-color-change) ease,
+    color var(--animation-speed-color-change) ease,
+    border var(--animation-speed-color-change) ease,
+    left var(--animation-speed-tile-movement) ease,
+    top var(--animation-speed-tile-movement) ease,
+    opacity var(--animation-speed-color-change) ease;
 }
 
 .tile.completed-6 {
   background-color: #e0f2f1;
   border: 2px solid #80cbc4;
   color: #00796b;
-  transition: background-color 0.5s ease, color 0.5s ease, border 0.5s ease,
-    left 0.5s ease, top 0.5s ease, opacity 0.5s ease;
+  transition: background-color var(--animation-speed-color-change) ease,
+    color var(--animation-speed-color-change) ease,
+    border var(--animation-speed-color-change) ease,
+    left var(--animation-speed-tile-movement) ease,
+    top var(--animation-speed-tile-movement) ease,
+    opacity var(--animation-speed-color-change) ease;
 }
 
 .tile.completed-7 {
   background-color: #fce4ec;
   border: 2px solid #f48fb1;
   color: #c2185b;
-  transition: background-color 0.5s ease, color 0.5s ease, border 0.5s ease,
-    left 0.5s ease, top 0.5s ease, opacity 0.5s ease;
+  transition: background-color var(--animation-speed-color-change) ease,
+    color var(--animation-speed-color-change) ease,
+    border var(--animation-speed-color-change) ease,
+    left var(--animation-speed-tile-movement) ease,
+    top var(--animation-speed-tile-movement) ease,
+    opacity var(--animation-speed-color-change) ease;
 }
 
 .tile.completed-8 {
   background-color: #e8eaf6;
   border: 2px solid #9fa8da;
   color: #303f9f;
-  transition: background-color 0.5s ease, color 0.5s ease, border 0.5s ease,
-    left 0.5s ease, top 0.5s ease, opacity 0.5s ease;
+  transition: background-color var(--animation-speed-color-change) ease,
+    color var(--animation-speed-color-change) ease,
+    border var(--animation-speed-color-change) ease,
+    left var(--animation-speed-tile-movement) ease,
+    top var(--animation-speed-tile-movement) ease,
+    opacity var(--animation-speed-color-change) ease;
 }
 
 .toastify-error {
@@ -281,7 +423,7 @@ body.dark-theme {
 
 body.dark-theme #theme-toggle-button::before {
   content: "☀️";
-  transition: color 0.5s ease;
+  transition: color var(--animation-speed-color-change) ease;
 }
 
 body.dark-theme #header {
@@ -292,109 +434,186 @@ body.dark-theme #controls button {
   color: #ffffff;
   border: 2px solid #5a5a5a;
   background-color: #4d4d4d;
-  transition: background-color 0.5s ease, color 0.5s ease, border 0.5s ease;
+  transition: background-color var(--animation-speed-color-change) ease,
+    color var(--animation-speed-color-change) ease,
+    border var(--animation-speed-color-change) ease;
 }
 
 body.dark-theme #controls button:hover {
   background-color: #5a5a5a;
-  transition: background-color 0.5s ease;
+  transition: background-color var(--animation-speed-color-change) ease;
 }
 
 body.dark-theme #controls button:active {
   background-color: #383838;
-  transition: background-color 0.5s ease;
+  transition: background-color var(--animation-speed-color-change) ease;
 }
 
 body.dark-theme #controls button:disabled {
   background-color: #3a3a3a;
   color: #777777;
   cursor: not-allowed;
-  transition: background-color 0.5s ease, color 0.5s ease;
+  transition: background-color var(--animation-speed-color-change) ease,
+    color var(--animation-speed-color-change) ease;
+}
+
+body.dark-theme #difficulty-button[data-difficulty="easy"] {
+  background-color: #1e462b;
+  color: #d4edda;
+}
+
+body.dark-theme #difficulty-button[data-difficulty="medium"] {
+  background-color: #5c4813;
+  color: #fff3cd;
+}
+
+body.dark-theme #difficulty-button[data-difficulty="hard"] {
+  background-color: #5c1f26;
+  color: #f8d7da;
+}
+
+body.dark-theme #difficulty-button[data-difficulty="easy"]:hover {
+  background-color: #275f3a;
+}
+body.dark-theme #difficulty-button[data-difficulty="easy"]:active {
+  background-color: #2f7645;
+}
+
+body.dark-theme #difficulty-button[data-difficulty="medium"]:hover {
+  background-color: #6e5719;
+}
+body.dark-theme #difficulty-button[data-difficulty="medium"]:active {
+  background-color: #83691e;
+}
+
+body.dark-theme #difficulty-button[data-difficulty="hard"]:hover {
+  background-color: #722532;
+}
+body.dark-theme #difficulty-button[data-difficulty="hard"]:active {
+  background-color: #8a2d3d;
 }
 
 body.dark-theme .tile {
   color: #f0f0f0;
   border: 2px solid #525252;
   background-color: #2d2d2d;
-  transition: background-color 0.5s ease, color 0.5s ease, border 0.5s ease,
-    left 0.5s ease, top 0.5s ease;
+  transition: background-color var(--animation-speed-color-change) ease,
+    color var(--animation-speed-color-change) ease,
+    border var(--animation-speed-color-change) ease,
+    left var(--animation-speed-tile-movement) ease,
+    top var(--animation-speed-tile-movement) ease;
 }
 
 body.dark-theme .tile:hover {
   background-color: #444444;
-  transition: background-color 0.5s ease;
+  transition: background-color var(--animation-speed-color-change) ease;
 }
 
 body.dark-theme .tile:active,
 body.dark-theme .tile.selected {
   background-color: #1e1e1e;
   border: 3px solid #7a7a7a;
-  transition: background-color 0.5s ease, color 0.5s ease, border 0.5s ease,
-    left 0.5s ease, top 0.5s ease;
+  transition: background-color var(--animation-speed-color-change) ease,
+    color var(--animation-speed-color-change) ease,
+    border var(--animation-speed-color-change) ease,
+    left var(--animation-speed-tile-movement) ease,
+    top var(--animation-speed-tile-movement) ease;
 }
 
 body.dark-theme .tile.completed-1 {
   background-color: #5d1a1a;
   border: 2px solid #9e2a2a;
   color: #ef9a9a;
-  transition: background-color 0.5s ease, color 0.5s ease, border 0.5s ease,
-    left 0.5s ease, top 0.5s ease, opacity 0.5s ease;
+  transition: background-color var(--animation-speed-color-change) ease,
+    color var(--animation-speed-color-change) ease,
+    border var(--animation-speed-color-change) ease,
+    left var(--animation-speed-tile-movement) ease,
+    top var(--animation-speed-tile-movement) ease,
+    opacity var(--animation-speed-color-change) ease;
 }
 
 body.dark-theme .tile.completed-2 {
   background-color: #4a1a64;
   border: 2px solid #7d3c98;
   color: #d1a7e0;
-  transition: background-color 0.5s ease, color 0.5s ease, border 0.5s ease,
-    left 0.5s ease, top 0.5s ease, opacity 0.5s ease;
+  transition: background-color var(--animation-speed-color-change) ease,
+    color var(--animation-speed-color-change) ease,
+    border var(--animation-speed-color-change) ease,
+    left var(--animation-speed-tile-movement) ease,
+    top var(--animation-speed-tile-movement) ease,
+    opacity var(--animation-speed-color-change) ease;
 }
 
 body.dark-theme .tile.completed-3 {
   background-color: #193c5d;
   border: 2px solid #2e6da4;
   color: #90caf9;
-  transition: background-color 0.5s ease, color 0.5s ease, border 0.5s ease,
-    left 0.5s ease, top 0.5s ease, opacity 0.5s ease;
+  transition: background-color var(--animation-speed-color-change) ease,
+    color var(--animation-speed-color-change) ease,
+    border var(--animation-speed-color-change) ease,
+    left var(--animation-speed-tile-movement) ease,
+    top var(--animation-speed-tile-movement) ease,
+    opacity var(--animation-speed-color-change) ease;
 }
 
 body.dark-theme .tile.completed-4 {
   background-color: #1e4620;
   border: 2px solid #357a38;
   color: #a5d6a7;
-  transition: background-color 0.5s ease, color 0.5s ease, border 0.5s ease,
-    left 0.5s ease, top 0.5s ease, opacity 0.5s ease;
+  transition: background-color var(--animation-speed-color-change) ease,
+    color var(--animation-speed-color-change) ease,
+    border var(--animation-speed-color-change) ease,
+    left var(--animation-speed-tile-movement) ease,
+    top var(--animation-speed-tile-movement) ease,
+    opacity var(--animation-speed-color-change) ease;
 }
 
 body.dark-theme .tile.completed-5 {
   background-color: #5d4037;
   border: 2px solid #8d6e63;
   color: #ffe082;
-  transition: background-color 0.5s ease, color 0.5s ease, border 0.5s ease,
-    left 0.5s ease, top 0.5s ease, opacity 0.5s ease;
+  transition: background-color var(--animation-speed-color-change) ease,
+    color var(--animation-speed-color-change) ease,
+    border var(--animation-speed-color-change) ease,
+    left var(--animation-speed-tile-movement) ease,
+    top var(--animation-speed-tile-movement) ease,
+    opacity var(--animation-speed-color-change) ease;
 }
 
 body.dark-theme .tile.completed-6 {
   background-color: #1a413f;
   border: 2px solid #26756f;
   color: #80cbc4;
-  transition: background-color 0.5s ease, color 0.5s ease, border 0.5s ease,
-    left 0.5s ease, top 0.5s ease, opacity 0.5s ease;
+  transition: background-color var(--animation-speed-color-change) ease,
+    color var(--animation-speed-color-change) ease,
+    border var(--animation-speed-color-change) ease,
+    left var(--animation-speed-tile-movement) ease,
+    top var(--animation-speed-tile-movement) ease,
+    opacity var(--animation-speed-color-change) ease;
 }
 
 body.dark-theme .tile.completed-7 {
   background-color: #5c1b3c;
   border: 2px solid #913063;
   color: #f48fb1;
-  transition: background-color 0.5s ease, color 0.5s ease, border 0.5s ease,
-    left 0.5s ease, top 0.5s ease, opacity 0.5s ease;
+  transition: background-color var(--animation-speed-color-change) ease,
+    color var(--animation-speed-color-change) ease,
+    border var(--animation-speed-color-change) ease,
+    left var(--animation-speed-tile-movement) ease,
+    top var(--animation-speed-tile-movement) ease,
+    opacity var(--animation-speed-color-change) ease;
 }
 
 body.dark-theme .tile.completed-8 {
   background-color: #1a2250;
   border: 2px solid #303f9f;
   color: #9fa8da;
-  transition: background-color 0.5s ease, color 0.5s ease, border 0.5s ease,
-    left 0.5s ease, top 0.5s ease, opacity 0.5s ease;
+  transition: background-color var(--animation-speed-color-change) ease,
+    color var(--animation-speed-color-change) ease,
+    border var(--animation-speed-color-change) ease,
+    left var(--animation-speed-tile-movement) ease,
+    top var(--animation-speed-tile-movement) ease,
+    opacity var(--animation-speed-color-change) ease;
 }
 
 body.dark-theme .toastify-error {
@@ -499,26 +718,12 @@ body.dark-theme .toastify-winner {
   max-width: -moz-fit-content;
 }
 
-@media only screen and (max-width: 360px) {
-  .toastify-right,
-  .toastify-left {
-    margin-left: auto;
-    margin-right: auto;
-    left: 0;
-    right: 0;
-    max-width: fit-content;
-  }
-}
-
 /* Mobile */
-
-@media (max-width: 768px) {
+@media only screen and (max-width: 768px) {
   #theme-toggle-button {
     font-size: 24px;
   }
-}
 
-@media (max-width: 768px) {
   #controls {
     max-width: 90vw;
   }
@@ -527,18 +732,38 @@ body.dark-theme .toastify-winner {
     font-size: 0.6em;
     padding: 4px 8px;
     margin: 2px;
+    width: 18%;
   }
-}
 
-@media (max-width: 768px) {
   #board {
     width: 90vw;
     height: 50vh;
+  }
+
+  #error-message {
+    font-size: 1.5rem;
+  }
+
+  #error-message-refresh {
+    font-size: 1rem;
+  }
+
+  #error-emoji {
+    font-size: 10rem; /* Set large size */
+    margin-top: 5px;
   }
 
   .tile {
     font-size: 0.6em;
     padding: 4px 8px;
     margin: 2px;
+  }
+  .toastify-right,
+  .toastify-left {
+    margin-left: auto;
+    margin-right: auto;
+    left: 0;
+    right: 0;
+    max-width: fit-content;
   }
 }

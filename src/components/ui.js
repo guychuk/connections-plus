@@ -4,6 +4,7 @@ import {
   TOAST_CORRECT,
   TOAST_INCORRECT,
   TOAST_WINNER,
+  TOAST_ERROR,
   makeTooFewToast,
   makeTooManyToast,
   makePartialToast,
@@ -360,4 +361,98 @@ export const setThemeBasedOnPreference = () => {
   } else {
     document.body.classList.remove("dark-theme");
   }
+};
+
+/**
+ * Get the text for the difficulty button based on the difficulty.
+ * @param {string} difficulty The difficulty.
+ * @returns {string} The text for the difficulty button.
+ */
+export const getDifficultyButtonText = (difficulty) => {
+  if (difficulty === "easy") {
+    return "Easy 🥚";
+  } else if (difficulty === "medium") {
+    return "Medium 🐤";
+  } else if (difficulty === "hard") {
+    return "Hard 🐔";
+  }
+
+  throw new Error("Invalid difficulty");
+};
+
+/**
+ * Disable the buttons.
+ * @param {Array} buttons The buttons to disable.
+ */
+export const disableButtons = (buttons) => {
+  for (let i = 0; i < buttons.length; i++) {
+    buttons[i].disabled = true;
+  }
+};
+
+/**
+ * Enable the buttons.
+ * @param {Array} buttons The buttons to enable.
+ */
+export const enableButtons = (buttons) => {
+  for (let i = 0; i < buttons.length; i++) {
+    buttons[i].disabled = false;
+  }
+};
+
+/**
+ * Clear the banners (colored boxes over completed groups).
+ * @param {Array} completedGroups The completed groups array.
+ */
+export const clearBanners = (completedGroups) => {
+  for (let i = 0; i < completedGroups.length; i++) {
+    if (completedGroups[i].button) {
+      completedGroups[i].button.classList.add("hidden");
+
+      setTimeout(() => {
+        completedGroups[i].button.remove();
+        completedGroups[i].button = null;
+      }, 500);
+    }
+  }
+};
+
+/**
+ * Update the tiles.
+ * @param {Set} tiles The tiles array.
+ * @param {Set} newTiles The new tiles array.
+ */
+export const updateTiles = (tiles, newTiles) => {
+  const tilesArray = Array.from(tiles);
+  const newTilesArray = Array.from(newTiles);
+
+  for (let i = 0; i < tilesArray.length; i++) {
+    tilesArray[i].id = newTilesArray[i].id;
+    tilesArray[i].term = newTilesArray[i].term;
+    tilesArray[i].category = newTilesArray[i].category;
+    tilesArray[i].groupSize = newTilesArray[i].groupSize;
+    tilesArray[i].groupIndex = newTilesArray[i].groupIndex;
+
+    // The buton tied to the tile stays the same, it's just the text that changes
+    tilesArray[i].button.textContent = tilesArray[i].term;
+    tilesArray[i].button.className = "tile";
+    tilesArray[i].button.disabled = false;
+  }
+};
+
+export const showErrorScreen = () => {
+  // Hide all body children
+  [...document.body.children].forEach((child) => {
+    if (child.id !== "error-screen" && child.id !== "theme-toggle-button") {
+      child.style.display = "none";
+    }
+  });
+
+  // Show error screen
+  const errorScreen = document.getElementById("error-screen");
+  if (errorScreen) {
+    errorScreen.style.display = "flex";
+  }
+
+  TOAST_ERROR.showToast();
 };

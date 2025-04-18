@@ -38,8 +38,25 @@
         <button id="deselect-all-button">Deselect All 🧹</button>
         <button id="shuffle-button">Shuffle 🎲</button>
         <button id="submit-button">Submit ✔️</button>
+        <button id="difficulty-button"></button>
       </div>
     </div>
+    <div id="error-screen" style="display: none">
+      <p id="error-message">An unexpected error occurred.</p>
+      <p id="error-emoji">🫣</p>
+      <p id="error-message-refresh">Click the emoji to refresh</p>
+    </div>
     <button id="theme-toggle-button" title="toggle light/dark modes"></button>
+    <script>
+      const emoji = document.getElementById("error-emoji");
+      document.getElementById("error-emoji").addEventListener("click", () => {
+        emoji.classList.add("spin");
+
+        // Delay reload to let the spin finish
+        setTimeout(() => {
+          location.reload();
+        }, 600); // Match the animation duration (0.6s)
+      });
+    </script>
   </body>
 </html>
