@@ -166,7 +166,7 @@ const V_GAP = parseFloat(boardCSS.rowGap);
     );
 
     if (remainngTiles.size === 0) {
-      enableButtons([
+      disableButtons([
         shuffleButton,
         submitButton,
         deselectButton,
