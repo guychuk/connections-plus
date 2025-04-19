@@ -11,6 +11,7 @@ import { processNewCompletedGroup } from "../core/gameLogic";
  * Event handler for the submit button.
  * @param {MouseEvent} event The event when the user clicks the submit button.
  * @param {HTMLCanvasElement} board The board element containing the tiles.
+ * @param {string} layout The layout of the board ("compact" or "spacious").
  * @param {Set} remainngTiles The set of remaining tiles.
  * @param {Set} selectedTiles The set of currently selected tiles.
  * @param {Set} previousSubmissions The set of previously submitted tiles.
@@ -25,6 +26,7 @@ import { processNewCompletedGroup } from "../core/gameLogic";
 export const clickSubmit = (
   event,
   board,
+  layout,
   remainngTiles,
   selectedTiles,
   previousSubmissions,
@@ -70,6 +72,7 @@ export const clickSubmit = (
 
     repositionTiles(
       board,
+      layout,
       remainngTiles,
       completedGroups,
       groups,

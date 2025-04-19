@@ -152,6 +152,7 @@ export const getNewTiles = async (client, groups, difficulty) => {
  * @param {HTMLButtonElement} difficultyButton The difficulty button element.
  * @param {Array} groups An array of group sizes.
  * @param {HTMLCanvasElement} board The board element.
+ * @param {string} layout The layout of the board ("compact" or "spacious").
  * @param {number} hgap The horizontal gap between tiles.
  * @param {number} vgap The vertical gap between tiles.
  * @returns {Object} An object containing the tiles set, selected tiles set, positions array and tile size object.
@@ -161,6 +162,7 @@ export const initializeGame = async (
   difficultyButton,
   groups,
   board,
+  layout,
   hgap,
   vgap
 ) => {
@@ -186,7 +188,7 @@ export const initializeGame = async (
     groups[groups.length - 1]
   );
 
-  shuffleBoard(tiles, positions, cols, tileSize, hgap, vgap);
+  shuffleBoard(tiles, positions, cols, tileSize, hgap, vgap, layout);
 
   return { tiles, selectedTiles, positions, tileSize };
 };
@@ -198,6 +200,7 @@ export const initializeGame = async (
  * @param {Array} groups An array of group sizes.
  * @param {Set} tiles The set of tiles.
  * @param {Object} tileSize An object containing the height and width of the tile.
+ * @param {string} layout The layout of the board ("compact" or "spacious").
  * @param {number} hgap The horizontal gap between tiles.
  * @param {number} vgap The vertical gap between tiles.
  * @returns {Array} An array of positions for the tiles.
@@ -209,6 +212,7 @@ export const resetGame = async (
   groups,
   tiles,
   tileSize,
+  layout,
   hgap,
   vgap
 ) => {
@@ -231,7 +235,8 @@ export const resetGame = async (
     groups[groups.length - 1],
     tileSize,
     hgap,
-    vgap
+    vgap,
+    layout
   );
 
   return positions;

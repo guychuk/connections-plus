@@ -12,6 +12,23 @@ import {
 import confetti from "canvas-confetti";
 import { confettiDuration } from "../config/config.json";
 
+export const showErrorScreen = () => {
+  // Hide all body children
+  [...document.body.children].forEach((child) => {
+    if (child.id !== "error-screen" && child.id !== "theme-toggle-button") {
+      child.style.display = "none";
+    }
+  });
+
+  // Show error screen
+  const errorScreen = document.getElementById("error-screen");
+  if (errorScreen) {
+    errorScreen.style.display = "flex";
+  }
+
+  TOAST_ERROR.showToast();
+};
+
 /**
  * Calculates the tile size based on the canvas size and the number of rows and columns.
  * @param {HTMLCanvasElement} canvas The canvas element.
@@ -85,6 +102,7 @@ const getPositionOnCanvasCentered = (
  * @param {Object} tileSize An object containing the height and width of the tile.
  * @param {number} hgap The horizontal gap between tiles.
  * @param {number} vgap The vertical gap between tiles.
+ * @param {string} layout The layout of the board ("compact" or "spacious").
  */
 export const shuffleBoard = (
   tiles,
@@ -92,18 +110,29 @@ export const shuffleBoard = (
   columns,
   tileSize,
   hgap,
-  vgap
+  vgap,
+  layout
 ) => {
-  shuffleArray(positions, tiles.size);
-
   let i = 0;
   const remainder = tiles.size % columns;
   const lastRow = Math.floor(tiles.size / columns) - (remainder > 0 ? 0 : 1);
+  const compact = layout === "compact";
+
+  if (layout !== "spacious" && layout !== "compact") {
+    console.error("Layout must be either 'spacious' or 'compact'");
+    showErrorScreen();
+  }
+
+  if (compact) {
+    shuffleArray(positions, tiles.size);
+  } else {
+    shuffleArray(positions);
+  }
 
   for (let tile of tiles) {
     let position = null;
 
-    if (remainder > 0 && positions[i].row === lastRow) {
+    if (compact && remainder > 0 && positions[i].row === lastRow) {
       position = getPositionOnCanvasCentered(
         positions[i],
         remainder,
@@ -222,6 +251,7 @@ export const submitToast = (selectedTiles, previousSubmissions, groups) => {
 /**
  * Reposition the tiles on the board.
  * @param {HTMLCanvasElement} board The board element containing the tiles.
+ * @param {string} layout The layout of the board ("compact" or "spacious").
  * @param {Set} remainngTiles The set of remaining tiles.
  * @param {Array} completedGroups An array of completed groups.
  * @param {Array} groups An array of group sizes in the game, sorted.
@@ -232,6 +262,7 @@ export const submitToast = (selectedTiles, previousSubmissions, groups) => {
  */
 export const repositionTiles = (
   board,
+  layout,
   remainngTiles,
   completedGroups,
   groups,
@@ -310,7 +341,7 @@ export const repositionTiles = (
   }
 
   // Now draw the rest
-  shuffleBoard(remainngTiles, positions, cols, tileSize, hgap, vgap);
+  shuffleBoard(remainngTiles, positions, cols, tileSize, hgap, vgap, layout);
 };
 
 /**
@@ -460,21 +491,4 @@ export const updateTiles = (tiles, newTiles) => {
     tilesArray[i].button.className = "tile";
     tilesArray[i].button.disabled = false;
   }
-};
-
-export const showErrorScreen = () => {
-  // Hide all body children
-  [...document.body.children].forEach((child) => {
-    if (child.id !== "error-screen" && child.id !== "theme-toggle-button") {
-      child.style.display = "none";
-    }
-  });
-
-  // Show error screen
-  const errorScreen = document.getElementById("error-screen");
-  if (errorScreen) {
-    errorScreen.style.display = "flex";
-  }
-
-  TOAST_ERROR.showToast();
 };

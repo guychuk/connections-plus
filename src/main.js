@@ -71,6 +71,7 @@ const V_GAP = parseFloat(boardCSS.rowGap);
     difficultyButton,
     GROUPS,
     board,
+    config["layout"],
     H_GAP,
     V_GAP
   );
@@ -97,7 +98,8 @@ const V_GAP = parseFloat(boardCSS.rowGap);
       GROUPS[GROUPS.length - 1], // columns
       tileSize,
       H_GAP,
-      V_GAP
+      V_GAP,
+      config["layout"]
     );
   });
 
@@ -122,6 +124,7 @@ const V_GAP = parseFloat(boardCSS.rowGap);
       GROUPS,
       allTiles,
       tileSize,
+      config["layout"],
       H_GAP,
       V_GAP
     );
@@ -150,6 +153,7 @@ const V_GAP = parseFloat(boardCSS.rowGap);
     positions = clickSubmit(
       event,
       board,
+      config["layout"],
       remainngTiles,
       selectedTiles,
       previousSubmissions,
