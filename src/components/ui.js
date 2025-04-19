@@ -86,16 +86,38 @@ const getPositionOnCanvasCentered = (
  * @param {number} hgap The horizontal gap between tiles.
  * @param {number} vgap The vertical gap between tiles.
  */
-export const shuffleBoard = (tiles, positions, tileSize, hgap, vgap) => {
-  shuffleArray(positions);
+export const shuffleBoard = (
+  tiles,
+  positions,
+  columns,
+  tileSize,
+  hgap,
+  vgap
+) => {
+  shuffleArray(positions, tiles.size);
 
   let i = 0;
+  const remainder = tiles.size % columns;
+  const lastRow = Math.floor(tiles.size / columns) - (remainder > 0 ? 0 : 1);
 
   for (let tile of tiles) {
-    const { x, y } = getPositionOnCanvas(positions[i], tileSize, hgap, vgap);
+    let position = null;
 
-    tile.button.style.left = `${x}px`;
-    tile.button.style.top = `${y}px`;
+    if (remainder > 0 && positions[i].row === lastRow) {
+      position = getPositionOnCanvasCentered(
+        positions[i],
+        remainder,
+        columns,
+        tileSize,
+        hgap,
+        vgap
+      );
+    } else {
+      position = getPositionOnCanvas(positions[i], tileSize, hgap, vgap);
+    }
+
+    tile.button.style.left = `${position.x}px`;
+    tile.button.style.top = `${position.y}px`;
     i++;
   }
 };
@@ -288,7 +310,7 @@ export const repositionTiles = (
   }
 
   // Now draw the rest
-  shuffleBoard(remainngTiles, positions, tileSize, hgap, vgap);
+  shuffleBoard(remainngTiles, positions, cols, tileSize, hgap, vgap);
 };
 
 /**

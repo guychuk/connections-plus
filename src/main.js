@@ -91,7 +91,14 @@ const V_GAP = parseFloat(boardCSS.rowGap);
   // Add the shuffle button functionality
   const shuffleButton = document.getElementById("shuffle-button");
   shuffleButton.addEventListener("click", () => {
-    shuffleBoard(remainngTiles, positions, tileSize, H_GAP, V_GAP);
+    shuffleBoard(
+      remainngTiles,
+      positions,
+      GROUPS[GROUPS.length - 1], // columns
+      tileSize,
+      H_GAP,
+      V_GAP
+    );
   });
 
   // Add the new game button functionality

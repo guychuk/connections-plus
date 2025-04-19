@@ -4,7 +4,7 @@ import {
   getCategoryName,
   getTerms,
 } from "../services/supabase";
-import { shuffleArray, makePositions } from "../core/utils";
+import { makePositions } from "../core/utils";
 import {
   calculateTileSize,
   createButtons,
@@ -175,8 +175,6 @@ export const initializeGame = async (
 
   const tiles = await getNewTiles(client, groups, difficulty);
 
-  shuffleArray(positions);
-
   createButtons(
     board,
     positions,
@@ -187,6 +185,8 @@ export const initializeGame = async (
     selectedTiles,
     groups[groups.length - 1]
   );
+
+  shuffleBoard(tiles, positions, cols, tileSize, hgap, vgap);
 
   return { tiles, selectedTiles, positions, tileSize };
 };
@@ -225,7 +225,14 @@ export const resetGame = async (
   // Keep the same tiles set as before, but replace the contents
   updateTiles(tiles, newTiles);
 
-  shuffleBoard(tiles, positions, tileSize, hgap, vgap);
+  shuffleBoard(
+    tiles,
+    positions,
+    groups[groups.length - 1],
+    tileSize,
+    hgap,
+    vgap
+  );
 
   return positions;
 };

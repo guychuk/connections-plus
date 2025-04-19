@@ -38,11 +38,14 @@ export const randomNum = (min, max) =>
 /**
  * Shuffle an array in-place.
  * @param {Array} array An array to shuffle.
+ * @param {number} limit The number of elements to shuffle (defaults -1 to the entire array).
  */
-export const shuffleArray = (array) => {
-  const perm = getRandomNums(array.length);
+export const shuffleArray = (array, limit = -1) => {
+  const n = limit === -1 ? array.length : limit;
 
-  for (let i = 0; i < array.length; i++) {
+  const perm = getRandomNums(n);
+
+  for (let i = 0; i < n; i++) {
     [array[i], array[perm[i] - 1]] = [array[perm[i] - 1], array[i]];
   }
 };
