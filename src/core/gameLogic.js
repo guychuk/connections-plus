@@ -88,7 +88,7 @@ export const getNewTiles = async (client, groups, difficulty) => {
 
       // If no categories were found, try again with different tags
       if (newValidCategories.length === 0) {
-        console.debug("No categories found, trying again with different tags");
+        console.error("No categories found, trying again with different tags");
         break;
       }
 
@@ -117,10 +117,9 @@ export const getNewTiles = async (client, groups, difficulty) => {
     );
 
     const allTerms = await Promise.all(fetchTermsPromises);
-    console.log(allTerms.flat().sort());
 
     if (new Set(allTerms.flat()).size !== allTerms.flat().length) {
-      console.log("Duplicate terms found, trying again");
+      console.error("Duplicate terms found, trying again");
       iterations++;
       continue;
     }
