@@ -46,17 +46,23 @@
       <p id="error-emoji">🫣</p>
       <p id="error-message-refresh">Click the emoji to refresh</p>
     </div>
-    <button id="theme-toggle-button" title="toggle light/dark modes"></button>
+    <div id="settings">
+      <button id="theme-toggle-button" title="toggle light/dark modes"></button>
+      <button id="settings-button" title="toggle light/dark modes">⚙️</button>
+    </div>
     <script>
-      const emoji = document.getElementById("error-emoji");
-      document.getElementById("error-emoji").addEventListener("click", () => {
-        emoji.classList.add("spin");
+      const errorEmojiButton = document.getElementById("error-emoji");
+      const settingsButton = document.getElementById("settings-button");
 
-        // Delay reload to let the spin finish
+      const spin = (event) => {
+        event.target.classList.add("spin");
         setTimeout(() => {
-          location.reload();
-        }, 600); // Match the animation duration (0.6s)
-      });
+          event.target.classList.remove("spin");
+        }, 600);
+      };
+
+      errorEmojiButton.addEventListener("click", spin);
+      settingsButton.addEventListener("click", spin);
     </script>
   </body>
 </html>

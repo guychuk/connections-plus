@@ -5,7 +5,7 @@
   font-feature-settings: "liga" 1, "calt" 1; /* fix for Chrome */
   --animation-speed-tile-movement: 1s;
   --animation-speed-color-change: 0.5s;
-  --animation-speed-emoji-spin: 0.6s;
+  --animation-speed-spin: 0.6s;
 }
 @supports (font-variation-settings: normal) {
   :root {
@@ -25,13 +25,20 @@
   gap: 20px;
 }
 
-#theme-toggle-button {
-  position: absolute;
-  top: 10px;
-  right: 10px;
+#settings {
+  position: absolute; /* or 'fixed' if you want them to stay visible on scroll */
+  top: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column; /* stack vertically */
+  gap: 10px; /* space between buttons */
+}
+
+#settings button {
   background-color: transparent;
   border: none;
   cursor: pointer;
+  padding: 8px 12px;
   font-size: 36px;
 }
 
@@ -139,9 +146,14 @@ body {
   }
 }
 
+#settings-button.spin,
+body.dark-theme #settings-button.spin {
+  animation: spin var(--animation-speed-spin) linear forwards;
+}
+
 #error-emoji.spin,
 body.dark-theme #error-emoji.spin {
-  animation: spin var(--animation-speed-emoji-spin) linear forwards;
+  animation: spin var(--animation-speed-spin) linear forwards;
 }
 
 body.dark-theme #error-screen {
