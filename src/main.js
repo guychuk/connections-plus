@@ -37,8 +37,7 @@ window
 // Read game configuration
 
 /** Number of tiles in each group */
-const GROUPS = config["groups"];
-GROUPS.sort();
+const GROUPS = config["groups"].sort((a, b) => a - b);
 
 if (containsDulpicates(GROUPS)) {
   throw new Error("Groups contain duplicates");
@@ -71,6 +70,7 @@ const V_GAP = parseFloat(boardCSS.rowGap);
     difficultyButton,
     GROUPS,
     board,
+    config["layout"],
     H_GAP,
     V_GAP
   );
@@ -91,7 +91,15 @@ const V_GAP = parseFloat(boardCSS.rowGap);
   // Add the shuffle button functionality
   const shuffleButton = document.getElementById("shuffle-button");
   shuffleButton.addEventListener("click", () => {
-    shuffleBoard(remainngTiles, positions, tileSize, H_GAP, V_GAP);
+    shuffleBoard(
+      remainngTiles,
+      positions,
+      GROUPS[GROUPS.length - 1], // columns
+      tileSize,
+      H_GAP,
+      V_GAP,
+      config["layout"]
+    );
   });
 
   // Add the new game button functionality
@@ -115,6 +123,7 @@ const V_GAP = parseFloat(boardCSS.rowGap);
       GROUPS,
       allTiles,
       tileSize,
+      config["layout"],
       H_GAP,
       V_GAP
     );
@@ -143,6 +152,7 @@ const V_GAP = parseFloat(boardCSS.rowGap);
     positions = clickSubmit(
       event,
       board,
+      config["layout"],
       remainngTiles,
       selectedTiles,
       previousSubmissions,
@@ -155,7 +165,7 @@ const V_GAP = parseFloat(boardCSS.rowGap);
     );
 
     if (remainngTiles.size === 0) {
-      enableButtons([
+      disableButtons([
         shuffleButton,
         submitButton,
         deselectButton,

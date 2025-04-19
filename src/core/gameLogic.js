@@ -4,7 +4,7 @@ import {
   getCategoryName,
   getTerms,
 } from "../services/supabase";
-import { shuffleArray, makePositions } from "../core/utils";
+import { makePositions } from "../core/utils";
 import {
   calculateTileSize,
   createButtons,
@@ -69,11 +69,9 @@ export const getNewTiles = async (client, groups, difficulty) => {
 
   const categoriesSet = new Set();
 
-  var success = false;
-
   var iterations = 0;
 
-  while (!success && iterations < 20) {
+  while (iterations < 20) {
     const tags = (await getTags(client, numTags)).map((tag) => tag.tag);
 
     let i = groups.length;
@@ -90,7 +88,7 @@ export const getNewTiles = async (client, groups, difficulty) => {
 
       // If no categories were found, try again with different tags
       if (newValidCategories.length === 0) {
-        console.debug("No categories found, trying again with different tags");
+        console.error("No categories found, trying again with different tags");
         break;
       }
 
@@ -101,49 +99,50 @@ export const getNewTiles = async (client, groups, difficulty) => {
       }
     }
 
-    if (i === 0) {
-      success = true;
+    if (i > 0) {
+      iterations++;
+      continue;
     }
 
-    iterations++;
-  }
+    const categoriesNamesPromises = categories.map((category) =>
+      getCategoryName(client, category.cat_id)
+    );
 
-  if (!success) {
-    console.error("Failed to get categories after 20 iterations");
-    showErrorScreen();
-    return;
-  }
+    const categoriesNames = await Promise.all(categoriesNamesPromises);
 
-  const categoriesNamesPromises = categories.map((category) =>
-    getCategoryName(client, category.cat_id)
-  );
+    const fetchTermsPromises = groups.map((groupSize, index) =>
+      getTerms(client, categories[index].cat_id, groupSize).then((terms) => {
+        return terms.map((term) => term.term);
+      })
+    );
 
-  const categoriesNames = await Promise.all(categoriesNamesPromises);
+    const allTerms = await Promise.all(fetchTermsPromises);
 
-  const fetchTermsPromises = groups.map((groupSize, index) =>
-    getTerms(client, categories[index].cat_id, groupSize)
-  );
-
-  const allTerms = await Promise.all(fetchTermsPromises);
-
-  const tiles = new Set();
-
-  for (let i = 0; i < groups.length; i++) {
-    for (let j = 0; j < groups[i]; j++) {
-      tiles.add(
-        makeTile(
-          tiles.length, // id
-          allTerms[i][j].term, // term
-          categoriesNames[i], // category
-          groups[i], // groupSize
-          i, // groupIndex
-          null // button (not yet created)
-        )
-      );
+    if (new Set(allTerms.flat()).size !== allTerms.flat().length) {
+      console.error("Duplicate terms found, trying again");
+      iterations++;
+      continue;
     }
-  }
 
-  return tiles;
+    const tiles = new Set();
+
+    for (let i = 0; i < groups.length; i++) {
+      for (let j = 0; j < groups[i]; j++) {
+        tiles.add(
+          makeTile(
+            tiles.length, // id
+            allTerms[i][j], // term
+            categoriesNames[i], // category
+            groups[i], // groupSize
+            i, // groupIndex
+            null // button (not yet created)
+          )
+        );
+      }
+    }
+
+    return tiles;
+  }
 };
 
 /**
@@ -152,6 +151,7 @@ export const getNewTiles = async (client, groups, difficulty) => {
  * @param {HTMLButtonElement} difficultyButton The difficulty button element.
  * @param {Array} groups An array of group sizes.
  * @param {HTMLCanvasElement} board The board element.
+ * @param {string} layout The layout of the board ("compact" or "spacious").
  * @param {number} hgap The horizontal gap between tiles.
  * @param {number} vgap The vertical gap between tiles.
  * @returns {Object} An object containing the tiles set, selected tiles set, positions array and tile size object.
@@ -161,6 +161,7 @@ export const initializeGame = async (
   difficultyButton,
   groups,
   board,
+  layout,
   hgap,
   vgap
 ) => {
@@ -175,8 +176,6 @@ export const initializeGame = async (
 
   const tiles = await getNewTiles(client, groups, difficulty);
 
-  shuffleArray(positions);
-
   createButtons(
     board,
     positions,
@@ -188,6 +187,8 @@ export const initializeGame = async (
     groups[groups.length - 1]
   );
 
+  shuffleBoard(tiles, positions, cols, tileSize, hgap, vgap, layout);
+
   return { tiles, selectedTiles, positions, tileSize };
 };
 
@@ -198,6 +199,7 @@ export const initializeGame = async (
  * @param {Array} groups An array of group sizes.
  * @param {Set} tiles The set of tiles.
  * @param {Object} tileSize An object containing the height and width of the tile.
+ * @param {string} layout The layout of the board ("compact" or "spacious").
  * @param {number} hgap The horizontal gap between tiles.
  * @param {number} vgap The vertical gap between tiles.
  * @returns {Array} An array of positions for the tiles.
@@ -209,6 +211,7 @@ export const resetGame = async (
   groups,
   tiles,
   tileSize,
+  layout,
   hgap,
   vgap
 ) => {
@@ -225,7 +228,15 @@ export const resetGame = async (
   // Keep the same tiles set as before, but replace the contents
   updateTiles(tiles, newTiles);
 
-  shuffleBoard(tiles, positions, tileSize, hgap, vgap);
+  shuffleBoard(
+    tiles,
+    positions,
+    groups[groups.length - 1],
+    tileSize,
+    hgap,
+    vgap,
+    layout
+  );
 
   return positions;
 };

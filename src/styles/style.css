@@ -187,39 +187,39 @@ body.dark-theme #error-screen {
     color var(--animation-speed-color-change) ease;
 }
 
-#difficulty-button[data-difficulty="easy"] {
+#difficulty-button[data-difficulty="easy"]:not(:disabled) {
   background-color: #d4edda;
   color: #155724;
 }
 
-#difficulty-button[data-difficulty="medium"] {
+#difficulty-button[data-difficulty="medium"]:not(:disabled) {
   background-color: #fff3cd;
   color: #856404;
 }
 
-#difficulty-button[data-difficulty="hard"] {
+#difficulty-button[data-difficulty="hard"]:not(:disabled) {
   background-color: #f8d7da;
   color: #721c24;
 }
 
-#difficulty-button[data-difficulty="easy"]:hover {
+#difficulty-button[data-difficulty="easy"]:hover:not(:disabled) {
   background-color: #c3e6cb;
 }
-#difficulty-button[data-difficulty="easy"]:active {
+#difficulty-button[data-difficulty="easy"]:active:not(:disabled) {
   background-color: #a8d5b1;
 }
 
-#difficulty-button[data-difficulty="medium"]:hover {
+#difficulty-button[data-difficulty="medium"]:hover:not(:disabled) {
   background-color: #ffe8a1;
 }
-#difficulty-button[data-difficulty="medium"]:active {
+#difficulty-button[data-difficulty="medium"]:active:not(:disabled) {
   background-color: #ffdd80;
 }
 
-#difficulty-button[data-difficulty="hard"]:hover {
+#difficulty-button[data-difficulty="hard"]:hover:not(:disabled) {
   background-color: #f1b0b7;
 }
-#difficulty-button[data-difficulty="hard"]:active {
+#difficulty-button[data-difficulty="hard"]:active:not(:disabled) {
   background-color: #e07c84;
 }
 
@@ -457,39 +457,45 @@ body.dark-theme #controls button:disabled {
     color var(--animation-speed-color-change) ease;
 }
 
-body.dark-theme #difficulty-button[data-difficulty="easy"] {
+body.dark-theme #difficulty-button[data-difficulty="easy"]:not(:disabled) {
   background-color: #1e462b;
   color: #d4edda;
 }
 
-body.dark-theme #difficulty-button[data-difficulty="medium"] {
+body.dark-theme #difficulty-button[data-difficulty="medium"]:not(:disabled) {
   background-color: #5c4813;
   color: #fff3cd;
 }
 
-body.dark-theme #difficulty-button[data-difficulty="hard"] {
+body.dark-theme #difficulty-button[data-difficulty="hard"]:not(:disabled) {
   background-color: #5c1f26;
   color: #f8d7da;
 }
 
-body.dark-theme #difficulty-button[data-difficulty="easy"]:hover {
+body.dark-theme
+  #difficulty-button[data-difficulty="easy"]:hover:not(:disabled) {
   background-color: #275f3a;
 }
-body.dark-theme #difficulty-button[data-difficulty="easy"]:active {
+body.dark-theme
+  #difficulty-button[data-difficulty="easy"]:active:not(:disabled) {
   background-color: #2f7645;
 }
 
-body.dark-theme #difficulty-button[data-difficulty="medium"]:hover {
+body.dark-theme
+  #difficulty-button[data-difficulty="medium"]:hover:not(:disabled) {
   background-color: #6e5719;
 }
-body.dark-theme #difficulty-button[data-difficulty="medium"]:active {
+body.dark-theme
+  #difficulty-button[data-difficulty="medium"]:active:not(:disabled) {
   background-color: #83691e;
 }
 
-body.dark-theme #difficulty-button[data-difficulty="hard"]:hover {
+body.dark-theme
+  #difficulty-button[data-difficulty="hard"]:hover:not(:disabled) {
   background-color: #722532;
 }
-body.dark-theme #difficulty-button[data-difficulty="hard"]:active {
+body.dark-theme
+  #difficulty-button[data-difficulty="hard"]:active:not(:disabled) {
   background-color: #8a2d3d;
 }
 

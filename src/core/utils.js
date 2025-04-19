@@ -1,3 +1,5 @@
+import { showErrorScreen } from "../components/ui";
+
 /**
  * Get k random distinct numbers in [1, n].
  * @param {number} n Number of options.
@@ -38,11 +40,14 @@ export const randomNum = (min, max) =>
 /**
  * Shuffle an array in-place.
  * @param {Array} array An array to shuffle.
+ * @param {number} limit The number of elements to shuffle (defaults -1 to the entire array).
  */
-export const shuffleArray = (array) => {
-  const perm = getRandomNums(array.length);
+export const shuffleArray = (array, limit = -1) => {
+  const n = limit === -1 ? array.length : limit;
 
-  for (let i = 0; i < array.length; i++) {
+  const perm = getRandomNums(n);
+
+  for (let i = 0; i < n; i++) {
     [array[i], array[perm[i] - 1]] = [array[perm[i] - 1], array[i]];
   }
 };
@@ -91,3 +96,14 @@ export const makePositions = (rows, cols) => {
  */
 export const randomChoices = (arr, c) =>
   getRandomNums(arr.length, c).map((i) => arr[i - 1]);
+
+/**
+ * Throw an error if some values are null.
+ * @param {Array} values Array of values to check.
+ */
+export const assertNotNullOrUndefined = (values) => {
+  if (values.some((value) => value === null || value === undefined)) {
+    showErrorScreen();
+    return;
+  }
+};
