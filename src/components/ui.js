@@ -1,4 +1,9 @@
-import { shuffleArray, hashTilesSet, randomNum } from "../core/utils.js";
+import {
+  shuffleArray,
+  hashTilesSet,
+  randomNum,
+  assertNotNullOrUndefined,
+} from "../core/utils.js";
 import {
   TOAST_DUPLICATE,
   TOAST_CORRECT,
@@ -173,6 +178,17 @@ export const createButtons = (
   maxSelections
 ) => {
   let i = 0;
+
+  assertNotNullOrUndefined([
+    board,
+    positions,
+    tiles,
+    tileSize,
+    hgap,
+    vgap,
+    selectedTiles,
+    maxSelections,
+  ]);
 
   for (const tile of tiles) {
     const button = document.createElement("button");
@@ -476,6 +492,8 @@ export const clearBanners = (completedGroups) => {
  * @param {Set} newTiles The new tiles array.
  */
 export const updateTiles = (tiles, newTiles) => {
+  assertNotNullOrUndefined([tiles, newTiles]);
+
   const tilesArray = Array.from(tiles);
   const newTilesArray = Array.from(newTiles);
 

@@ -37,8 +37,7 @@ window
 // Read game configuration
 
 /** Number of tiles in each group */
-const GROUPS = config["groups"];
-GROUPS.sort();
+const GROUPS = config["groups"].sort((a, b) => a - b);
 
 if (containsDulpicates(GROUPS)) {
   throw new Error("Groups contain duplicates");

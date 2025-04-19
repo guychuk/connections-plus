@@ -1,3 +1,5 @@
+import { showErrorScreen } from "../components/ui";
+
 /**
  * Get k random distinct numbers in [1, n].
  * @param {number} n Number of options.
@@ -94,3 +96,14 @@ export const makePositions = (rows, cols) => {
  */
 export const randomChoices = (arr, c) =>
   getRandomNums(arr.length, c).map((i) => arr[i - 1]);
+
+/**
+ * Throw an error if some values are null.
+ * @param {Array} values Array of values to check.
+ */
+export const assertNotNullOrUndefined = (values) => {
+  if (values.some((value) => value === null || value === undefined)) {
+    showErrorScreen();
+    return;
+  }
+};

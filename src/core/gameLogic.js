@@ -69,11 +69,9 @@ export const getNewTiles = async (client, groups, difficulty) => {
 
   const categoriesSet = new Set();
 
-  var success = false;
-
   var iterations = 0;
 
-  while (!success && iterations < 20) {
+  while (iterations < 20) {
     const tags = (await getTags(client, numTags)).map((tag) => tag.tag);
 
     let i = groups.length;
@@ -101,49 +99,51 @@ export const getNewTiles = async (client, groups, difficulty) => {
       }
     }
 
-    if (i === 0) {
-      success = true;
+    if (i > 0) {
+      iterations++;
+      continue;
     }
 
-    iterations++;
-  }
+    const categoriesNamesPromises = categories.map((category) =>
+      getCategoryName(client, category.cat_id)
+    );
 
-  if (!success) {
-    console.error("Failed to get categories after 20 iterations");
-    showErrorScreen();
-    return;
-  }
+    const categoriesNames = await Promise.all(categoriesNamesPromises);
 
-  const categoriesNamesPromises = categories.map((category) =>
-    getCategoryName(client, category.cat_id)
-  );
+    const fetchTermsPromises = groups.map((groupSize, index) =>
+      getTerms(client, categories[index].cat_id, groupSize).then((terms) => {
+        return terms.map((term) => term.term);
+      })
+    );
 
-  const categoriesNames = await Promise.all(categoriesNamesPromises);
+    const allTerms = await Promise.all(fetchTermsPromises);
+    console.log(allTerms.flat().sort());
 
-  const fetchTermsPromises = groups.map((groupSize, index) =>
-    getTerms(client, categories[index].cat_id, groupSize)
-  );
-
-  const allTerms = await Promise.all(fetchTermsPromises);
-
-  const tiles = new Set();
-
-  for (let i = 0; i < groups.length; i++) {
-    for (let j = 0; j < groups[i]; j++) {
-      tiles.add(
-        makeTile(
-          tiles.length, // id
-          allTerms[i][j].term, // term
-          categoriesNames[i], // category
-          groups[i], // groupSize
-          i, // groupIndex
-          null // button (not yet created)
-        )
-      );
+    if (new Set(allTerms.flat()).size !== allTerms.flat().length) {
+      console.log("Duplicate terms found, trying again");
+      iterations++;
+      continue;
     }
-  }
 
-  return tiles;
+    const tiles = new Set();
+
+    for (let i = 0; i < groups.length; i++) {
+      for (let j = 0; j < groups[i]; j++) {
+        tiles.add(
+          makeTile(
+            tiles.length, // id
+            allTerms[i][j], // term
+            categoriesNames[i], // category
+            groups[i], // groupSize
+            i, // groupIndex
+            null // button (not yet created)
+          )
+        );
+      }
+    }
+
+    return tiles;
+  }
 };
 
 /**
