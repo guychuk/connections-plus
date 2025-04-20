@@ -27,9 +27,7 @@ export const showErrorScreen = () => {
 
   // Show error screen
   const errorScreen = document.getElementById("error-screen");
-  if (errorScreen) {
-    errorScreen.style.display = "flex";
-  }
+  errorScreen.style.display = "flex";
 
   TOAST_ERROR.showToast();
 };
@@ -336,7 +334,8 @@ export const repositionTiles = (
         button = completedGroups[i].button;
 
         button.classList.add("tile");
-        button.classList.add(`completed-${i + 1}`);
+        button.classList.add(`group-${i + 1}`);
+        button.classList.add(`completed`);
 
         button.style.width = `${group * (tileSize.width + hgap) - hgap}px`;
         button.style.height = `${tileSize.height}px`;
@@ -509,4 +508,20 @@ export const updateTiles = (tiles, newTiles) => {
     tilesArray[i].button.className = "tile";
     tilesArray[i].button.disabled = false;
   }
+};
+
+/**
+ * Spin the emoji.
+ * @param {MouseEvent} event The event when the user clicks the tile.
+ */
+export const spin = (event) => {
+  const rootStyles = getComputedStyle(document.documentElement);
+  const spinDuration = rootStyles
+    .getPropertyValue("--animation-speed-spin")
+    .trim();
+
+  event.target.classList.add("spin");
+  setTimeout(() => {
+    event.target.classList.remove("spin");
+  }, parseFloat(spinDuration) * 1000);
 };

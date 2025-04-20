@@ -1,78 +1,17 @@
+/* ------------------------
+   BASE & TYPOGRAPHY
+------------------------ */
 /* Use Inter font from Google Fonts */
-
 :root {
   font-family: Inter, sans-serif;
   font-feature-settings: "liga" 1, "calt" 1; /* fix for Chrome */
-  --animation-speed-tile-movement: 1s;
-  --animation-speed-color-change: 0.5s;
-  --animation-speed-spin: 0.6s;
 }
+
 @supports (font-variation-settings: normal) {
   :root {
     font-family: InterVariable, sans-serif;
   }
 }
-
-/* Elements */
-
-#game-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: 100%;
-  gap: 20px;
-}
-
-#settings {
-  position: absolute; /* or 'fixed' if you want them to stay visible on scroll */
-  top: 20px;
-  right: 20px;
-  display: flex;
-  flex-direction: column; /* stack vertically */
-  gap: 10px; /* space between buttons */
-}
-
-#settings button {
-  background-color: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 8px 12px;
-  font-size: 36px;
-}
-
-#controls {
-  display: flex;
-  justify-content: center;
-  max-width: 70vw;
-}
-
-#board {
-  position: relative;
-  width: 70vw;
-  height: 70vh;
-  row-gap: 10px;
-  column-gap: 10px;
-}
-
-.toastify {
-  padding: 12px 20px;
-  display: inline-block;
-  box-shadow: 0 3px 6px -1px rgba(0, 0, 0, 0.12),
-    0 10px 36px -4px rgba(77, 96, 232, 0.3);
-  position: fixed;
-  opacity: 0;
-  transition: all var(--animation-speed-color-change)
-    cubic-bezier(0.215, 0.61, 0.355, 1);
-  cursor: pointer;
-  text-decoration: none;
-  max-width: calc(50% - 20px);
-  z-index: 2147483647;
-  font-family: Inter, sans-serif;
-}
-
-/* Light Theme */
 
 body {
   display: flex;
@@ -81,50 +20,242 @@ body {
   align-items: center;
   height: 100vh;
   margin: 0;
-  background-color: #f2f2f2;
+  background-color: var(--theme-bg);
   transition: background-color var(--animation-speed-color-change) ease;
 }
 
-#theme-toggle-button::before {
-  content: "🌙";
-  transition: color var(--animation-speed-color-change) ease;
+/* ------------------------
+   CORE VARIABLES
+------------------------ */
+:root {
+  /* Z-indexes */
+  --z-index-toggle-theme: 4; /* Highest - Always on top */
+  --z-index-settings-panel: 3;
+  --z-index-blur-overlay: 2;
+  --z-index-toast: 1;
+
+  /* Animation Speeds */
+  --animation-speed-tile-movement: 1s;
+  --animation-speed-color-change: 0.5s;
+  --animation-speed-blur: 0.3s;
+  --animation-speed-spin: 0.6s;
+  --animation-speed-settings-panel: 0.5s;
 }
 
-#header {
-  color: #393939;
-  font-family: Inter, sans-serif;
-  text-align: center;
-  transition: color var(--animation-speed-color-change) ease;
+/* ------------------------
+   THEME: LIGHT (DEFAULT)
+------------------------ */
+:root {
+  /* General UI */
+  --theme-bg: #f2f2f2;
+  --theme-text-color: #333333;
+  --theme-toggle-theme-emoji: "🌜";
+
+  /* Settings Panel */
+  --theme-settings-panel-bg: #ffffff;
+  --theme-settings-panel-text-color: #333333;
+  --theme-settings-panel-border: #cccccc;
+  --theme-settings-panel-header-bg: #f2f2f2;
+  --theme-settings-panel-header-text-color: #333333;
+
+  /* Error Screen */
+  --theme-error-screen-bg: #8b0000;
+  --theme-error-screen-text: #f0f0f0;
+
+  /* Game Controls */
+  --theme-game-controls-bg: #e0e0e0;
+  --theme-game-controls-text-color: #333333;
+  --theme-game-controls-border-color: #cccccc;
+  --theme-game-controls-bg-hover: #ebebeb;
+  --theme-game-controls-bg-active: #d0d0d0;
+  --theme-game-controls-bg-disabled: #f0f0f0;
+  --theme-game-controls-text-disabled: #aaaaaa;
+
+  /* Difficulty Button */
+  --theme-difficulty-bg-easy: #d4edda;
+  --theme-difficulty-bg-easy-hover: #c3e6cb;
+  --theme-difficulty-bg-easy-active: #a8d5b1;
+  --theme-difficulty-text-easy: #155724;
+  --theme-difficulty-bg-medium: #fff3cd;
+  --theme-difficulty-bg-medium-hover: #ffe8a1;
+  --theme-difficulty-bg-medium-active: #ffdd80;
+  --theme-difficulty-text-medium: #856404;
+  --theme-difficulty-bg-hard: #f8d7da;
+  --theme-difficulty-bg-hard-hover: #f1b0b7;
+  --theme-difficulty-bg-hard-active: #e07c84;
+  --theme-difficulty-text-hard: #721c24;
+
+  /* Game Tiles - Base */
+  --theme-tile-bg: #ffffff;
+  --theme-tile-text: #333333;
+  --theme-tile-border: #d9d9d9;
+  --theme-tile-bg-hover: #f0f0f0;
+  --theme-tile-bg-selected: #e0e0e0;
+  --theme-tile-text-selected: #bdbdbd;
+
+  /* Game Tiles - Completed Groups */
+  --theme-tile-bg-completed-1: #ffebee;
+  --theme-tile-text-completed-1: #c62828;
+  --theme-tile-border-completed-1: #ef9a9a;
+  --theme-tile-bg-completed-2: #f3e5f5;
+  --theme-tile-text-completed-2: #7b1fa2;
+  --theme-tile-border-completed-2: #ce93d8;
+  --theme-tile-bg-completed-3: #e3f2fd;
+  --theme-tile-text-completed-3: #1565c0;
+  --theme-tile-border-completed-3: #90caf9;
+  --theme-tile-bg-completed-4: #e8f5e9;
+  --theme-tile-text-completed-4: #2e7d32;
+  --theme-tile-border-completed-4: #a5d6a7;
+  --theme-tile-bg-completed-5: #fff8e1;
+  --theme-tile-text-completed-5: #ff8f00;
+  --theme-tile-border-completed-5: #ffe082;
+  --theme-tile-bg-completed-6: #e0f2f1;
+  --theme-tile-text-completed-6: #00796b;
+  --theme-tile-border-completed-6: #80cbc4;
+  --theme-tile-bg-completed-7: #fce4ec;
+  --theme-tile-text-completed-7: #c2185b;
+  --theme-tile-border-completed-7: #f48fb1;
+  --theme-tile-bg-completed-8: #e8eaf6;
+  --theme-tile-text-completed-8: #303f9f;
+  --theme-tile-border-completed-8: #9fa8da;
+
+  /* Toast Notifications */
+  --theme-toast-error-bg: #f8d7da;
+  --theme-toast-error-text: #721c24;
+  --theme-toast-error-border: #f5c6cb;
+  --theme-toast-error-shadow: rgba(114, 28, 36, 0.2);
+  --theme-toast-correct-bg: #d4edda;
+  --theme-toast-correct-text: #155724;
+  --theme-toast-correct-border: #c3e6cb;
+  --theme-toast-correct-shadow: rgba(21, 87, 36, 0.2);
+  --theme-toast-partial-bg: #d1ecf1;
+  --theme-toast-partial-text: #0c5460;
+  --theme-toast-partial-border: #bee5eb;
+  --theme-toast-partial-shadow: rgba(12, 84, 96, 0.2);
+  --theme-toast-duplicate-bg: #fff0d9;
+  --theme-toast-duplicate-text: #683c06;
+  --theme-toast-duplicate-border: #ffe0b2;
+  --theme-toast-duplicate-shadow: rgba(104, 60, 6, 0.2);
+  --theme-toast-invalid-choice-bg: #fff3cd;
+  --theme-toast-invalid-choice-text: #856404;
+  --theme-toast-invalid-choice-border: #ffeeba;
+  --theme-toast-invalid-choice-shadow: rgba(133, 100, 4, 0.2);
+  --theme-toast-winner-bg: #f3e8ff;
+  --theme-toast-winner-text: #4a0f66;
+  --theme-toast-winner-border: #d6b3ff;
+  --theme-toast-winner-shadow: rgba(74, 15, 102, 0.2);
 }
 
-#error-screen {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: 100%;
-  font-family: Inter, sans-serif;
-  background: #8b0000; /* Light Red */
-  color: #f0f0f0; /* Dark Text */
-  transition: background-color var(--animation-speed-color-change) ease;
+/* ------------------------
+   THEME: DARK
+------------------------ */
+body.dark-theme {
+  /* General UI */
+  --theme-bg: #393939;
+  --theme-text-color: #f2f2f2;
+  --theme-toggle-theme-emoji: "🌞";
+
+  /* Settings Panel */
+  --theme-settings-panel-bg: #1a1a1a;
+  --theme-settings-panel-text-color: #b0b0b0;
+  --theme-settings-panel-border: #333333;
+  --theme-settings-panel-header-bg: #262626;
+  --theme-settings-panel-header-text-color: #b0b0b0;
+
+  /* Error Screen */
+  --theme-error-screen-bg: #4b0000;
+
+  /* Game Controls */
+  --theme-game-controls-bg: #4d4d4d;
+  --theme-game-controls-text-color: #ffffff;
+  --theme-game-controls-border-color: #5a5a5a;
+  --theme-game-controls-bg-hover: #5a5a5a;
+  --theme-game-controls-bg-active: #383838;
+  --theme-game-controls-bg-disabled: #3a3a3a;
+  --theme-game-controls-text-disabled: #777777;
+
+  /* Difficulty Button */
+  --theme-difficulty-bg-easy: #1e462b;
+  --theme-difficulty-bg-easy-hover: #275f3a;
+  --theme-difficulty-bg-easy-active: #2f7645;
+  --theme-difficulty-text-easy: #d4edda;
+  --theme-difficulty-bg-medium: #5c4813;
+  --theme-difficulty-bg-medium-hover: #6e5719;
+  --theme-difficulty-bg-medium-active: #83691e;
+  --theme-difficulty-text-medium: #fff3cd;
+  --theme-difficulty-bg-hard: #5c1f26;
+  --theme-difficulty-bg-hard-hover: #722532;
+  --theme-difficulty-bg-hard-active: #8a2d3d;
+  --theme-difficulty-text-hard: #f8d7da;
+
+  /* Game Tiles - Base */
+  --theme-tile-bg: #2d2d2d;
+  --theme-tile-text: #f0f0f0;
+  --theme-tile-border: #525252;
+  --theme-tile-bg-hover: #444444;
+  --theme-tile-bg-selected: #1e1e1e;
+  --theme-tile-text-selected: #7a7a7a;
+
+  /* Game Tiles - Completed Groups */
+  --theme-tile-bg-completed-1: #5d1a1a;
+  --theme-tile-text-completed-1: #ef9a9a;
+  --theme-tile-border-completed-1: #9e2a2a;
+  --theme-tile-bg-completed-2: #4a1a64;
+  --theme-tile-text-completed-2: #d1a7e0;
+  --theme-tile-border-completed-2: #7d3c98;
+  --theme-tile-bg-completed-3: #193c5d;
+  --theme-tile-text-completed-3: #90caf9;
+  --theme-tile-border-completed-3: #2e6da4;
+  --theme-tile-bg-completed-4: #1e4620;
+  --theme-tile-text-completed-4: #a5d6a7;
+  --theme-tile-border-completed-4: #357a38;
+  --theme-tile-bg-completed-5: #5d4037;
+  --theme-tile-text-completed-5: #ffe082;
+  --theme-tile-border-completed-5: #8d6e63;
+  --theme-tile-bg-completed-6: #1a413f;
+  --theme-tile-text-completed-6: #80cbc4;
+  --theme-tile-border-completed-6: #26756f;
+  --theme-tile-bg-completed-7: #5c1b3c;
+  --theme-tile-text-completed-7: #f48fb1;
+  --theme-tile-border-completed-7: #913063;
+  --theme-tile-bg-completed-8: #1a2250;
+  --theme-tile-text-completed-8: #9fa8da;
+  --theme-tile-border-completed-8: #303f9f;
+
+  /* Toast Notifications */
+  --theme-toast-error-text: #f8dada;
+  --theme-toast-error-bg: #5c1f26;
+  --theme-toast-error-border: #8b2a32;
+  --theme-toast-error-shadow: rgba(0, 0, 0, 0.3);
+  --theme-toast-correct-text: #d4edda;
+  --theme-toast-correct-bg: #1e462b;
+  --theme-toast-correct-border: #2a6339;
+  --theme-toast-correct-shadow: rgba(0, 0, 0, 0.3);
+  --theme-toast-incorrect-text: #f8d7da;
+  --theme-toast-incorrect-bg: #5c1f26;
+  --theme-toast-incorrect-border: #8b2a32;
+  --theme-toast-incorrect-shadow: rgba(0, 0, 0, 0.3);
+  --theme-toast-partial-text: #d1ecf1;
+  --theme-toast-partial-bg: #1a4a54;
+  --theme-toast-partial-border: #276974;
+  --theme-toast-partial-shadow: rgba(0, 0, 0, 0.3);
+  --theme-toast-duplicate-text: #ffe0b2;
+  --theme-toast-duplicate-bg: #552f05;
+  --theme-toast-duplicate-border: #7d4607;
+  --theme-toast-duplicate-shadow: rgba(0, 0, 0, 0.3);
+  --theme-toast-invalid-choice-text: #fff3cd;
+  --theme-toast-invalid-choice-bg: #5c4813;
+  --theme-toast-invalid-choice-border: #856a1d;
+  --theme-toast-invalid-choice-shadow: rgba(0, 0, 0, 0.3);
+  --theme-toast-winner-text: #e9d8ff;
+  --theme-toast-winner-bg: #2b183a;
+  --theme-toast-winner-border: #7e4eb8;
+  --theme-toast-winner-shadow: rgba(0, 0, 0, 0.3);
 }
 
-#error-message {
-  font-size: 3rem;
-}
-
-#error-message-refresh {
-  font-size: 1rem;
-}
-
-#error-emoji {
-  font-size: 15rem; /* Set large size */
-  animation: pulse 1s infinite; /* Apply pulse animation */
-  margin-top: 10px;
-  cursor: pointer;
-}
-
+/* ------------------------
+   ANIMATIONS
+------------------------ */
 @keyframes pulse {
   0% {
     transform: scale(1);
@@ -146,22 +277,162 @@ body {
   }
 }
 
-#settings-button.spin,
-body.dark-theme #settings-button.spin {
+/* ------------------------
+   LAYOUT COMPONENTS
+------------------------ */
+#game-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  gap: 20px;
+}
+
+.game-header {
+  color: var(--theme-text-color);
+  font-family: Inter, sans-serif;
+  text-align: center;
+  transition: color var(--animation-speed-color-change) ease;
+}
+
+.utility-bar {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.utility-bar button {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 8px 12px;
+  font-size: 36px;
+  z-index: var(--z-index-toggle-theme);
+}
+
+.game-controls {
+  display: flex;
+  justify-content: center;
+  max-width: 70vw;
+}
+
+.game-board {
+  position: relative;
+  width: 70vw;
+  height: 70vh;
+  row-gap: 10px;
+  column-gap: 10px;
+}
+
+/* ------------------------
+   UI ELEMENTS
+------------------------ */
+#theme-toggle-button::before {
+  content: var(--theme-toggle-theme-emoji);
+}
+
+#settings-button.spin {
   animation: spin var(--animation-speed-spin) linear forwards;
 }
 
-#error-emoji.spin,
-body.dark-theme #error-emoji.spin {
+.blur-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  backdrop-filter: blur(0px);
+  transition: background-color var(--animation-speed-color-change) ease,
+    backdrop-filter var(--animation-speed-blur) ease;
+  z-index: var(--z-index-blur-overlay);
+  pointer-events: none; /* Permit click-through when not active */
+}
+
+.blurred {
+  backdrop-filter: blur(12px);
+  pointer-events: auto; /* Prohibit click-through when active */
+}
+
+.settings-panel {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.9);
+  opacity: 0;
+  background: var(--theme-settings-panel-bg);
+  color: var(--theme-settings-panel-text-color);
+  padding: 2rem;
+  border: 2px solid var(--theme-settings-panel-border);
+  border-radius: 12px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+  transition: opacity var(--animation-settings-panel) ease,
+    transform var(--animation-settings-panel) ease;
+  z-index: var(--z-index-settings-panel);
+  pointer-events: none;
+}
+
+.settings-panel.blurred {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+  pointer-events: auto;
+}
+
+.settings-panel h2 {
+  color: var(--theme-settings-panel-text-color);
+  font-family: Inter, sans-serif;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  transition: color var(--animation-speed-color-change) ease;
+}
+
+/* ------------------------
+   ERROR HANDLING
+------------------------ */
+.error-container {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  font-family: Inter, sans-serif;
+  background: var(--theme-error-screen-bg);
+  color: var(--theme-error-screen-text);
+  opacity: 1;
+  transition: background-color var(--animation-speed-color-change) ease,
+    opacity var(--animation-speed-color-change) ease,
+    max-height var(--animation-speed-color-change) ease;
+}
+
+#error-message {
+  font-size: 3rem;
+}
+
+#error-message-refresh {
+  font-size: 1rem;
+}
+
+#error-button {
+  font-family: Inter, sans-serif;
+  font-size: 15rem;
+  margin-top: 10px;
+  cursor: pointer;
+  animation: pulse 1s infinite;
+}
+
+#error-button.spin {
   animation: spin var(--animation-speed-spin) linear forwards;
 }
 
-body.dark-theme #error-screen {
-  background: #4b0000; /* Dark Red */
-  transition: background-color var(--animation-speed-color-change) ease;
-}
-
-#controls button {
+/* ------------------------
+   GAME CONTROLS
+------------------------ */
+.game-controls button {
   font-family: Inter, sans-serif;
   font-size: 1em;
   width: 7vw;
@@ -169,11 +440,11 @@ body.dark-theme #error-screen {
   overflow-wrap: break-word;
   white-space: normal;
   hyphens: auto;
-  color: #333333;
-  background-color: #e0e0e0;
+  color: var(--theme-game-controls-text-color);
+  background-color: var(--theme-game-controls-bg);
   padding: 5px 10px;
   margin: 3px;
-  border: 2px solid #cccccc;
+  border: 2px solid var(--theme-game-controls-border-color);
   border-radius: 7px;
   cursor: pointer;
   transition: background-color var(--animation-speed-color-change) ease,
@@ -181,60 +452,60 @@ body.dark-theme #error-screen {
     border var(--animation-speed-color-change) ease;
 }
 
-#controls button:hover {
-  background-color: #ebebeb;
-  transition: background-color var(--animation-speed-color-change) ease;
+.game-controls button:hover {
+  background-color: var(--theme-game-controls-bg-hover);
 }
 
-#controls button:active {
-  background-color: #d0d0d0;
-  transition: background-color var(--animation-speed-color-change) ease;
+.game-controls button:active {
+  background-color: var(--theme-game-controls-bg-active);
 }
 
-#controls button:disabled {
-  background-color: #f0f0f0;
-  color: #aaaaaa;
+.game-controls button:disabled {
+  background-color: var(--theme-game-controls-bg-disabled);
+  color: var(--theme-game-controls-text-disabled);
   cursor: not-allowed;
-  transition: background-color var(--animation-speed-color-change) ease,
-    color var(--animation-speed-color-change) ease;
 }
 
-#difficulty-button[data-difficulty="easy"]:not(:disabled) {
-  background-color: #d4edda;
-  color: #155724;
+/* Difficulty Button States */
+#difficulty-button[data-difficulty="easy"] {
+  background-color: var(--theme-difficulty-bg-easy);
+  color: var(--theme-difficulty-text-easy);
 }
 
-#difficulty-button[data-difficulty="medium"]:not(:disabled) {
-  background-color: #fff3cd;
-  color: #856404;
+#difficulty-button[data-difficulty="medium"] {
+  background-color: var(--theme-difficulty-bg-medium);
+  color: var(--theme-difficulty-text-medium);
 }
 
-#difficulty-button[data-difficulty="hard"]:not(:disabled) {
-  background-color: #f8d7da;
-  color: #721c24;
+#difficulty-button[data-difficulty="hard"] {
+  background-color: var(--theme-difficulty-bg-hard);
+  color: var(--theme-difficulty-text-hard);
 }
 
 #difficulty-button[data-difficulty="easy"]:hover:not(:disabled) {
-  background-color: #c3e6cb;
+  background-color: var(--theme-difficulty-bg-easy-hover);
 }
 #difficulty-button[data-difficulty="easy"]:active:not(:disabled) {
-  background-color: #a8d5b1;
+  background-color: var(--theme-difficulty-bg-easy-active);
 }
 
 #difficulty-button[data-difficulty="medium"]:hover:not(:disabled) {
-  background-color: #ffe8a1;
+  background-color: var(--theme-difficulty-bg-medium-hover);
 }
 #difficulty-button[data-difficulty="medium"]:active:not(:disabled) {
-  background-color: #ffdd80;
+  background-color: var(--theme-difficulty-bg-medium-active);
 }
 
 #difficulty-button[data-difficulty="hard"]:hover:not(:disabled) {
-  background-color: #f1b0b7;
+  background-color: var(--theme-difficulty-bg-hard-hover);
 }
 #difficulty-button[data-difficulty="hard"]:active:not(:disabled) {
-  background-color: #e07c84;
+  background-color: var(--theme-difficulty-bg-hard-active);
 }
 
+/* ------------------------
+   GAME TILES
+------------------------ */
 .tile {
   font-family: Inter, sans-serif;
   font-size: 1em;
@@ -242,11 +513,11 @@ body.dark-theme #error-screen {
   overflow-wrap: break-word;
   white-space: normal;
   hyphens: auto;
-  color: #333333;
-  background-color: #ffffff;
+  color: var(--theme-tile-text);
+  background-color: var(--theme-tile-bg);
   padding: 5px 10px;
   margin: 3px;
-  border: 2px solid #d9d9d9;
+  border: 2px solid var(--theme-tile-border);
   border-radius: 7px;
   cursor: pointer;
   transition: background-color var(--animation-speed-color-change) ease,
@@ -258,14 +529,14 @@ body.dark-theme #error-screen {
 }
 
 .tile:hover {
-  background-color: #f0f0f0;
+  background-color: var(--theme-tile-bg-hover);
   transition: background-color var(--animation-speed-color-change) ease;
 }
 
 .tile:active,
 .tile.tile.selected {
-  background-color: #e0e0e0;
-  border: 3px solid #bdbdbd;
+  background-color: var(--theme-tile-bg-selected);
+  border: 3px solid var(--theme-tile-text-selected);
   transition: background-color var(--animation-speed-color-change) ease,
     color var(--animation-speed-color-change) ease,
     border var(--animation-speed-color-change) ease,
@@ -282,10 +553,7 @@ body.dark-theme #error-screen {
   transition: opacity var(--animation-speed-color-change) ease;
 }
 
-.tile.completed-1 {
-  background-color: #ffebee;
-  border: 2px solid #ef9a9a;
-  color: #c62828;
+.tile.completed {
   transition: background-color var(--animation-speed-color-change) ease,
     color var(--animation-speed-color-change) ease,
     border var(--animation-speed-color-change) ease,
@@ -294,396 +562,73 @@ body.dark-theme #error-screen {
     opacity var(--animation-speed-color-change) ease;
 }
 
-.tile.completed-2 {
-  background-color: #f3e5f5;
-  border: 2px solid #ce93d8;
-  color: #7b1fa2;
-  transition: background-color var(--animation-speed-color-change) ease,
-    color var(--animation-speed-color-change) ease,
-    border var(--animation-speed-color-change) ease,
-    left var(--animation-speed-tile-movement) ease,
-    top var(--animation-speed-tile-movement) ease,
-    opacity var(--animation-speed-color-change) ease;
+/* Tile Group Color Schemes */
+.tile.group-1 {
+  background-color: var(--theme-tile-bg-completed-1);
+  border: 2px solid var(--theme-tile-border-completed-1);
+  color: var(--theme-tile-text-completed-1);
 }
 
-.tile.completed-3 {
-  background-color: #e3f2fd;
-  border: 2px solid #90caf9;
-  color: #1565c0;
-  transition: background-color var(--animation-speed-color-change) ease,
-    color var(--animation-speed-color-change) ease,
-    border var(--animation-speed-color-change) ease,
-    left var(--animation-speed-tile-movement) ease,
-    top var(--animation-speed-tile-movement) ease,
-    opacity var(--animation-speed-color-change) ease;
+.tile.group-2 {
+  background-color: var(--theme-tile-bg-completed-2);
+  border: 2px solid var(--theme-tile-border-completed-2);
+  color: var(--theme-tile-text-completed-2);
 }
 
-.tile.completed-4 {
-  background-color: #e8f5e9;
-  border: 2px solid #a5d6a7;
-  color: #2e7d32;
-  transition: background-color var(--animation-speed-color-change) ease,
-    color var(--animation-speed-color-change) ease,
-    border var(--animation-speed-color-change) ease,
-    left var(--animation-speed-tile-movement) ease,
-    top var(--animation-speed-tile-movement) ease,
-    opacity var(--animation-speed-color-change) ease;
+.tile.group-3 {
+  background-color: var(--theme-tile-bg-completed-3);
+  border: 2px solid var(--theme-tile-border-completed-3);
+  color: var(--theme-tile-text-completed-3);
 }
 
-.tile.completed-5 {
-  background-color: #fff8e1;
-  border: 2px solid #ffe082;
-  color: #ff8f00;
-  transition: background-color var(--animation-speed-color-change) ease,
-    color var(--animation-speed-color-change) ease,
-    border var(--animation-speed-color-change) ease,
-    left var(--animation-speed-tile-movement) ease,
-    top var(--animation-speed-tile-movement) ease,
-    opacity var(--animation-speed-color-change) ease;
+.tile.group-4 {
+  background-color: var(--theme-tile-bg-completed-4);
+  border: 2px solid var(--theme-tile-border-completed-4);
+  color: var(--theme-tile-text-completed-4);
 }
 
-.tile.completed-6 {
-  background-color: #e0f2f1;
-  border: 2px solid #80cbc4;
-  color: #00796b;
-  transition: background-color var(--animation-speed-color-change) ease,
-    color var(--animation-speed-color-change) ease,
-    border var(--animation-speed-color-change) ease,
-    left var(--animation-speed-tile-movement) ease,
-    top var(--animation-speed-tile-movement) ease,
-    opacity var(--animation-speed-color-change) ease;
+.tile.group-5 {
+  background-color: var(--theme-tile-bg-completed-5);
+  border: 2px solid var(--theme-tile-border-completed-5);
+  color: var(--theme-tile-text-completed-5);
 }
 
-.tile.completed-7 {
-  background-color: #fce4ec;
-  border: 2px solid #f48fb1;
-  color: #c2185b;
-  transition: background-color var(--animation-speed-color-change) ease,
-    color var(--animation-speed-color-change) ease,
-    border var(--animation-speed-color-change) ease,
-    left var(--animation-speed-tile-movement) ease,
-    top var(--animation-speed-tile-movement) ease,
-    opacity var(--animation-speed-color-change) ease;
+.tile.group-6 {
+  background-color: var(--theme-tile-bg-completed-6);
+  border: 2px solid var(--theme-tile-border-completed-6);
+  color: var(--theme-tile-text-completed-6);
 }
 
-.tile.completed-8 {
-  background-color: #e8eaf6;
-  border: 2px solid #9fa8da;
-  color: #303f9f;
-  transition: background-color var(--animation-speed-color-change) ease,
-    color var(--animation-speed-color-change) ease,
-    border var(--animation-speed-color-change) ease,
-    left var(--animation-speed-tile-movement) ease,
-    top var(--animation-speed-tile-movement) ease,
-    opacity var(--animation-speed-color-change) ease;
+.tile.group-7 {
+  background-color: var(--theme-tile-bg-completed-7);
+  border: 2px solid var(--theme-tile-border-completed-7);
+  color: var(--theme-tile-text-completed-7);
 }
 
-.toastify-error {
-  color: #721c24;
-  background-color: #f8d7da;
-  border-color: #f5c6cb;
-  box-shadow: 0 2px 8px rgba(114, 28, 36, 0.2);
+.tile.group-8 {
+  background-color: var(--theme-tile-bg-completed-8);
+  border: 2px solid var(--theme-tile-border-completed-8);
+  color: var(--theme-tile-text-completed-8);
 }
 
-.toastify-correct {
-  color: #155724;
-  background-color: #d4edda;
-  border-color: #c3e6cb;
-  box-shadow: 0 2px 8px rgba(21, 87, 36, 0.2);
+/* ------------------------
+   TOAST NOTIFICATIONS
+------------------------ */
+.toastify {
+  padding: 12px 20px;
+  display: inline-block;
+  box-shadow: 0 3px 6px -1px rgba(0, 0, 0, 0.12),
+    0 10px 36px -4px rgba(77, 96, 232, 0.3);
+  position: fixed;
+  opacity: 0;
+  transition: all var(--animation-speed-color-change)
+    cubic-bezier(0.215, 0.61, 0.355, 1);
+  cursor: pointer;
+  text-decoration: none;
+  max-width: calc(50% - 20px);
+  z-index: var(--z-index-toast);
+  font-family: Inter, sans-serif;
 }
-
-.toastify-incorrect {
-  color: #721c24;
-  background-color: #f8d7da;
-  border-color: #f5c6cb;
-  box-shadow: 0 2px 8px rgba(114, 28, 36, 0.2);
-}
-
-.toastify-partial {
-  color: #0c5460;
-  background-color: #d1ecf1;
-  border-color: #bee5eb;
-  box-shadow: 0 2px 8px rgba(12, 84, 96, 0.2);
-}
-
-.toastify-duplicate {
-  color: #683c06;
-  background-color: #fff0d9;
-  border-color: #ffe0b2;
-  box-shadow: 0 2px 8px rgba(104, 60, 6, 0.2);
-}
-
-.toastify-invalid-choice {
-  color: #856404;
-  background-color: #fff3cd;
-  border-color: #ffeeba;
-  box-shadow: 0 2px 8px rgba(133, 100, 4, 0.2);
-}
-
-.toastify-winner {
-  color: #4a0f66;
-  background-color: #f3e8ff;
-  border-color: #d6b3ff;
-  box-shadow: 0 2px 8px rgba(74, 15, 102, 0.2);
-}
-
-/* Dark Theme */
-
-body.dark-theme {
-  background-color: #393939;
-}
-
-body.dark-theme #theme-toggle-button::before {
-  content: "☀️";
-  transition: color var(--animation-speed-color-change) ease;
-}
-
-body.dark-theme #header {
-  color: #f2f2f2;
-}
-
-body.dark-theme #controls button {
-  color: #ffffff;
-  border: 2px solid #5a5a5a;
-  background-color: #4d4d4d;
-  transition: background-color var(--animation-speed-color-change) ease,
-    color var(--animation-speed-color-change) ease,
-    border var(--animation-speed-color-change) ease;
-}
-
-body.dark-theme #controls button:hover {
-  background-color: #5a5a5a;
-  transition: background-color var(--animation-speed-color-change) ease;
-}
-
-body.dark-theme #controls button:active {
-  background-color: #383838;
-  transition: background-color var(--animation-speed-color-change) ease;
-}
-
-body.dark-theme #controls button:disabled {
-  background-color: #3a3a3a;
-  color: #777777;
-  cursor: not-allowed;
-  transition: background-color var(--animation-speed-color-change) ease,
-    color var(--animation-speed-color-change) ease;
-}
-
-body.dark-theme #difficulty-button[data-difficulty="easy"]:not(:disabled) {
-  background-color: #1e462b;
-  color: #d4edda;
-}
-
-body.dark-theme #difficulty-button[data-difficulty="medium"]:not(:disabled) {
-  background-color: #5c4813;
-  color: #fff3cd;
-}
-
-body.dark-theme #difficulty-button[data-difficulty="hard"]:not(:disabled) {
-  background-color: #5c1f26;
-  color: #f8d7da;
-}
-
-body.dark-theme
-  #difficulty-button[data-difficulty="easy"]:hover:not(:disabled) {
-  background-color: #275f3a;
-}
-body.dark-theme
-  #difficulty-button[data-difficulty="easy"]:active:not(:disabled) {
-  background-color: #2f7645;
-}
-
-body.dark-theme
-  #difficulty-button[data-difficulty="medium"]:hover:not(:disabled) {
-  background-color: #6e5719;
-}
-body.dark-theme
-  #difficulty-button[data-difficulty="medium"]:active:not(:disabled) {
-  background-color: #83691e;
-}
-
-body.dark-theme
-  #difficulty-button[data-difficulty="hard"]:hover:not(:disabled) {
-  background-color: #722532;
-}
-body.dark-theme
-  #difficulty-button[data-difficulty="hard"]:active:not(:disabled) {
-  background-color: #8a2d3d;
-}
-
-body.dark-theme .tile {
-  color: #f0f0f0;
-  border: 2px solid #525252;
-  background-color: #2d2d2d;
-  transition: background-color var(--animation-speed-color-change) ease,
-    color var(--animation-speed-color-change) ease,
-    border var(--animation-speed-color-change) ease,
-    left var(--animation-speed-tile-movement) ease,
-    top var(--animation-speed-tile-movement) ease;
-}
-
-body.dark-theme .tile:hover {
-  background-color: #444444;
-  transition: background-color var(--animation-speed-color-change) ease;
-}
-
-body.dark-theme .tile:active,
-body.dark-theme .tile.selected {
-  background-color: #1e1e1e;
-  border: 3px solid #7a7a7a;
-  transition: background-color var(--animation-speed-color-change) ease,
-    color var(--animation-speed-color-change) ease,
-    border var(--animation-speed-color-change) ease,
-    left var(--animation-speed-tile-movement) ease,
-    top var(--animation-speed-tile-movement) ease;
-}
-
-body.dark-theme .tile.completed-1 {
-  background-color: #5d1a1a;
-  border: 2px solid #9e2a2a;
-  color: #ef9a9a;
-  transition: background-color var(--animation-speed-color-change) ease,
-    color var(--animation-speed-color-change) ease,
-    border var(--animation-speed-color-change) ease,
-    left var(--animation-speed-tile-movement) ease,
-    top var(--animation-speed-tile-movement) ease,
-    opacity var(--animation-speed-color-change) ease;
-}
-
-body.dark-theme .tile.completed-2 {
-  background-color: #4a1a64;
-  border: 2px solid #7d3c98;
-  color: #d1a7e0;
-  transition: background-color var(--animation-speed-color-change) ease,
-    color var(--animation-speed-color-change) ease,
-    border var(--animation-speed-color-change) ease,
-    left var(--animation-speed-tile-movement) ease,
-    top var(--animation-speed-tile-movement) ease,
-    opacity var(--animation-speed-color-change) ease;
-}
-
-body.dark-theme .tile.completed-3 {
-  background-color: #193c5d;
-  border: 2px solid #2e6da4;
-  color: #90caf9;
-  transition: background-color var(--animation-speed-color-change) ease,
-    color var(--animation-speed-color-change) ease,
-    border var(--animation-speed-color-change) ease,
-    left var(--animation-speed-tile-movement) ease,
-    top var(--animation-speed-tile-movement) ease,
-    opacity var(--animation-speed-color-change) ease;
-}
-
-body.dark-theme .tile.completed-4 {
-  background-color: #1e4620;
-  border: 2px solid #357a38;
-  color: #a5d6a7;
-  transition: background-color var(--animation-speed-color-change) ease,
-    color var(--animation-speed-color-change) ease,
-    border var(--animation-speed-color-change) ease,
-    left var(--animation-speed-tile-movement) ease,
-    top var(--animation-speed-tile-movement) ease,
-    opacity var(--animation-speed-color-change) ease;
-}
-
-body.dark-theme .tile.completed-5 {
-  background-color: #5d4037;
-  border: 2px solid #8d6e63;
-  color: #ffe082;
-  transition: background-color var(--animation-speed-color-change) ease,
-    color var(--animation-speed-color-change) ease,
-    border var(--animation-speed-color-change) ease,
-    left var(--animation-speed-tile-movement) ease,
-    top var(--animation-speed-tile-movement) ease,
-    opacity var(--animation-speed-color-change) ease;
-}
-
-body.dark-theme .tile.completed-6 {
-  background-color: #1a413f;
-  border: 2px solid #26756f;
-  color: #80cbc4;
-  transition: background-color var(--animation-speed-color-change) ease,
-    color var(--animation-speed-color-change) ease,
-    border var(--animation-speed-color-change) ease,
-    left var(--animation-speed-tile-movement) ease,
-    top var(--animation-speed-tile-movement) ease,
-    opacity var(--animation-speed-color-change) ease;
-}
-
-body.dark-theme .tile.completed-7 {
-  background-color: #5c1b3c;
-  border: 2px solid #913063;
-  color: #f48fb1;
-  transition: background-color var(--animation-speed-color-change) ease,
-    color var(--animation-speed-color-change) ease,
-    border var(--animation-speed-color-change) ease,
-    left var(--animation-speed-tile-movement) ease,
-    top var(--animation-speed-tile-movement) ease,
-    opacity var(--animation-speed-color-change) ease;
-}
-
-body.dark-theme .tile.completed-8 {
-  background-color: #1a2250;
-  border: 2px solid #303f9f;
-  color: #9fa8da;
-  transition: background-color var(--animation-speed-color-change) ease,
-    color var(--animation-speed-color-change) ease,
-    border var(--animation-speed-color-change) ease,
-    left var(--animation-speed-tile-movement) ease,
-    top var(--animation-speed-tile-movement) ease,
-    opacity var(--animation-speed-color-change) ease;
-}
-
-body.dark-theme .toastify-error {
-  color: #f8dada;
-  background-color: #5c1f26;
-  border-color: #8b2a32;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
-
-body.dark-theme .toastify-correct {
-  color: #d4edda;
-  background-color: #1e462b;
-  border-color: #2a6339;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
-
-body.dark-theme .toastify-incorrect {
-  color: #f8d7da;
-  background-color: #5c1f26;
-  border-color: #8b2a32;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
-
-body.dark-theme .toastify-partial {
-  color: #d1ecf1;
-  background-color: #1a4a54;
-  border-color: #276974;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
-
-body.dark-theme .toastify-duplicate {
-  color: #ffe0b2;
-  background-color: #552f05;
-  border-color: #7d4607;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
-
-body.dark-theme .toastify-invalid-choice {
-  color: #fff3cd;
-  background-color: #5c4813;
-  border-color: #856a1d;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
-
-body.dark-theme .toastify-winner {
-  color: #e9d8ff;
-  background-color: #2b183a;
-  border-color: #7e4eb8;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
-
-/* Other Toast Styles (from Toastify) */
 
 .toastify.on {
   opacity: 1;
@@ -736,7 +681,59 @@ body.dark-theme .toastify-winner {
   max-width: -moz-fit-content;
 }
 
-/* Mobile */
+/* Toast type styles */
+.toastify-error {
+  color: var(--theme-toast-error-text);
+  background-color: var(--theme-toast-error-bg);
+  border-color: var(--theme-toast-error-border);
+  box-shadow: 0 2px 8px var(--theme-toast-error-shadow);
+}
+
+.toastify-correct {
+  color: var(--theme-toast-correct-text);
+  background-color: var(--theme-toast-correct-bg);
+  border-color: var(--theme-toast-correct-border);
+  box-shadow: 0 2px 8px var(--theme-toast-correct-shadow);
+}
+
+.toastify-incorrect {
+  color: var(--theme-toast-error-text);
+  background-color: var(--theme-toast-error-bg);
+  border-color: var(--theme-toast-error-border);
+  box-shadow: 0 2px 8px var(--theme-toast-error-shadow);
+}
+
+.toastify-partial {
+  color: var(--theme-toast-partial-text);
+  background-color: var(--theme-toast-partial-bg);
+  border-color: var(--theme-toast-partial-border);
+  box-shadow: 0 2px 8px var(--theme-toast-partial-shadow);
+}
+
+.toastify-duplicate {
+  color: var(--theme-toast-duplicate-text);
+  background-color: var(--theme-toast-duplicate-bg);
+  border-color: var(--theme-toast-duplicate-border);
+  box-shadow: 0 2px 8px var(--theme-toast-duplicate-shadow);
+}
+
+.toastify-invalid-choice {
+  color: var(--theme-toast-invalid-choice-text);
+  background-color: var(--theme-toast-invalid-choice-bg);
+  border-color: var(--theme-toast-invalid-choice-border);
+  box-shadow: 0 2px 8px var(--theme-toast-invalid-choice-shadow);
+}
+
+.toastify-winner {
+  color: var(--theme-toast-winner-text);
+  background-color: var(--theme-toast-winner-bg);
+  border-color: var(--theme-toast-winner-border);
+  box-shadow: 0 2px 8px var(--theme-toast-winner-shadow);
+}
+
+/* ------------------------
+   RESPONSIVE / MOBILE
+------------------------ */
 @media only screen and (max-width: 768px) {
   #theme-toggle-button {
     font-size: 24px;
@@ -753,7 +750,7 @@ body.dark-theme .toastify-winner {
     width: 18%;
   }
 
-  #board {
+  .game-board {
     width: 90vw;
     height: 50vh;
   }

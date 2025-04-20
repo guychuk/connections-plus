@@ -10,7 +10,12 @@ import { containsDulpicates } from "./core/utils";
 import config from "./config/config.json";
 import { createClient } from "@supabase/supabase-js";
 import { initializeGame, resetGame, resetGameState } from "./core/gameLogic";
-import { clickSubmit, clickDifficulty } from "./events/events";
+import {
+  clickSubmit,
+  clickDifficulty,
+  clickSettings,
+  clickError,
+} from "./events/events";
 
 // Supabase connection
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
@@ -33,6 +38,14 @@ window
   .addEventListener("change", () => {
     setThemeBasedOnPreference();
   });
+
+// Set the spin functionality
+
+const errorEmojiButton = document.getElementById("error-button");
+const settingsButton = document.getElementById("settings-button");
+
+errorEmojiButton.addEventListener("click", clickError);
+settingsButton.addEventListener("click", clickSettings);
 
 // Read game configuration
 

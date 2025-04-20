@@ -4,6 +4,7 @@ import {
   showErrorScreen,
   win,
   getDifficultyButtonText,
+  spin,
 } from "../components/ui";
 import { processNewCompletedGroup } from "../core/gameLogic";
 
@@ -63,7 +64,8 @@ export const clickSubmit = (
       remainngTiles.delete(tile);
       tile.button.classList.remove("selected");
       tile.button.classList.add("hidden");
-      tile.button.classList.add(`completed-${groupIndex + 1}`);
+      tile.button.classList.add(`group-${groupIndex + 1}`);
+      tile.button.classList.add(`completed`);
       tile.button.disabled = true;
     }
 
@@ -143,4 +145,31 @@ export const clickNewGame = async (
       }, 500);
     }
   }
+};
+
+export const clickSettings = (event) => {
+  spin(event);
+
+  // const settingsButton = event.currentTarget;
+
+  const settingsPanel = document.getElementById("settings-panel");
+
+  const blurOverlay = document.getElementById("blur-overlay");
+
+  blurOverlay.classList.toggle("blurred");
+
+  settingsPanel.classList.toggle("blurred");
+};
+
+export const clickError = (event) => {
+  const rootStyles = getComputedStyle(document.documentElement);
+  const spinDuration = rootStyles
+    .getPropertyValue("--animation-speed-spin")
+    .trim();
+
+  spin(event);
+
+  setTimeout(() => {
+    location.reload();
+  }, parseFloat(spinDuration) * 1000);
 };

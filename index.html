@@ -5,13 +5,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+    <!-- Fonts -->
     <link rel="preconnect" href="https://rsms.me/" />
     <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
 
+    <!-- Styles -->
     <link rel="stylesheet" href="./src/styles/style.css" />
 
-    <title>Connections+</title>
-
+    <!-- Favicon -->
     <link
       rel="icon"
       type="image/png"
@@ -19,50 +20,101 @@
       sizes="16x16"
     />
 
+    <title>Connections+</title>
+  </head>
+
+  <body>
+    <header>
+      <div class="utility-bar">
+        <button
+          id="theme-toggle-button"
+          aria-label="Toggle light/dark modes"
+          title="Toggle light/dark modes"
+        ></button>
+
+        <button
+          id="settings-button"
+          aria-label="Open settings"
+          title="Open settings"
+        >
+          ⚙️
+        </button>
+      </div>
+    </header>
+
+    <main id="game-container">
+      <div class="game-header">
+        <h1 id="title">Connections+</h1>
+        <p id="subtitle"></p>
+      </div>
+
+      <div id="board" class="game-board" aria-label="Game board"></div>
+
+      <div class="game-controls">
+        <button
+          id="new-game-button"
+          aria-label="Start a new game"
+          title="Start a new game"
+        >
+          New Game 🎮
+        </button>
+
+        <button
+          id="deselect-all-button"
+          aria-label="Deselect all tiles"
+          title="Deselect all tiles"
+        >
+          Deselect All 🧹
+        </button>
+
+        <button
+          id="shuffle-button"
+          aria-label="Shuffle the tiles"
+          title="Shuffle the tiles"
+        >
+          Shuffle 🎲
+        </button>
+
+        <button
+          id="submit-button"
+          aria-label="Submit your selection"
+          title="Submit your selection"
+        >
+          Submit ✔️
+        </button>
+
+        <button
+          id="difficulty-button"
+          aria-label="Change difficulty level"
+          title="Change difficulty level"
+        ></button>
+      </div>
+    </main>
+
+    <div id="error-screen" class="error-container">
+      <p id="error-message">An unexpected error occurred.</p>
+      <p id="error-button" aria-label="Refresh" title="Refresh">🫣</p>
+      <p id="error-message-refresh">Click the emoji to refresh</p>
+    </div>
+
+    <div id="blur-overlay" class="blur-overlay"></div>
+
+    <div id="settings-panel" class="settings-panel">
+      <h2>Settings</h2>
+      <div class="settings-group">
+        <label for="layout">Layout:</label>
+        <select id="layout" aria-label="Select layout style">
+          <option value="compact">Compact</option>
+          <option value="spacious">Spacious</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Scripts -->
     <script type="module" src="./src/main.js"></script>
     <script
       type="text/javascript"
       src="https://cdn.jsdelivr.net/npm/toastify-js"
     ></script>
-  </head>
-
-  <body>
-    <div id="game-container">
-      <div id="header">
-        <h1 id="title">Connections+</h1>
-        <p id="subtitle"></p>
-      </div>
-      <div id="board"></div>
-      <div id="controls">
-        <button id="new-game-button">New Game 🎮</button>
-        <button id="deselect-all-button">Deselect All 🧹</button>
-        <button id="shuffle-button">Shuffle 🎲</button>
-        <button id="submit-button">Submit ✔️</button>
-        <button id="difficulty-button"></button>
-      </div>
-    </div>
-    <div id="error-screen" style="display: none">
-      <p id="error-message">An unexpected error occurred.</p>
-      <p id="error-emoji">🫣</p>
-      <p id="error-message-refresh">Click the emoji to refresh</p>
-    </div>
-    <div id="settings">
-      <button id="theme-toggle-button" title="toggle light/dark modes"></button>
-      <button id="settings-button" title="toggle light/dark modes">⚙️</button>
-    </div>
-    <script>
-      const errorEmojiButton = document.getElementById("error-emoji");
-      const settingsButton = document.getElementById("settings-button");
-
-      const spin = (event) => {
-        event.target.classList.add("spin");
-        setTimeout(() => {
-          event.target.classList.remove("spin");
-        }, 600);
-      };
-
-      errorEmojiButton.addEventListener("click", spin);
-      settingsButton.addEventListener("click", spin);
-    </script>
   </body>
 </html>
