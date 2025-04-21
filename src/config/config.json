@@ -1,5 +1,5 @@
 {
-  "groups": [1, 2, 3, 4],
+  "groups": [1, 2, 3, 4, 5],
   "toastsDuration": 2000,
   "confettiDuration": 1500,
   "layout": "compact"
