@@ -5,3 +5,4 @@ data/*
 !data/populate_db.py
 dist/
 icons.pptx
+README.md

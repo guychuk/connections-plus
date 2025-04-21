@@ -588,17 +588,16 @@ export function setThemeBasedOnPreference() {
  * @param {Array} completedGroups The completed groups array.
  */
 export function clearBanners(completedGroups) {
-  completedGroups
-    .filter((group) => group.banner)
-    .map((group) => group.banner)
-    .forEach((banner) => {
-      banner.classList.add("hidden");
+  for (const group of completedGroups) {
+    if (group.banner) {
+      group.banner.classList.add("hidden");
 
       setTimeout(() => {
-        banner.remove();
-        banner = null;
+        group.banner.remove();
+        group.banner = null;
       }, 500);
-    });
+    }
+  }
 }
 
 /**
