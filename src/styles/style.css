@@ -57,6 +57,7 @@ body {
   --theme-settings-panel-border: #cccccc;
   --theme-settings-panel-header-bg: #f2f2f2;
   --theme-settings-panel-header-text-color: #333333;
+  --theme-settings-panel-box-shadow: rgba(0, 0, 0, 0.1);
 
   /* Error Screen */
   --theme-error-screen-bg: #8b0000;
@@ -161,6 +162,7 @@ body.dark-theme {
   --theme-settings-panel-border: #333333;
   --theme-settings-panel-header-bg: #262626;
   --theme-settings-panel-header-text-color: #b0b0b0;
+  --theme-settings-panel-box-shadow: rgba(0, 0, 0, 0.4);
 
   /* Error Screen */
   --theme-error-screen-bg: #4b0000;
@@ -358,6 +360,10 @@ body.dark-theme {
   pointer-events: auto; /* Prohibit click-through when active */
 }
 
+/* ------------------------
+   SETTINGS PANEL
+------------------------ */
+
 .settings-panel {
   position: fixed;
   top: 50%;
@@ -366,12 +372,16 @@ body.dark-theme {
   opacity: 0;
   background: var(--theme-settings-panel-bg);
   color: var(--theme-settings-panel-text-color);
+  font-family: Inter, sans-serif;
   padding: 2rem;
   border: 2px solid var(--theme-settings-panel-border);
   border-radius: 12px;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 20px var(--theme-settings-panel-box-shadow);
   transition: opacity var(--animation-settings-panel) ease,
-    transform var(--animation-settings-panel) ease;
+    transform var(--animation-settings-panel) ease,
+    background-color var(--animation-speed-color-change) ease,
+    color var(--animation-speed-color-change) ease,
+    border var(--animation-speed-color-change) ease;
   z-index: var(--z-index-settings-panel);
   pointer-events: none;
 }
@@ -383,11 +393,25 @@ body.dark-theme {
 }
 
 .settings-panel h2 {
-  color: var(--theme-settings-panel-text-color);
-  font-family: Inter, sans-serif;
   font-size: 1.5rem;
   margin-bottom: 1rem;
-  transition: color var(--animation-speed-color-change) ease;
+}
+
+.settings-panel label {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.settings-panel select {
+  font-size: 1rem;
+  padding: 0.5rem;
+  border: 1px solid var(--theme-settings-panel-border);
+  border-radius: 4px;
+  background-color: var(--theme-settings-panel-bg);
+  color: var(--theme-settings-panel-text-color);
+  transition: border-color var(--animation-speed-color-change) ease,
+    background-color var(--animation-speed-color-change) ease,
+    color var(--animation-speed-color-change) ease;
 }
 
 /* ------------------------

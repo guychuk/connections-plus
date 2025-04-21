@@ -11,6 +11,8 @@ import {
   shuffleBoard,
   updateTiles,
   showErrorScreen,
+  getLayout,
+  drawBoard,
 } from "../components/ui";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { TOAST_WINNER } from "../components/toasts";
@@ -151,7 +153,6 @@ export const getNewTiles = async (client, groups, difficulty) => {
  * @param {HTMLButtonElement} difficultyButton The difficulty button element.
  * @param {Array} groups An array of group sizes.
  * @param {HTMLCanvasElement} board The board element.
- * @param {string} layout The layout of the board ("compact" or "spacious").
  * @param {number} hgap The horizontal gap between tiles.
  * @param {number} vgap The vertical gap between tiles.
  * @returns {Object} An object containing the tiles set, selected tiles set, positions array and tile size object.
@@ -161,84 +162,91 @@ export const initializeGame = async (
   difficultyButton,
   groups,
   board,
-  layout,
   hgap,
   vgap
 ) => {
+  // Get board grid layout
   const rows = groups.length;
   const cols = groups[groups.length - 1];
 
   const tileSize = calculateTileSize(board, rows, cols, hgap, vgap);
+
   const positions = makePositions(rows, cols);
+
   const selectedTiles = new Set();
+
+  const previousSubmissions = new Set();
+
+  const completedGroups = Array.from({ length: groups.length }, () => ({
+    tiles: [],
+    banner: null,
+  }));
 
   const difficulty = difficultyButton.dataset.difficulty;
 
-  const tiles = await getNewTiles(client, groups, difficulty);
+  const allTiles = await getNewTiles(client, groups, difficulty);
 
   createButtons(
     board,
     positions,
-    tiles,
+    allTiles,
     tileSize,
     hgap,
     vgap,
-    selectedTiles,
-    groups[groups.length - 1]
+    selectedTiles, // ref
+    cols // max selections
   );
 
-  shuffleBoard(tiles, positions, cols, tileSize, hgap, vgap, layout);
+  shuffleBoard(allTiles, positions, getLayout());
 
-  return { tiles, selectedTiles, positions, tileSize };
+  return {
+    allTiles,
+    selectedTiles,
+    previousSubmissions,
+    completedGroups,
+    positions,
+    tileSize,
+  };
 };
 
-/**
- * Reset the game board with new tiles.
- * @param {SupabaseClient} SupabaseClient The Supabase client.
- * @param {boolean} afterWin True if the game was won, false otherwise.
- * @param {Array} groups An array of group sizes.
- * @param {Set} tiles The set of tiles.
- * @param {Object} tileSize An object containing the height and width of the tile.
- * @param {string} layout The layout of the board ("compact" or "spacious").
- * @param {number} hgap The horizontal gap between tiles.
- * @param {number} vgap The vertical gap between tiles.
- * @returns {Array} An array of positions for the tiles.
- */
 export const resetGame = async (
   SupabaseClient,
   difficultyButton,
   afterWin,
   groups,
   tiles,
-  tileSize,
-  layout,
-  hgap,
-  vgap
+  previousSubmissions,
+  selectedTiles,
+  completedGroups,
+  positions
 ) => {
   if (afterWin) {
     TOAST_WINNER.hideToast();
   }
 
+  previousSubmissions.clear();
+  selectedTiles.clear();
+
+  for (let i = 0; i < completedGroups.length; i++) {
+    completedGroups[i].tiles.length = 0;
+  }
+
+  const layout = getLayout();
+
   const difficulty = difficultyButton.dataset.difficulty;
 
   const newTiles = await getNewTiles(SupabaseClient, groups, difficulty);
 
-  const positions = makePositions(groups.length, groups[groups.length - 1]);
+  positions.length = 0;
+
+  const rows = groups.length;
+
+  const cols = groups[rows - 1];
+
+  positions.push(...makePositions(rows, cols));
 
   // Keep the same tiles set as before, but replace the contents
   updateTiles(tiles, newTiles);
-
-  shuffleBoard(
-    tiles,
-    positions,
-    groups[groups.length - 1],
-    tileSize,
-    hgap,
-    vgap,
-    layout
-  );
-
-  return positions;
 };
 
 /**
@@ -256,19 +264,4 @@ export const processNewCompletedGroup = (selectedTiles, groups, positions) => {
   const rows = positions.length / cols - 1;
 
   return makePositions(rows, cols);
-};
-
-/**
- * Reset the game state.
- * @param {Set} prevSub The set of previously selected combos.
- * @param {Set} selected The set of selected tiles.
- * @param {Array} completed An array of completed groups.
- */
-export const resetGameState = (prevSub, selected, completed) => {
-  prevSub.clear();
-  selected.clear();
-
-  for (let i = 0; i < completed.length; i++) {
-    completed[i].tiles.length = 0;
-  }
 };

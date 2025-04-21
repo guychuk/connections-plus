@@ -99,58 +99,204 @@ const getPositionOnCanvasCentered = (
 };
 
 /**
- * Shuffles the positions of the tiles on the board.
- * @param {Set} tiles A set of tile objects.
- * @param {Array} positions An array of positions to shuffle.
- * @param {Object} tileSize An object containing the height and width of the tile.
- * @param {number} hgap The horizontal gap between tiles.
- * @param {number} vgap The vertical gap between tiles.
- * @param {string} layout The layout of the board ("compact" or "spacious").
+ * Gets the layout from local storage, or returns the default layout if no value is stored.
+ * @returns {string} The layout from local storage, or the default if none is stored.
  */
-export const shuffleBoard = (
-  tiles,
-  positions,
-  columns,
+export const getLayout = () => {
+  return localStorage.getItem("layout");
+};
+
+/**
+ * Sets the layout of the game in local storage and updates the layout select element.
+ * @param {string} layout The layout to set, either "compact" or "spacious".
+ * @returns {string} The new layout.
+ */
+export const setLayout = (layout) => {
+  localStorage.setItem("layout", layout);
+
+  const select = document.getElementById("select-layout");
+
+  select.value = layout;
+
+  return getLayout();
+};
+
+export const drawBanners = (
+  board,
+  completedGroups,
   tileSize,
   hgap,
   vgap,
+  rows,
+  cols
+) => {
+  let currentRow = rows - 1;
+
+  for (let i = rows - 1; i >= 0; i--) {
+    const group = completedGroups[i];
+    const tiles = group.tiles;
+    const groupSize = tiles.length;
+    let banner = group.banner;
+
+    if (groupSize > 0) {
+      const category = tiles[0].category;
+      const terms = [];
+
+      // Move the group tiles to the correct position
+      tiles.forEach((tile, column) => {
+        terms.push(tile.term);
+
+        const { x, y } = getPositionOnCanvasCentered(
+          { row: currentRow, col: column },
+          groupSize,
+          cols,
+          tileSize,
+          hgap,
+          vgap
+        );
+
+        tile.button.style.left = `${x}px`;
+        tile.button.style.top = `${y}px`;
+      });
+
+      // Draw the banner
+      const { x, y } = getPositionOnCanvasCentered(
+        { row: currentRow, col: 0 },
+        groupSize,
+        cols,
+        tileSize,
+        hgap,
+        vgap
+      );
+
+      if (banner) {
+        // Update the banner's position
+
+        banner.style.left = `${x}px`;
+        banner.style.top = `${y}px`;
+      } else {
+        // Create the banner
+
+        banner = document.createElement("button");
+
+        banner.classList.add("tile");
+        banner.classList.add(`group-${i + 1}`);
+        banner.classList.add(`completed`);
+
+        banner.style.width = `${groupSize * (tileSize.width + hgap) - hgap}px`;
+        banner.style.height = `${tileSize.height}px`;
+
+        banner.style.position = "absolute";
+        banner.style.left = `${x}px`;
+        banner.style.top = `${y}px`;
+
+        banner.innerHTML = `<strong>${category}</strong><br>${terms.join(
+          ", "
+        )}`;
+
+        board.appendChild(banner);
+        group.banner = banner;
+      }
+
+      currentRow--;
+    }
+  }
+};
+
+export const drawTiles = (
+  positions,
+  remainingTiles,
+  tileSize,
+  hgap,
+  vgap,
+  rows,
+  cols,
   layout
 ) => {
+  if (layout !== "spacious" && layout !== "compact") {
+    console.error("Layout must be either 'spacious' or 'compact'");
+    showErrorScreen();
+  }
+
+  const remainder = remainingTiles.size % cols;
   let i = 0;
-  const remainder = tiles.size % columns;
-  const lastRow = Math.floor(tiles.size / columns) - (remainder > 0 ? 0 : 1);
-  const compact = layout === "compact";
+
+  for (const tile of remainingTiles) {
+    const button = tile.button;
+    const { row, col } = positions[i];
+    let posXY = null;
+
+    if (layout === "compact" && remainder > 0 && row === rows) {
+      posXY = getPositionOnCanvasCentered(
+        { row, col },
+        remainder,
+        cols,
+        tileSize,
+        hgap,
+        vgap
+      );
+    } else {
+      posXY = getPositionOnCanvas({ row, col }, tileSize, hgap, vgap);
+    }
+
+    button.style.left = `${posXY.x}px`;
+    button.style.top = `${posXY.y}px`;
+
+    i++;
+  }
+};
+
+export const drawBoard = (
+  board,
+  positions,
+  remainingTiles,
+  completedGroups,
+  tileSize,
+  hgap,
+  vgap,
+  rows,
+  cols
+) => {
+  const layout = getLayout();
 
   if (layout !== "spacious" && layout !== "compact") {
     console.error("Layout must be either 'spacious' or 'compact'");
     showErrorScreen();
   }
 
-  if (compact) {
+  // Draw the banners
+  drawBanners(board, completedGroups, tileSize, hgap, vgap, rows, cols);
+
+  // Draw the remaining tiles
+  drawTiles(
+    positions,
+    remainingTiles,
+    tileSize,
+    hgap,
+    vgap,
+    rows,
+    cols,
+    layout
+  );
+};
+
+/**
+ * Shuffles the positions of the tiles on the board.
+ * @param {Set} tiles A set of tile objects.
+ * @param {Array} positions An array of positions to shuffle.
+ */
+export const shuffleBoard = (tiles, positions) => {
+  const layout = getLayout();
+
+  if (layout !== "spacious" && layout !== "compact") {
+    console.error("Layout must be either 'spacious' or 'compact'");
+    showErrorScreen();
+  }
+
+  if (layout === "compact") {
     shuffleArray(positions, tiles.size);
   } else {
     shuffleArray(positions);
-  }
-
-  for (let tile of tiles) {
-    let position = null;
-
-    if (compact && remainder > 0 && positions[i].row === lastRow) {
-      position = getPositionOnCanvasCentered(
-        positions[i],
-        remainder,
-        columns,
-        tileSize,
-        hgap,
-        vgap
-      );
-    } else {
-      position = getPositionOnCanvas(positions[i], tileSize, hgap, vgap);
-    }
-
-    tile.button.style.left = `${position.x}px`;
-    tile.button.style.top = `${position.y}px`;
-    i++;
   }
 };
 
@@ -176,17 +322,6 @@ export const createButtons = (
   maxSelections
 ) => {
   let i = 0;
-
-  assertNotNullOrUndefined([
-    board,
-    positions,
-    tiles,
-    tileSize,
-    hgap,
-    vgap,
-    selectedTiles,
-    maxSelections,
-  ]);
 
   for (const tile of tiles) {
     const button = document.createElement("button");
@@ -260,103 +395,6 @@ export const submitToast = (selectedTiles, previousSubmissions, groups) => {
   }
 
   return { toast, newlyCompletedGroup };
-};
-
-/**
- * Reposition the tiles on the board.
- * @param {HTMLCanvasElement} board The board element containing the tiles.
- * @param {string} layout The layout of the board ("compact" or "spacious").
- * @param {Set} remainngTiles The set of remaining tiles.
- * @param {Array} completedGroups An array of completed groups.
- * @param {Array} groups An array of group sizes in the game, sorted.
- * @param {Array} positions An array of positions for the tiles.
- * @param {Object} tileSize An object containing the height and width of the tile.
- * @param {number} hgap The horizontal gap between tiles.
- * @param {number} vgap The vertical gap between tiles.
- */
-export const repositionTiles = (
-  board,
-  layout,
-  remainngTiles,
-  completedGroups,
-  groups,
-  positions,
-  tileSize,
-  hgap,
-  vgap
-) => {
-  // Move the completed ones down
-
-  const rows = groups.length;
-  const cols = groups[groups.length - 1];
-
-  let row = rows - 1;
-
-  // Reverse order so the larger groups are drawn first, at the bottom
-  for (let i = rows - 1; i >= 0; i--) {
-    const tiles = completedGroups[i].tiles;
-    const group = tiles.length;
-
-    let button = completedGroups[i].button;
-
-    // The player completed this group
-    if (group > 0) {
-      const categoty = tiles[0].category;
-      const terms = [];
-
-      for (let col = 0; col < group; col++) {
-        const { x, y } = getPositionOnCanvasCentered(
-          { row, col },
-          group,
-          cols,
-          tileSize,
-          hgap,
-          vgap
-        );
-
-        tiles[col].button.style.left = `${x}px`;
-        tiles[col].button.style.top = `${y}px`;
-
-        terms.push(tiles[col].term);
-      }
-
-      const firstPos = getPositionOnCanvasCentered(
-        { row, col: 0 },
-        group,
-        cols,
-        tileSize,
-        hgap,
-        vgap
-      );
-
-      if (button === null) {
-        completedGroups[i].button = document.createElement("button");
-        button = completedGroups[i].button;
-
-        button.classList.add("tile");
-        button.classList.add(`group-${i + 1}`);
-        button.classList.add(`completed`);
-
-        button.style.width = `${group * (tileSize.width + hgap) - hgap}px`;
-        button.style.height = `${tileSize.height}px`;
-        button.style.position = "absolute";
-        button.style.left = `${firstPos.x}px`;
-
-        button.innerHTML = `<strong>${categoty}</strong><br>${terms.join(
-          ", "
-        )}`;
-
-        board.appendChild(button);
-      }
-
-      button.style.top = `${firstPos.y}px`;
-
-      row--;
-    }
-  }
-
-  // Now draw the rest
-  shuffleBoard(remainngTiles, positions, cols, tileSize, hgap, vgap, layout);
 };
 
 /**
@@ -474,12 +512,12 @@ export const enableButtons = (buttons) => {
  */
 export const clearBanners = (completedGroups) => {
   for (let i = 0; i < completedGroups.length; i++) {
-    if (completedGroups[i].button) {
-      completedGroups[i].button.classList.add("hidden");
+    if (completedGroups[i].banner) {
+      completedGroups[i].banner.classList.add("hidden");
 
       setTimeout(() => {
-        completedGroups[i].button.remove();
-        completedGroups[i].button = null;
+        completedGroups[i].banner.remove();
+        completedGroups[i].banner = null;
       }, 500);
     }
   }
