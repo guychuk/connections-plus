@@ -89,15 +89,6 @@ export const makePositions = (rows, cols) => {
 };
 
 /**
- * Return c random elements from arr without replacement.
- * @param {Array} arr The array to select from.
- * @param {number} c The number of elements to select.
- * @returns {Array} An array of c random elements from arr.
- */
-export const randomChoices = (arr, c) =>
-  getRandomNums(arr.length, c).map((i) => arr[i - 1]);
-
-/**
  * Throw an error if some values are null.
  * @param {Array} values Array of values to check.
  */

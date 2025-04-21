@@ -1,10 +1,6 @@
 import {
-  shuffleBoard,
   setThemeBasedOnPreference,
-  getDifficultyButtonText,
-  disableButtons,
-  enableButtons,
-  clearBanners,
+  getTextForDifficultyButton,
   getLayout,
   drawBoard,
   setLayout,
@@ -12,7 +8,7 @@ import {
 import { containsDulpicates } from "./core/utils";
 import config from "./config/config.json";
 import { createClient } from "@supabase/supabase-js";
-import { initializeGame, resetGame } from "./core/gameLogic";
+import { initializeGame } from "./core/gameLogic";
 import {
   clickSubmit,
   clickDifficulty,
@@ -82,7 +78,7 @@ const V_GAP = parseFloat(boardCSS.rowGap);
 // Set default difficulty and this button's functionality
 const difficultyButton = document.getElementById("difficulty-button");
 difficultyButton.dataset.difficulty = "easy";
-difficultyButton.textContent = getDifficultyButtonText(
+difficultyButton.textContent = getTextForDifficultyButton(
   difficultyButton.dataset.difficulty
 );
 
@@ -95,23 +91,27 @@ if (!initialLayout) {
 }
 
 (async () => {
+  /* ---- Initialize the game ---- */
+
   let result = await initializeGame(
     supabaseClient,
-    difficultyButton,
+    difficultyButton.dataset.difficulty,
     GROUPS,
     board,
     H_GAP,
     V_GAP
   );
 
+  // Tiles
   let allTiles = result.allTiles;
   let remainngTiles = new Set(allTiles);
   let selectedTiles = result.selectedTiles;
 
+  // Positions and tile size
   let positions = result.positions;
-
   let tileSize = result.tileSize;
 
+  // Game state
   let previousSubmissions = result.previousSubmissions;
   let completedGroups = result.completedGroups;
 
@@ -127,12 +127,12 @@ if (!initialLayout) {
     COLS
   );
 
+  /* ---- Set the game control button events ---- */
+
   const shuffleButton = document.getElementById("shuffle-button");
   const newGameButton = document.getElementById("new-game-button");
   const deselectButton = document.getElementById("deselect-all-button");
   const submitButton = document.getElementById("submit-button");
-
-  const applyButton = document.getElementById("apply-button");
 
   shuffleButton.addEventListener("click", () => {
     clickShuffle(
@@ -148,7 +148,6 @@ if (!initialLayout) {
     );
   });
 
-  // Add the new game button functionality
   newGameButton.addEventListener("click", async () => {
     clickNewGame(
       shuffleButton,
@@ -197,15 +196,16 @@ if (!initialLayout) {
       deselectButton,
       difficultyButton
     );
-
-    console.log(positions);
   });
 
-  // Add the difficulty button functionality and set the initial difficulty to easy
   difficultyButton.addEventListener("click", (event) => {
     clickDifficulty(event);
     newGameButton.click();
   });
+
+  /* ---- Set the game's apply settings button events ---- */
+
+  const applyButton = document.getElementById("apply-button");
 
   applyButton.addEventListener("click", () => {
     clickApply(

@@ -17,20 +17,9 @@ import {
 import confetti from "canvas-confetti";
 import { confettiDuration } from "../config/config.json";
 
-export const showErrorScreen = () => {
-  // Hide all body children
-  [...document.body.children].forEach((child) => {
-    if (child.id !== "error-screen" && child.id !== "theme-toggle-button") {
-      child.style.display = "none";
-    }
-  });
-
-  // Show error screen
-  const errorScreen = document.getElementById("error-screen");
-  errorScreen.style.display = "flex";
-
-  TOAST_ERROR.showToast();
-};
+/* ------------------------
+    TILE POSITION & SIZE
+  ------------------------ */
 
 /**
  * Calculates the tile size based on the canvas size and the number of rows and columns.
@@ -98,6 +87,10 @@ const getPositionOnCanvasCentered = (
   };
 };
 
+/* -------------------------
+            Layout
+   ------------------------- */
+
 /**
  * Gets the layout from local storage, or returns the default layout if no value is stored.
  * @returns {string} The layout from local storage, or the default if none is stored.
@@ -121,6 +114,20 @@ export const setLayout = (layout) => {
   return getLayout();
 };
 
+/* -------------------------
+      DRAWING ON THE BOARD
+   ------------------------- */
+
+/**
+ * Draws the completed groups as banners on the board.
+ * @param {HTMLCanvasElement} board The canvas element.
+ * @param {Array} completedGroups The completed groups.
+ * @param {Object} tileSize The size of each tile.
+ * @param {number} hgap The horizontal gap between tiles.
+ * @param {number} vgap The vertical gap between tiles.
+ * @param {number} rows The number of rows in the grid.
+ * @param {number} cols The number of columns in the grid.
+ */
 export const drawBanners = (
   board,
   completedGroups,
@@ -130,7 +137,7 @@ export const drawBanners = (
   rows,
   cols
 ) => {
-  let currentRow = rows - 1;
+  let currentRow = rows - 1; // Start from the last row
 
   for (let i = rows - 1; i >= 0; i--) {
     const group = completedGroups[i];
@@ -138,6 +145,7 @@ export const drawBanners = (
     const groupSize = tiles.length;
     let banner = group.banner;
 
+    // If the group is not empty - it is completed
     if (groupSize > 0) {
       const category = tiles[0].category;
       const terms = [];
@@ -203,13 +211,22 @@ export const drawBanners = (
   }
 };
 
+/**
+ * Draws the tiles on the board.
+ * @param {Array<Object>} positions An array of objects containing row and column indices of the tiles.
+ * @param {Set<Object>} remainingTiles A Set of objects containing information about the tiles to be drawn.
+ * @param {Object} tileSize An object containing the height and width of the tile.
+ * @param {number} hgap The horizontal gap between tiles.
+ * @param {number} vgap The vertical gap between tiles.
+ * @param {number} cols The number of columns on the board.
+ * @param {string} layout The layout of the board. Must be either "spacious" or "compact".
+ */
 export const drawTiles = (
   positions,
   remainingTiles,
   tileSize,
   hgap,
   vgap,
-  rows,
   cols,
   layout
 ) => {
@@ -218,7 +235,10 @@ export const drawTiles = (
     showErrorScreen();
   }
 
+  const rowsIfCompact = Math.ceil(remainingTiles.size / cols);
+
   const remainder = remainingTiles.size % cols;
+
   let i = 0;
 
   for (const tile of remainingTiles) {
@@ -226,7 +246,8 @@ export const drawTiles = (
     const { row, col } = positions[i];
     let posXY = null;
 
-    if (layout === "compact" && remainder > 0 && row === rows) {
+    // Center the last row of compact layout
+    if (layout === "compact" && remainder > 0 && row === rowsIfCompact - 1) {
       posXY = getPositionOnCanvasCentered(
         { row, col },
         remainder,
@@ -246,6 +267,18 @@ export const drawTiles = (
   }
 };
 
+/**
+ * Draws the board with the remaining tiles and completed groups.
+ * @param {HTMLCanvasElement} board The canvas element.
+ * @param {Array} positions An array of positions for the tiles.
+ * @param {Set} remainingTiles The set of remaining tiles.
+ * @param {Array} completedGroups An array of completed groups.
+ * @param {Object} tileSize An object containing the height and width of the tile.
+ * @param {number} hgap The horizontal gap between tiles.
+ * @param {number} vgap The vertical gap between tiles.
+ * @param {number} rows The number of rows in the grid.
+ * @param {number} cols The number of columns in the grid.
+ */
 export const drawBoard = (
   board,
   positions,
@@ -268,16 +301,7 @@ export const drawBoard = (
   drawBanners(board, completedGroups, tileSize, hgap, vgap, rows, cols);
 
   // Draw the remaining tiles
-  drawTiles(
-    positions,
-    remainingTiles,
-    tileSize,
-    hgap,
-    vgap,
-    rows,
-    cols,
-    layout
-  );
+  drawTiles(positions, remainingTiles, tileSize, hgap, vgap, cols, layout);
 };
 
 /**
@@ -299,6 +323,35 @@ export const shuffleBoard = (tiles, positions) => {
     shuffleArray(positions);
   }
 };
+
+/**
+ * Update the tiles' text, id, ....
+ * @param {Set} tiles The tiles array.
+ * @param {Set} newTiles The new tiles array.
+ */
+export const updateTiles = (tiles, newTiles) => {
+  assertNotNullOrUndefined([tiles, newTiles]);
+
+  const tilesArray = Array.from(tiles);
+  const newTilesArray = Array.from(newTiles);
+
+  for (let i = 0; i < tilesArray.length; i++) {
+    tilesArray[i].id = newTilesArray[i].id;
+    tilesArray[i].term = newTilesArray[i].term;
+    tilesArray[i].category = newTilesArray[i].category;
+    tilesArray[i].groupSize = newTilesArray[i].groupSize;
+    tilesArray[i].groupIndex = newTilesArray[i].groupIndex;
+
+    // The buton tied to the tile stays the same, it's just the text that changes
+    tilesArray[i].button.textContent = tilesArray[i].term;
+    tilesArray[i].button.className = "tile";
+    tilesArray[i].button.disabled = false;
+  }
+};
+
+/* -------------------------
+          BUTTONS
+   ------------------------- */
 
 /**
  * Creates buttons for the tiles and put them on the board.
@@ -327,6 +380,7 @@ export const createButtons = (
     const button = document.createElement("button");
     const { x, y } = getPositionOnCanvas(positions[i++], tileSize, hgap, vgap);
 
+    // Create the button
     button.classList.add("tile");
     button.style.width = `${tileSize.width}px`;
     button.style.height = `${tileSize.height}px`;
@@ -335,7 +389,7 @@ export const createButtons = (
     button.style.left = `${x}px`;
     button.style.top = `${y}px`;
 
-    tile.button = button;
+    tile.button = button; // Bind to a tile
 
     button.addEventListener("click", () => {
       if (selectedTiles.has(tile)) {
@@ -344,12 +398,51 @@ export const createButtons = (
       } else if (selectedTiles.size < maxSelections) {
         button.classList.add("selected");
         selectedTiles.add(tile);
+      } else {
+        makeTooManyToast(maxSelections).showToast();
       }
     });
 
     board.appendChild(button);
   }
 };
+
+/**
+ * Get the text for the difficulty button based on the difficulty.
+ * @param {string} difficulty The difficulty.
+ * @returns {string} The text for the difficulty button.
+ */
+export const getTextForDifficultyButton = (difficulty) => {
+  if (difficulty === "easy") {
+    return "Easy 🥚";
+  } else if (difficulty === "medium") {
+    return "Medium 🐤";
+  } else if (difficulty === "hard") {
+    return "Hard 🐔";
+  }
+
+  throw new Error("Invalid difficulty");
+};
+
+/**
+ * Disable the buttons.
+ * @param {Array} buttons The buttons to disable.
+ */
+export const disableButtons = (buttons) => {
+  buttons.forEach((button) => (button.disabled = true));
+};
+
+/**
+ * Enable the buttons.
+ * @param {Array} buttons The buttons to enable.
+ */
+export const enableButtons = (buttons) => {
+  buttons.forEach((button) => (button.disabled = false));
+};
+
+/* -------------------------
+           TOASTS
+   ------------------------- */
 
 /**
  * Creates a Toastify message for submitting a set of tiles.
@@ -367,8 +460,6 @@ export const submitToast = (selectedTiles, previousSubmissions, groups) => {
 
   if (group < groups[0]) {
     toast = makeTooFewToast(groups[0]);
-  } else if (group > groups[groups.length - 1]) {
-    toast = makeTooManyToast(groups[groups.length - 1]);
   } else {
     const selectedTilesHashed = hashTilesSet(selectedTiles);
 
@@ -397,11 +488,34 @@ export const submitToast = (selectedTiles, previousSubmissions, groups) => {
   return { toast, newlyCompletedGroup };
 };
 
+/* -------------------------
+      ERRORS AND EFFECTS
+   ------------------------- */
+
+/**
+ * Displays the error screen by hiding all other elements except the theme toggle button.
+ * Triggers an error toast notification.
+ */
+export function showErrorScreen() {
+  // Hide all body children
+  [...document.body.children].forEach((child) => {
+    if (child.id !== "error-screen" && child.id !== "theme-toggle-button") {
+      child.style.display = "none";
+    }
+  });
+
+  // Show error screen
+  const errorScreen = document.getElementById("error-screen");
+  errorScreen.style.display = "flex";
+
+  TOAST_ERROR.showToast();
+}
+
 /**
  * Celebrate with confetti.
  * @param {number} duration The duration of the celebration in milliseconds.
  */
-export const celebrate = (duration) => {
+export function celebrate(duration) {
   const isMobile = window.innerWidth <= 768;
 
   var animationEnd = Date.now() + duration;
@@ -443,20 +557,20 @@ export const celebrate = (duration) => {
       origin: { x: randomNum(0.7, 0.9), y: Math.random() - 0.2 },
     });
   }, 250);
-};
+}
 
 /**
  * Show the win toast and celebrate with confetti.
  */
-export const win = () => {
+export function win() {
   TOAST_WINNER.showToast();
   celebrate(confettiDuration);
-};
+}
 
 /**
  * Set the theme based on the user's preference.
  */
-export const setThemeBasedOnPreference = () => {
+export function setThemeBasedOnPreference() {
   const prefersDarkScheme = window.matchMedia(
     "(prefers-color-scheme: dark)"
   ).matches;
@@ -467,92 +581,31 @@ export const setThemeBasedOnPreference = () => {
   } else {
     document.body.classList.remove("dark-theme");
   }
-};
-
-/**
- * Get the text for the difficulty button based on the difficulty.
- * @param {string} difficulty The difficulty.
- * @returns {string} The text for the difficulty button.
- */
-export const getDifficultyButtonText = (difficulty) => {
-  if (difficulty === "easy") {
-    return "Easy 🥚";
-  } else if (difficulty === "medium") {
-    return "Medium 🐤";
-  } else if (difficulty === "hard") {
-    return "Hard 🐔";
-  }
-
-  throw new Error("Invalid difficulty");
-};
-
-/**
- * Disable the buttons.
- * @param {Array} buttons The buttons to disable.
- */
-export const disableButtons = (buttons) => {
-  for (let i = 0; i < buttons.length; i++) {
-    buttons[i].disabled = true;
-  }
-};
-
-/**
- * Enable the buttons.
- * @param {Array} buttons The buttons to enable.
- */
-export const enableButtons = (buttons) => {
-  for (let i = 0; i < buttons.length; i++) {
-    buttons[i].disabled = false;
-  }
-};
+}
 
 /**
  * Clear the banners (colored boxes over completed groups).
  * @param {Array} completedGroups The completed groups array.
  */
-export const clearBanners = (completedGroups) => {
-  for (let i = 0; i < completedGroups.length; i++) {
-    if (completedGroups[i].banner) {
-      completedGroups[i].banner.classList.add("hidden");
+export function clearBanners(completedGroups) {
+  completedGroups
+    .filter((group) => group.banner)
+    .map((group) => group.banner)
+    .forEach((banner) => {
+      banner.classList.add("hidden");
 
       setTimeout(() => {
-        completedGroups[i].banner.remove();
-        completedGroups[i].banner = null;
+        banner.remove();
+        banner = null;
       }, 500);
-    }
-  }
-};
+    });
+}
 
 /**
- * Update the tiles.
- * @param {Set} tiles The tiles array.
- * @param {Set} newTiles The new tiles array.
- */
-export const updateTiles = (tiles, newTiles) => {
-  assertNotNullOrUndefined([tiles, newTiles]);
-
-  const tilesArray = Array.from(tiles);
-  const newTilesArray = Array.from(newTiles);
-
-  for (let i = 0; i < tilesArray.length; i++) {
-    tilesArray[i].id = newTilesArray[i].id;
-    tilesArray[i].term = newTilesArray[i].term;
-    tilesArray[i].category = newTilesArray[i].category;
-    tilesArray[i].groupSize = newTilesArray[i].groupSize;
-    tilesArray[i].groupIndex = newTilesArray[i].groupIndex;
-
-    // The buton tied to the tile stays the same, it's just the text that changes
-    tilesArray[i].button.textContent = tilesArray[i].term;
-    tilesArray[i].button.className = "tile";
-    tilesArray[i].button.disabled = false;
-  }
-};
-
-/**
- * Spin the emoji.
+ * Spin an emoji button.
  * @param {MouseEvent} event The event when the user clicks the tile.
  */
-export const spin = (event) => {
+export function spin(event) {
   const rootStyles = getComputedStyle(document.documentElement);
   const spinDuration = rootStyles
     .getPropertyValue("--animation-speed-spin")
@@ -562,4 +615,4 @@ export const spin = (event) => {
   setTimeout(() => {
     event.target.classList.remove("spin");
   }, parseFloat(spinDuration) * 1000);
-};
+}

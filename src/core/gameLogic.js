@@ -10,12 +10,35 @@ import {
   createButtons,
   shuffleBoard,
   updateTiles,
-  showErrorScreen,
   getLayout,
-  drawBoard,
 } from "../components/ui";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { TOAST_WINNER } from "../components/toasts";
+
+/* ------------------------
+      GAME PROPERTIES
+  ------------------------ */
+
+/**
+ * Get the number of tags for a given difficulty and number of groups.
+ * @param {string} difficulty The difficulty.
+ * @param {number} numGroups The number of groups.
+ * @returns {number} The number of tags.
+ */
+const getNumOfTags = (difficulty, numGroups) => {
+  switch (difficulty) {
+    case "easy":
+      return numGroups;
+    case "medium":
+      return Math.floor(numGroups / 2);
+    case "hard":
+      return Math.floor(numGroups / 3);
+  }
+};
+
+/* -------------------------
+            TILES
+   ------------------------- */
 
 /**
  * Make a tile object.
@@ -39,23 +62,6 @@ const makeTile = (id, term, category, groupSize, groupIndex, button) => {
 };
 
 /**
- * Get the number of tags for a given difficulty and number of groups.
- * @param {string} difficulty The difficulty.
- * @param {number} numGroups The number of groups.
- * @returns {number} The number of tags.
- */
-const getNumOfTags = (difficulty, numGroups) => {
-  switch (difficulty) {
-    case "easy":
-      return numGroups;
-    case "medium":
-      return Math.floor(numGroups / 2);
-    case "hard":
-      return Math.floor(numGroups / 3);
-  }
-};
-
-/**
  * Create tiles for a new game.
  * @param {SupabaseClient} client Supabase client.
  * @param {Array} groups array of group sizes.
@@ -64,11 +70,9 @@ const getNumOfTags = (difficulty, numGroups) => {
  */
 export const getNewTiles = async (client, groups, difficulty) => {
   const numGroups = groups.length;
-
   const numTags = getNumOfTags(difficulty, numGroups);
 
   var categories;
-
   const categoriesSet = new Set();
 
   var iterations = 0;
@@ -81,22 +85,23 @@ export const getNewTiles = async (client, groups, difficulty) => {
     categories = Array.from({ length: numGroups }, () => null);
     categoriesSet.clear();
 
+    // Test this choice of Tags
     while (0 < i) {
-      const newCategories = await getCategories(client, tags, groups[i - 1]);
-
-      const newValidCategories = newCategories.filter((category) => {
-        return !categoriesSet.has(category.cat_id);
-      });
+      const newCategories = (
+        await getCategories(client, tags, groups[i - 1])
+      ).filter((category) => !categoriesSet.has(category.cat_id));
 
       // If no categories were found, try again with different tags
-      if (newValidCategories.length === 0) {
-        console.error("No categories found, trying again with different tags");
+      if (newCategories.length === 0) {
+        console.error(
+          "Did not find new categories, trying again with different tags"
+        );
         break;
       }
 
-      for (let j = 0; j < newValidCategories.length && i > 0; j++) {
-        categories[i - 1] = newValidCategories[j];
-        categoriesSet.add(newValidCategories[j].cat_id);
+      for (let j = 0; j < newCategories.length && i > 0; j++) {
+        categories[i - 1] = newCategories[j];
+        categoriesSet.add(newCategories[j].cat_id);
         i--;
       }
     }
@@ -106,11 +111,15 @@ export const getNewTiles = async (client, groups, difficulty) => {
       continue;
     }
 
+    // Get categories names
+
     const categoriesNamesPromises = categories.map((category) =>
       getCategoryName(client, category.cat_id)
     );
 
     const categoriesNames = await Promise.all(categoriesNamesPromises);
+
+    // Get terms
 
     const fetchTermsPromises = groups.map((groupSize, index) =>
       getTerms(client, categories[index].cat_id, groupSize).then((terms) => {
@@ -120,6 +129,7 @@ export const getNewTiles = async (client, groups, difficulty) => {
 
     const allTerms = await Promise.all(fetchTermsPromises);
 
+    // Check for duplicate terms
     if (new Set(allTerms.flat()).size !== allTerms.flat().length) {
       console.error("Duplicate terms found, trying again");
       iterations++;
@@ -147,10 +157,14 @@ export const getNewTiles = async (client, groups, difficulty) => {
   }
 };
 
+/* -------------------------
+  GAME INITIALIZATION AND RESET
+   ------------------------- */
+
 /**
  * Initialize the game board with tiles.
  * @param {SupabaseClient} client The Supabase client.
- * @param {HTMLButtonElement} difficultyButton The difficulty button element.
+ * @param {string} difficulty The difficulty.
  * @param {Array} groups An array of group sizes.
  * @param {HTMLCanvasElement} board The board element.
  * @param {number} hgap The horizontal gap between tiles.
@@ -159,7 +173,7 @@ export const getNewTiles = async (client, groups, difficulty) => {
  */
 export const initializeGame = async (
   client,
-  difficultyButton,
+  difficulty,
   groups,
   board,
   hgap,
@@ -169,21 +183,19 @@ export const initializeGame = async (
   const rows = groups.length;
   const cols = groups[groups.length - 1];
 
+  // Tile size and positions
   const tileSize = calculateTileSize(board, rows, cols, hgap, vgap);
-
   const positions = makePositions(rows, cols);
 
+  // Game state
   const selectedTiles = new Set();
-
   const previousSubmissions = new Set();
-
   const completedGroups = Array.from({ length: groups.length }, () => ({
     tiles: [],
     banner: null,
   }));
 
-  const difficulty = difficultyButton.dataset.difficulty;
-
+  // Get tiles
   const allTiles = await getNewTiles(client, groups, difficulty);
 
   createButtons(
@@ -197,6 +209,7 @@ export const initializeGame = async (
     cols // max selections
   );
 
+  // Shuffle board
   shuffleBoard(allTiles, positions, getLayout());
 
   return {
@@ -209,59 +222,58 @@ export const initializeGame = async (
   };
 };
 
+/**
+ * Reset the game state and fetch new tiles.
+ * @param {SupabaseClient} client The Supabase client.
+ * @param {string} difficulty The difficulty.
+ * @param {Array} groups The group sizes.
+ * @param {Set} tiles The set of tiles to replace.
+ * @param {Set} previousSubmissions The set of previously submitted tiles.
+ * @param {Set} selectedTiles The set of currently selected tiles.
+ * @param {Set} remainngTiles The set of remaining tiles.
+ * @param {Array} completedGroups The array of completed groups.
+ * @param {Array} positions The array of positions for the tiles.
+ */
 export const resetGame = async (
   SupabaseClient,
-  difficultyButton,
-  afterWin,
+  difficulty,
   groups,
   tiles,
   previousSubmissions,
   selectedTiles,
+  remainngTiles,
   completedGroups,
   positions
 ) => {
-  if (afterWin) {
+  if (remainngTiles.size === 0) {
     TOAST_WINNER.hideToast();
   }
 
+  // Reset game state
+
   previousSubmissions.clear();
   selectedTiles.clear();
+  remainngTiles.clear();
 
   for (let i = 0; i < completedGroups.length; i++) {
     completedGroups[i].tiles.length = 0;
   }
 
-  const layout = getLayout();
-
-  const difficulty = difficultyButton.dataset.difficulty;
-
+  // Get new tiles
   const newTiles = await getNewTiles(SupabaseClient, groups, difficulty);
 
-  positions.length = 0;
+  // Get new list of positions
 
   const rows = groups.length;
-
   const cols = groups[rows - 1];
 
+  positions.length = 0;
   positions.push(...makePositions(rows, cols));
 
   // Keep the same tiles set as before, but replace the contents
   updateTiles(tiles, newTiles);
-};
 
-/**
- * Process the new completed group and return the new positions array.
- * @param {Set} selectedTiles The set of selected tiles.
- * @param {Array} groups An array of group sizes in the game, sorted.
- * @param {Array} positions An array of positions for the tiles.
- * @returns {Array} An array of positions for the tiles.
- */
-export const processNewCompletedGroup = (selectedTiles, groups, positions) => {
-  selectedTiles.clear();
-
-  // Update free positions
-  const cols = groups[groups.length - 1];
-  const rows = positions.length / cols - 1;
-
-  return makePositions(rows, cols);
+  for (const tile of tiles) {
+    remainngTiles.add(tile);
+  }
 };
