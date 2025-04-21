@@ -58,6 +58,11 @@ body {
   --theme-settings-panel-header-bg: #f2f2f2;
   --theme-settings-panel-header-text-color: #333333;
   --theme-settings-panel-box-shadow: rgba(0, 0, 0, 0.1);
+  --theme-settings-button-bg: #f9f9f9;
+  --theme-settings-button-text-color: #222222;
+  --theme-settings-button-hover-bg: #eeeeee;
+  --theme-settings-button-active-bg: #dddddd;
+  --theme-settings-button-border: #cccccc;
 
   /* Error Screen */
   --theme-error-screen-bg: #8b0000;
@@ -163,6 +168,11 @@ body.dark-theme {
   --theme-settings-panel-header-bg: #262626;
   --theme-settings-panel-header-text-color: #b0b0b0;
   --theme-settings-panel-box-shadow: rgba(0, 0, 0, 0.4);
+  --theme-settings-button-bg: #2a2a2a;
+  --theme-settings-button-text-color: #e0e0e0;
+  --theme-settings-button-hover-bg: #3a3a3a;
+  --theme-settings-button-active-bg: #4a4a4a;
+  --theme-settings-button-border: #444444;
 
   /* Error Screen */
   --theme-error-screen-bg: #4b0000;
@@ -361,11 +371,34 @@ body.dark-theme {
 }
 
 /* ------------------------
+  BUTTONS
+------------------------ */
+
+.game-button {
+  font-family: Inter, sans-serif;
+  font-size: 1em;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+  hyphens: auto;
+  padding: 5px 10px;
+  margin: 3px;
+  border: 2px solid;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: background-color var(--animation-speed-color-change) ease,
+    color var(--animation-speed-color-change) ease,
+    border var(--animation-speed-color-change) ease;
+}
+
+/* ------------------------
    SETTINGS PANEL
 ------------------------ */
 
 .settings-panel {
   position: fixed;
+  display: flex;
+  flex-direction: column;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%) scale(0.9);
@@ -374,6 +407,7 @@ body.dark-theme {
   color: var(--theme-settings-panel-text-color);
   font-family: Inter, sans-serif;
   padding: 2rem;
+  gap: 1.5rem;
   border: 2px solid var(--theme-settings-panel-border);
   border-radius: 12px;
   box-shadow: 0 0 20px var(--theme-settings-panel-box-shadow);
@@ -393,8 +427,17 @@ body.dark-theme {
 }
 
 .settings-panel h2 {
+  text-align: center;
   font-size: 1.5rem;
   margin-bottom: 1rem;
+  margin: 0;
+}
+
+.settings-group-layout {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  justify-content: flex-start;
 }
 
 .settings-panel label {
@@ -412,6 +455,20 @@ body.dark-theme {
   transition: border-color var(--animation-speed-color-change) ease,
     background-color var(--animation-speed-color-change) ease,
     color var(--animation-speed-color-change) ease;
+}
+
+.settings-panel .game-button {
+  color: var(--theme-settings-button-text-color);
+  background-color: var(--theme-settings-button-bg);
+  border-color: var(--theme-settings-button-border);
+}
+
+.settings-panel .game-button:hover {
+  background-color: var(--theme-settings-button-hover-bg);
+}
+
+.settings-panel .game-button:active {
+  background-color: var(--theme-settings-button-active-bg);
 }
 
 /* ------------------------
@@ -456,35 +513,22 @@ body.dark-theme {
 /* ------------------------
    GAME CONTROLS
 ------------------------ */
-.game-controls button {
-  font-family: Inter, sans-serif;
-  font-size: 1em;
+.game-controls .game-button {
   width: 7vw;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-  white-space: normal;
-  hyphens: auto;
   color: var(--theme-game-controls-text-color);
   background-color: var(--theme-game-controls-bg);
-  padding: 5px 10px;
-  margin: 3px;
-  border: 2px solid var(--theme-game-controls-border-color);
-  border-radius: 7px;
-  cursor: pointer;
-  transition: background-color var(--animation-speed-color-change) ease,
-    color var(--animation-speed-color-change) ease,
-    border var(--animation-speed-color-change) ease;
+  border-color: var(--theme-game-controls-border-color);
 }
 
-.game-controls button:hover {
+.game-controls .game-button:hover {
   background-color: var(--theme-game-controls-bg-hover);
 }
 
-.game-controls button:active {
+.game-controls .game-button:active {
   background-color: var(--theme-game-controls-bg-active);
 }
 
-.game-controls button:disabled {
+.game-controls .game-button:disabled {
   background-color: var(--theme-game-controls-bg-disabled);
   color: var(--theme-game-controls-text-disabled);
   cursor: not-allowed;
@@ -759,15 +803,21 @@ body.dark-theme {
    RESPONSIVE / MOBILE
 ------------------------ */
 @media only screen and (max-width: 768px) {
-  #theme-toggle-button {
+  .utility-bar {
+    top: 10px;
+    right: 5px;
+    gap: 5px;
+  }
+
+  .utility-bar button {
     font-size: 24px;
   }
 
-  #controls {
+  .game-controls {
     max-width: 90vw;
   }
 
-  #controls button {
+  .game-controls .game-button {
     font-size: 0.6em;
     padding: 4px 8px;
     margin: 2px;
@@ -790,6 +840,14 @@ body.dark-theme {
   #error-emoji {
     font-size: 10rem; /* Set large size */
     margin-top: 5px;
+  }
+
+  .settings-panel h2 {
+    font-size: 1.25rem;
+  }
+
+  .settings-panel label {
+    font-size: 1rem;
   }
 
   .tile {

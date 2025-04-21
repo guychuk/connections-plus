@@ -316,6 +316,8 @@ export const clickSettings = (event) => {
  * @param {number} cols The number of columns on the board.
  */
 export const clickApply = (
+  settingsPanel,
+  blurOverlay,
   remainngTiles,
   positions,
   board,
@@ -354,6 +356,10 @@ export const clickApply = (
       cols
     );
   }
+
+  // Close settings panel
+  blurOverlay.classList.remove("blurred");
+  settingsPanel.classList.remove("blurred");
 };
 
 /* ------------------------

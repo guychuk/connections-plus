@@ -49,6 +49,15 @@ const settingsButton = document.getElementById("settings-button");
 errorEmojiButton.addEventListener("click", clickError);
 settingsButton.addEventListener("click", clickSettings);
 
+const blurOverlay = document.getElementById("blur-overlay");
+const settingsPanel = document.getElementById("settings-panel");
+
+// Close settings panel when clicking the blur overlay
+blurOverlay.addEventListener("click", () => {
+  blurOverlay.classList.remove("blurred");
+  settingsPanel.classList.remove("blurred");
+});
+
 // Read game configuration
 
 /** Number of tiles in each group */
@@ -209,6 +218,8 @@ if (!initialLayout) {
 
   applyButton.addEventListener("click", () => {
     clickApply(
+      settingsPanel,
+      blurOverlay,
       remainngTiles,
       positions,
       board,
