@@ -1,15 +1,16 @@
 # Connectons+
 
-<div style="text-align: center;">
+<p align="center">
   <img src="public/icon-pink.png" alt="Logo" width="100" height="100">
+</p>
 
-  <br>
-  A remix of The New York Times' <a href="https://www.nytimes.com/games/connections">Connections</a> — but with a twist ✨
+<p align="center">
+  A remix of The New York Times' <a href="https://www.nytimes.com/games/connections">Connections</a> — but with a twist ✨  
   <br>
   <b>Connectons+</b> lets you tackle word <i>groups of different sizes</i> for an extra dose of challenge and variety 😄
-  <br>
-  <br>
+</p>
 
+<p align="center">
   <img src="https://img.shields.io/badge/html5-%23E34F26.svg?style=for-the-badge&logo=html5&logoColor=white">
   <img src="https://img.shields.io/badge/css3-%231572B6.svg?style=for-the-badge&logo=css3&logoColor=white">
   <img src="https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E">
@@ -17,7 +18,7 @@
   <img src="https://img.shields.io/badge/vite-%23646CFF.svg?style=for-the-badge&logo=vite&logoColor=white">
   <img src="https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white">
   <img src="https://img.shields.io/badge/vercel-%23000000.svg?style=for-the-badge&logo=vercel&logoColor=white">
-</div>
+</p>
 
 ## Overview
 
