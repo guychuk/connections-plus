@@ -561,8 +561,10 @@ export function celebrate(duration) {
 
 /**
  * Show the win toast and celebrate with confetti.
+ * @param {Array} buttons The buttons to disable.
  */
-export function win() {
+export function win(buttons) {
+  disableButtons(buttons);
   TOAST_WINNER.showToast();
   celebrate(confettiDuration);
 }

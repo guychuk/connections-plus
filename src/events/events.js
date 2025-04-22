@@ -12,8 +12,8 @@ import {
   enableButtons,
   clearBanners,
 } from "../components/ui";
-import { resetGame } from "../core/gameLogic";
-import { makePositions } from "../core/utils";
+import { resetGame, completeGroup, solveNextGroup } from "../core/gameLogic";
+import { delay, makePositions } from "../core/utils";
 
 /* ------------------------
       GAME CONTROLS
@@ -71,32 +71,17 @@ export const clickSubmit = (
 
   // Update completed groups
   if (newlyCompletedGroup !== null) {
-    const groupIndex = newlyCompletedGroup[0].groupIndex;
-
-    completedGroups[groupIndex].tiles = newlyCompletedGroup;
-
-    // Move and then hide the tiles in that group
-    for (let tile of selectedTiles) {
-      remainngTiles.delete(tile);
-      selectedTiles.delete(tile);
-
-      tile.button.classList.remove("selected");
-      tile.button.classList.add("hidden");
-      tile.button.classList.add(`group-${groupIndex + 1}`);
-      tile.button.classList.add(`completed`);
-
-      tile.button.disabled = true;
-    }
+    completeGroup(
+      newlyCompletedGroup[0].groupIndex,
+      completedGroups,
+      selectedTiles,
+      remainngTiles,
+      positions,
+      groups
+    );
 
     const rows = groups.length;
     const cols = groups[groups.length - 1];
-    const numOfCompletedGroups = completedGroups.filter(
-      (group) => group.tiles.length > 0
-    ).length;
-
-    // Update free positions
-    positions.length = 0;
-    positions.push(...makePositions(rows - numOfCompletedGroups, cols));
 
     drawBoard(
       board,
@@ -119,17 +104,7 @@ export const clickSubmit = (
       submitButton.disabled = false;
     }, toast.options.duration + 100);
   } else {
-    win();
-  }
-
-  // If there are no more tiles (the game is won), disable the buttons
-  if (remainngTiles.size === 0) {
-    disableButtons([
-      shuffleButton,
-      submitButton,
-      deselectButton,
-      difficultyButton,
-    ]);
+    win([shuffleButton, submitButton, deselectButton, difficultyButton]);
   }
 };
 
@@ -162,6 +137,7 @@ export const clickDifficulty = (event) => {
  * @param {HTMLElement} deselectButton The deselect all button.
  * @param {HTMLElement} difficultyButton The difficulty button.
  * @param {HTMLElement} newGameButton The new game button.
+ * @param {HTMLElement} solveButton The solve button.
  * @param {Array} completedGroups The array of completed groups.
  * @param {SupabaseClient} supabaseClient The Supabase client.
  * @param {Set} remainngTiles The set of remaining tiles.
@@ -183,6 +159,7 @@ export const clickNewGame = async (
   deselectButton,
   difficultyButton,
   newGameButton,
+  solveButton,
   completedGroups,
   supabaseClient,
   remainngTiles,
@@ -205,6 +182,7 @@ export const clickNewGame = async (
     deselectButton,
     difficultyButton,
     newGameButton,
+    solveButton,
   ]);
 
   clearBanners(completedGroups);
@@ -240,6 +218,7 @@ export const clickNewGame = async (
     deselectButton,
     difficultyButton,
     newGameButton,
+    solveButton,
   ]);
 };
 
@@ -382,4 +361,62 @@ export const clickError = (event) => {
   setTimeout(() => {
     location.reload();
   }, parseFloat(spinDuration) * 1000);
+};
+
+export const clickDeselect = (selectedTiles) => {
+  for (const tile of selectedTiles) {
+    tile.button.classList.remove("selected");
+  }
+
+  selectedTiles.clear();
+};
+
+export const clickSolve = async (
+  board,
+  remainngTiles,
+  selectedTiles,
+  completedGroups,
+  groups,
+  positions,
+  tileSize,
+  hgap,
+  vgap,
+  buttonsToDisable,
+  newGameButton
+) => {
+  const rows = groups.length;
+  const cols = groups[groups.length - 1];
+
+  disableButtons([newGameButton]);
+  disableButtons(buttonsToDisable);
+
+  const iteration = async () => {
+    solveNextGroup(
+      completedGroups,
+      groups,
+      selectedTiles,
+      remainngTiles,
+      positions
+    );
+
+    drawBoard(
+      board,
+      positions,
+      remainngTiles,
+      completedGroups,
+      tileSize,
+      hgap,
+      vgap,
+      rows,
+      cols
+    );
+
+    await delay(1000);
+  };
+
+  while (remainngTiles.size > 0) {
+    await iteration();
+  }
+
+  enableButtons([newGameButton]);
 };
