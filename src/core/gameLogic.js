@@ -14,6 +14,7 @@ import {
 } from "../components/ui";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { TOAST_WINNER } from "../components/toasts";
+import { clickDeselect } from "../events/events";
 
 /* ------------------------
       GAME PROPERTIES
@@ -245,7 +246,8 @@ export const resetGame = async (
   completedGroups,
   positions
 ) => {
-  if (remainngTiles.size === 0) {
+  // If won but not by solving automatically
+  if (remainngTiles.size === 0 && TOAST_WINNER.timeOutVal) {
     TOAST_WINNER.hideToast();
   }
 
@@ -276,4 +278,81 @@ export const resetGame = async (
   for (const tile of tiles) {
     remainngTiles.add(tile);
   }
+};
+
+export const completeGroup = (
+  groupIndex,
+  completedGroups,
+  selectedTiles,
+  remainngTiles,
+  positions,
+  groups
+) => {
+  completedGroups[groupIndex].tiles = [];
+
+  // Move and then hide the tiles in that group
+  for (let tile of selectedTiles) {
+    completedGroups[groupIndex].tiles.push(tile);
+    remainngTiles.delete(tile);
+    selectedTiles.delete(tile);
+
+    tile.button.classList.remove("selected");
+    tile.button.classList.add("hidden");
+    tile.button.classList.add(`group-${groupIndex + 1}`);
+    tile.button.classList.add(`completed`);
+
+    tile.button.disabled = true;
+  }
+
+  const rows = groups.length;
+  const cols = groups[groups.length - 1];
+  const numOfCompletedGroups = completedGroups.filter(
+    (group) => group.tiles.length > 0
+  ).length;
+
+  // Update free positions
+  positions.length = 0;
+  positions.push(...makePositions(rows - numOfCompletedGroups, cols));
+};
+
+export const solveNextGroup = (
+  completedGroups,
+  groups,
+  selectedTiles,
+  remainingTiles,
+  positions
+) => {
+  let groupIndex = -1;
+
+  // Find the last unsolved group
+  for (let i = 0; i < completedGroups.length; i++) {
+    if (completedGroups[i].tiles.length === 0) {
+      groupIndex = i;
+    }
+  }
+
+  if (groupIndex === -1) {
+    return false;
+  }
+
+  // Deselect all tiles
+  clickDeselect(selectedTiles);
+
+  // Select all tiles in that group
+  for (let tile of remainingTiles) {
+    if (tile.groupIndex === groupIndex) {
+      selectedTiles.add(tile);
+    }
+  }
+
+  completeGroup(
+    groupIndex,
+    completedGroups,
+    selectedTiles,
+    remainingTiles,
+    positions,
+    groups
+  );
+
+  return true;
 };

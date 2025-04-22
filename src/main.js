@@ -17,6 +17,8 @@ import {
   clickApply,
   clickShuffle,
   clickNewGame,
+  clickSolve,
+  clickDeselect,
 } from "./events/events";
 
 // Supabase connection
@@ -142,6 +144,7 @@ if (!initialLayout) {
   const newGameButton = document.getElementById("new-game-button");
   const deselectButton = document.getElementById("deselect-all-button");
   const submitButton = document.getElementById("submit-button");
+  const solveButton = document.getElementById("solve-button");
 
   shuffleButton.addEventListener("click", () => {
     clickShuffle(
@@ -164,6 +167,7 @@ if (!initialLayout) {
       deselectButton,
       difficultyButton,
       newGameButton,
+      solveButton,
       completedGroups,
       supabaseClient,
       remainngTiles,
@@ -182,10 +186,7 @@ if (!initialLayout) {
   });
 
   deselectButton.addEventListener("click", () => {
-    for (const tile of selectedTiles) {
-      tile.button.classList.remove("selected");
-    }
-    selectedTiles.clear();
+    clickDeselect(selectedTiles);
   });
 
   submitButton.addEventListener("click", (event) => {
@@ -210,6 +211,28 @@ if (!initialLayout) {
   difficultyButton.addEventListener("click", (event) => {
     clickDifficulty(event);
     newGameButton.click();
+  });
+
+  solveButton.addEventListener("click", () => {
+    clickSolve(
+      board,
+      remainngTiles,
+      selectedTiles,
+      completedGroups,
+      GROUPS,
+      positions,
+      tileSize,
+      H_GAP,
+      V_GAP,
+      [
+        solveButton,
+        shuffleButton,
+        submitButton,
+        deselectButton,
+        difficultyButton,
+      ],
+      newGameButton
+    );
   });
 
   /* ---- Set the game's apply settings button events ---- */
