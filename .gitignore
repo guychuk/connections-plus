@@ -3,6 +3,8 @@ steps.txt
 node_modules/
 data/*
 !data/populate_db.py
+!data/scheme.sql
+!data/functions
+!data/rls_policies
 dist/
 icons.pptx
-README.md
