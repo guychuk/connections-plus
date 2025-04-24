@@ -29,11 +29,11 @@ import { clickDeselect } from "../events/events";
 const getNumOfTags = (difficulty, numGroups) => {
   switch (difficulty) {
     case "easy":
-      return numGroups;
+      return Math.max(1, numGroups);
     case "medium":
-      return Math.floor(numGroups / 2);
+      return Math.max(1, Math.floor(numGroups / 2));
     case "hard":
-      return Math.floor(numGroups / 3);
+      return Math.max(1, Math.floor(numGroups / 3));
   }
 };
 
@@ -78,7 +78,7 @@ export const getNewTiles = async (client, groups, difficulty) => {
 
   var iterations = 0;
 
-  while (iterations < 20) {
+  while (iterations < 30) {
     const tags = (await getTags(client, numTags)).map((tag) => tag.tag);
 
     let i = groups.length;
@@ -187,20 +187,22 @@ export const initializeGame = async (
   const positions = makePositions(rows, cols);
 
   // Game state
-  const completedGroups = Array.from({ length: groups.length }, () => ({
+  const solvedGroups = Array.from({ length: groups.length }, () => ({
     tiles: [],
     banner: null,
   }));
 
-  const allTiles = await getNewTiles(client, groups, difficulty);
+  const tileSet = await getNewTiles(client, groups, difficulty);
 
   // Game state
   const gameState = {
-    selectedTiles: new Set(),
-    previousSubmissions: new Set(),
-    completedGroups: completedGroups,
-    allTiles: allTiles,
-    remainingTiles: new Set(allTiles),
+    activeTiles: new Set(),
+    submissionHistory: new Set(),
+    solvedGroups: solvedGroups,
+    tileSet: tileSet,
+    unsolvedTiles: new Set(tileSet),
+    gameWon: false,
+    gameOver: false,
   };
 
   createButtons(
@@ -213,7 +215,7 @@ export const initializeGame = async (
   );
 
   // Shuffle board
-  shuffleBoard(allTiles, positions, getLayout());
+  shuffleBoard(tileSet, positions, getLayout());
 
   return {
     gameState,
@@ -239,18 +241,18 @@ export const resetGame = async (
   positions
 ) => {
   // If won but not by solving automatically
-  if (gameState.remainingTiles.size === 0 && TOAST_WINNER.timeOutVal) {
+  if (gameState.gameWon) {
     TOAST_WINNER.hideToast();
   }
 
   // Reset game state
 
-  gameState.previousSubmissions.clear();
-  gameState.selectedTiles.clear();
-  gameState.remainingTiles.clear();
+  gameState.submissionHistory.clear();
+  gameState.activeTiles.clear();
+  gameState.unsolvedTiles.clear();
 
-  for (let i = 0; i < gameState.completedGroups.length; i++) {
-    gameState.completedGroups[i].tiles.length = 0;
+  for (let i = 0; i < gameState.solvedGroups.length; i++) {
+    gameState.solvedGroups[i].tiles.length = 0;
   }
 
   // Get new tiles
@@ -265,21 +267,24 @@ export const resetGame = async (
   positions.push(...makePositions(rows, cols));
 
   // Keep the same tiles set as before, but replace the contents
-  updateTiles(gameState.allTiles, newTiles);
+  updateTiles(gameState.tileSet, newTiles);
 
-  for (const tile of gameState.allTiles) {
-    gameState.remainingTiles.add(tile);
+  for (const tile of gameState.tileSet) {
+    gameState.unsolvedTiles.add(tile);
   }
+
+  gameState.gameWon = false;
+  gameState.gameOver = false;
 };
 
 export const completeGroup = (groupIndex, gameState, positions, groups) => {
-  gameState.completedGroups[groupIndex].tiles = [];
+  gameState.solvedGroups[groupIndex].tiles = [];
 
   // Move and then hide the tiles in that group
-  for (let tile of gameState.selectedTiles) {
-    gameState.completedGroups[groupIndex].tiles.push(tile);
-    gameState.remainingTiles.delete(tile);
-    gameState.selectedTiles.delete(tile);
+  for (let tile of gameState.activeTiles) {
+    gameState.solvedGroups[groupIndex].tiles.push(tile);
+    gameState.unsolvedTiles.delete(tile);
+    gameState.activeTiles.delete(tile);
 
     tile.button.classList.remove("selected");
     tile.button.classList.add("hidden");
@@ -291,21 +296,21 @@ export const completeGroup = (groupIndex, gameState, positions, groups) => {
 
   const rows = groups.length;
   const cols = groups[groups.length - 1];
-  const numOfCompletedGroups = gameState.completedGroups.filter(
+  const numOfsolvedGroups = gameState.solvedGroups.filter(
     (group) => group.tiles.length > 0
   ).length;
 
   // Update free positions
   positions.length = 0;
-  positions.push(...makePositions(rows - numOfCompletedGroups, cols));
+  positions.push(...makePositions(rows - numOfsolvedGroups, cols));
 };
 
 export const solveNextGroup = (groups, gameState, positions) => {
   let groupIndex = -1;
 
   // Find the last unsolved group
-  for (let i = 0; i < gameState.completedGroups.length; i++) {
-    if (gameState.completedGroups[i].tiles.length === 0) {
+  for (let i = 0; i < gameState.solvedGroups.length; i++) {
+    if (gameState.solvedGroups[i].tiles.length === 0) {
       groupIndex = i;
     }
   }
@@ -315,12 +320,12 @@ export const solveNextGroup = (groups, gameState, positions) => {
   }
 
   // Deselect all tiles
-  clickDeselect(gameState.selectedTiles);
+  clickDeselect(gameState.activeTiles);
 
   // Select all tiles in that group
-  for (let tile of gameState.remainingTiles) {
+  for (let tile of gameState.unsolvedTiles) {
     if (tile.groupIndex === groupIndex) {
-      gameState.selectedTiles.add(tile);
+      gameState.activeTiles.add(tile);
     }
   }
 

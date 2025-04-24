@@ -154,7 +154,7 @@ if (!initialLayout) {
   });
 
   deselectButton.addEventListener("click", () => {
-    events.clickDeselect(gameState.selectedTiles);
+    events.clickDeselect(gameState.activeTiles);
   });
 
   submitButton.addEventListener("click", (event) => {
@@ -168,7 +168,8 @@ if (!initialLayout) {
       gaps,
       shuffleButton,
       deselectButton,
-      difficultyButton
+      difficultyButton,
+      solveButton
     );
   });
 
@@ -177,8 +178,8 @@ if (!initialLayout) {
     newGameButton.click();
   });
 
-  solveButton.addEventListener("click", () => {
-    events.clickSolve(
+  solveButton.addEventListener("click", async () => {
+    await events.clickSolve(
       board,
       gameState,
       groups,

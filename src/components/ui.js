@@ -117,7 +117,7 @@ export const setLayout = (layout) => {
 /**
  * Draws the completed groups as banners on the board.
  * @param {HTMLCanvasElement} board The canvas element.
- * @param {Array} completedGroups The completed groups.
+ * @param {Array} solvedGroups  The completed groups.
  * @param {Object} tileSize The size of each tile.
  * @param {Object} gaps The gaps between tiles.
  * @param {number} rows The number of rows in the grid.
@@ -125,7 +125,7 @@ export const setLayout = (layout) => {
  */
 export const drawBanners = (
   board,
-  completedGroups,
+  solvedGroups,
   tileSize,
   gaps,
   rows,
@@ -134,7 +134,7 @@ export const drawBanners = (
   let currentRow = rows - 1; // Start from the last row
 
   for (let i = rows - 1; i >= 0; i--) {
-    const group = completedGroups[i];
+    const group = solvedGroups[i];
     const tiles = group.tiles;
     const groupSize = tiles.length;
     let banner = group.banner;
@@ -208,7 +208,7 @@ export const drawBanners = (
 /**
  * Draws the tiles on the board.
  * @param {Array<Object>} positions An array of objects containing row and column indices of the tiles.
- * @param {Set<Object>} remainingTiles A Set of objects containing information about the tiles to be drawn.
+ * @param {Set<Object>} unsolvedTiles A Set of objects containing information about the tiles to be drawn.
  * @param {Object} tileSize An object containing the height and width of the tile.
  * @param {Object} gaps An object containing the horizontal and vertical gaps between tiles.
  * @param {number} cols The number of columns on the board.
@@ -216,7 +216,7 @@ export const drawBanners = (
  */
 export const drawTiles = (
   positions,
-  remainingTiles,
+  unsolvedTiles,
   tileSize,
   gaps,
   cols,
@@ -227,13 +227,13 @@ export const drawTiles = (
     showErrorScreen();
   }
 
-  const rowsIfCompact = Math.ceil(remainingTiles.size / cols);
+  const rowsIfCompact = Math.ceil(unsolvedTiles.size / cols);
 
-  const remainder = remainingTiles.size % cols;
+  const remainder = unsolvedTiles.size % cols;
 
   let i = 0;
 
-  for (const tile of remainingTiles) {
+  for (const tile of unsolvedTiles) {
     const button = tile.button;
     const { row, col } = positions[i];
     let posXY = null;
@@ -285,10 +285,10 @@ export const drawBoard = (
   }
 
   // Draw the banners
-  drawBanners(board, gameState.completedGroups, tileSize, gaps, rows, cols);
+  drawBanners(board, gameState.solvedGroups, tileSize, gaps, rows, cols);
 
   // Draw the remaining tiles
-  drawTiles(positions, gameState.remainingTiles, tileSize, gaps, cols, layout);
+  drawTiles(positions, gameState.unsolvedTiles, tileSize, gaps, cols, layout);
 };
 
 /**
@@ -359,7 +359,7 @@ export const createButtons = (
 ) => {
   let i = 0;
 
-  for (const tile of gameState.allTiles) {
+  for (const tile of gameState.tileSet) {
     const button = document.createElement("button");
     const { x, y } = getPositionOnCanvas(positions[i++], tileSize, gaps);
 
@@ -375,12 +375,12 @@ export const createButtons = (
     tile.button = button; // Bind to a tile
 
     button.addEventListener("click", () => {
-      if (gameState.selectedTiles.has(tile)) {
+      if (gameState.activeTiles.has(tile)) {
         button.classList.remove("selected");
-        gameState.selectedTiles.delete(tile);
-      } else if (gameState.selectedTiles.size < maxSelections) {
+        gameState.activeTiles.delete(tile);
+      } else if (gameState.activeTiles.size < maxSelections) {
         button.classList.add("selected");
-        gameState.selectedTiles.add(tile);
+        gameState.activeTiles.add(tile);
       } else {
         makeTooManyToast(maxSelections).showToast();
       }
@@ -434,7 +434,7 @@ export const enableButtons = (buttons) => {
  * @returns {Object} A Toastify message object and the newly completed group.
  */
 export const submitToast = (gameState, groups) => {
-  const group = gameState.selectedTiles.size;
+  const group = gameState.activeTiles.size;
 
   let toast = null;
 
@@ -443,20 +443,20 @@ export const submitToast = (gameState, groups) => {
   if (group < groups[0]) {
     toast = makeTooFewToast(groups[0]);
   } else {
-    const selectedTilesHashed = hashTilesSet(gameState.selectedTiles);
+    const activeTilesHashed = hashTilesSet(gameState.activeTiles);
 
-    if (gameState.previousSubmissions.has(selectedTilesHashed)) {
+    if (gameState.submissionHistory.has(activeTilesHashed)) {
       toast = TOAST_DUPLICATE;
     } else {
-      gameState.previousSubmissions.add(selectedTilesHashed);
+      gameState.submissionHistory.add(activeTilesHashed);
 
-      const correctTiles = Array.from(gameState.selectedTiles).reduce(
+      const correctTiles = Array.from(gameState.activeTiles).reduce(
         (acc, tile) => (tile.groupSize === group ? acc + 1 : acc),
         0
       );
 
       if (correctTiles === group) {
-        newlyCompletedGroup = [...gameState.selectedTiles];
+        newlyCompletedGroup = [...gameState.activeTiles];
         toast = TOAST_CORRECT;
       } else if (2 * correctTiles > group) {
         // ? Maybe give other info (largest group of common categoty, or something else)
@@ -569,10 +569,10 @@ export function setThemeBasedOnPreference() {
 
 /**
  * Clear the banners (colored boxes over completed groups).
- * @param {Array} completedGroups The completed groups array.
+ * @param {Array} solvedGroups  The completed groups array.
  */
-export function clearBanners(completedGroups) {
-  for (const group of completedGroups) {
+export function clearBanners(solvedGroups) {
+  for (const group of solvedGroups) {
     if (group.banner) {
       group.banner.classList.add("hidden");
 

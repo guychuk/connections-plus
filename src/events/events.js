@@ -31,6 +31,7 @@ import { delay, makePositions } from "../core/utils";
  * @param {HTMLButtonElement} shuffleButton The shuffle button element.
  * @param {HTMLButtonElement} deselectButton The deselect button element.
  * @param {HTMLButtonElement} difficultyButton The difficulty button element.
+ * @param {HTMLButtonElement} solveButton The solve button element.
  */
 export const clickSubmit = (
   event,
@@ -42,7 +43,8 @@ export const clickSubmit = (
   gaps,
   shuffleButton,
   deselectButton,
-  difficultyButton
+  difficultyButton,
+  solveButton
 ) => {
   const submitButton = event.currentTarget;
 
@@ -75,12 +77,21 @@ export const clickSubmit = (
   // When pressing the button fast enough, the toasts get stuck.
   submitButton.disabled = true;
 
-  if (gameState.remainingTiles.size > 0) {
+  if (gameState.unsolvedTiles.size > 0) {
     setTimeout(() => {
-      submitButton.disabled = false;
+      submitButton.disabled = gameState.gameOver;
     }, toast.options.duration + 100);
   } else {
-    win([shuffleButton, submitButton, deselectButton, difficultyButton]);
+    gameState.gameWon = true;
+    gameState.gameOver = true;
+
+    win([
+      shuffleButton,
+      submitButton,
+      solveButton,
+      deselectButton,
+      difficultyButton,
+    ]);
   }
 };
 
@@ -151,7 +162,7 @@ export const clickNewGame = async (
     solveButton,
   ]);
 
-  clearBanners(gameState.completedGroups);
+  clearBanners(gameState.solvedGroups);
 
   await resetGame(
     supabaseClient,
@@ -193,7 +204,7 @@ export const clickShuffle = (
   rows,
   cols
 ) => {
-  shuffleBoard(gameState.remainingTiles, positions, getLayout());
+  shuffleBoard(gameState.unsolvedTiles, positions, getLayout());
 
   drawBoard(board, positions, gameState, tileSize, gaps, rows, cols);
 };
@@ -201,14 +212,14 @@ export const clickShuffle = (
 /**
  * Deselects all currently selected tiles.
  * Removes the "selected" CSS class from each tile's button and clears the set of selected tiles.
- * @param {Set} selectedTiles The set of currently selected tiles.
+ * @param {Set} activeTiles The set of currently selected tiles.
  */
-export const clickDeselect = (selectedTiles) => {
-  for (const tile of selectedTiles) {
+export const clickDeselect = (activeTiles) => {
+  for (const tile of activeTiles) {
     tile.button.classList.remove("selected");
   }
 
-  selectedTiles.clear();
+  activeTiles.clear();
 };
 
 /**
@@ -244,12 +255,15 @@ export const clickSolve = async (
 
     drawBoard(board, positions, gameState, tileSize, gaps, rows, cols);
 
-    await delay(1000);
+    await delay(750);
   };
 
-  while (gameState.remainingTiles.size > 0) {
+  while (gameState.unsolvedTiles.size > 0) {
     await iteration();
   }
+
+  gameState.gameWon = false;
+  gameState.gameOver = true;
 
   enableButtons([newGameButton]);
 };
@@ -304,14 +318,14 @@ export const clickApply = (
   if (layout !== oldLayout) {
     setLayout(layout);
 
-    const numOfCompletedGroups = gameState.completedGroups.reduce(
+    const numOfsolvedGroups = gameState.solvedGroups.reduce(
       (acc, group) => (group.tiles.length > 0 ? acc + 1 : acc),
       0
     );
 
     // Update free positions
     positions.length = 0;
-    positions.push(...makePositions(rows - numOfCompletedGroups, cols));
+    positions.push(...makePositions(rows - numOfsolvedGroups, cols));
 
     clickShuffle(positions, board, gameState, tileSize, gaps, rows, cols);
   }
