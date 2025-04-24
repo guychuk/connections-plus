@@ -103,7 +103,7 @@ if (!initialLayout) {
 (async () => {
   /* ---- Initialize the game ---- */
 
-  let result = await initializeGame(
+  let { gameState, positions, tileSize } = await initializeGame(
     supabaseClient,
     difficultyButton.dataset.difficulty,
     groups,
@@ -111,29 +111,7 @@ if (!initialLayout) {
     gaps
   );
 
-  // Tiles
-  let allTiles = result.allTiles;
-  let remainngTiles = new Set(allTiles);
-  let selectedTiles = result.selectedTiles;
-
-  // Positions and tile size
-  let positions = result.positions;
-  let tileSize = result.tileSize;
-
-  // Game state
-  let previousSubmissions = result.previousSubmissions;
-  let completedGroups = result.completedGroups;
-
-  drawBoard(
-    board,
-    positions,
-    remainngTiles,
-    completedGroups,
-    tileSize,
-    gaps,
-    rows,
-    cols
-  );
+  drawBoard(board, positions, gameState, tileSize, gaps, rows, cols);
 
   /* ---- Set the game control button events ---- */
 
@@ -145,10 +123,9 @@ if (!initialLayout) {
 
   shuffleButton.addEventListener("click", () => {
     events.clickShuffle(
-      remainngTiles,
       positions,
       board,
-      completedGroups,
+      gameState,
       tileSize,
       gaps,
       rows,
@@ -164,13 +141,9 @@ if (!initialLayout) {
       difficultyButton,
       newGameButton,
       solveButton,
-      completedGroups,
+      gameState,
       supabaseClient,
-      remainngTiles,
       groups,
-      allTiles,
-      previousSubmissions,
-      selectedTiles,
       positions,
       board,
       tileSize,
@@ -181,17 +154,14 @@ if (!initialLayout) {
   });
 
   deselectButton.addEventListener("click", () => {
-    events.clickDeselect(selectedTiles);
+    events.clickDeselect(gameState.selectedTiles);
   });
 
   submitButton.addEventListener("click", (event) => {
     events.clickSubmit(
       event,
       board,
-      remainngTiles,
-      selectedTiles,
-      previousSubmissions,
-      completedGroups,
+      gameState,
       groups,
       positions,
       tileSize,
@@ -210,9 +180,7 @@ if (!initialLayout) {
   solveButton.addEventListener("click", () => {
     events.clickSolve(
       board,
-      remainngTiles,
-      selectedTiles,
-      completedGroups,
+      gameState,
       groups,
       positions,
       tileSize,
@@ -236,10 +204,9 @@ if (!initialLayout) {
     events.clickApply(
       settingsPanel,
       blurOverlay,
-      remainngTiles,
       positions,
       board,
-      completedGroups,
+      gameState,
       tileSize,
       gaps,
       rows,

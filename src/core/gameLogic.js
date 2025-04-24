@@ -169,7 +169,7 @@ export const getNewTiles = async (client, groups, difficulty) => {
  * @param {Array} groups An array of group sizes.
  * @param {HTMLCanvasElement} board The board element.
  * @param {Object} gaps The gaps object containing horizontal and vertical gaps.
- * @returns {Object} An object containing the tiles set, selected tiles set, positions array and tile size object.
+ * @returns {Object} An object containing the game state, positions array and tile size object.
  */
 export const initializeGame = async (
   client,
@@ -187,23 +187,28 @@ export const initializeGame = async (
   const positions = makePositions(rows, cols);
 
   // Game state
-  const selectedTiles = new Set();
-  const previousSubmissions = new Set();
   const completedGroups = Array.from({ length: groups.length }, () => ({
     tiles: [],
     banner: null,
   }));
 
-  // Get tiles
   const allTiles = await getNewTiles(client, groups, difficulty);
+
+  // Game state
+  const gameState = {
+    selectedTiles: new Set(),
+    previousSubmissions: new Set(),
+    completedGroups: completedGroups,
+    allTiles: allTiles,
+    remainingTiles: new Set(allTiles),
+  };
 
   createButtons(
     board,
     positions,
-    allTiles,
+    gameState,
     tileSize,
     gaps,
-    selectedTiles, // ref
     cols // max selections
   );
 
@@ -211,10 +216,7 @@ export const initializeGame = async (
   shuffleBoard(allTiles, positions, getLayout());
 
   return {
-    allTiles,
-    selectedTiles,
-    previousSubmissions,
-    completedGroups,
+    gameState,
     positions,
     tileSize,
   };
@@ -226,36 +228,29 @@ export const initializeGame = async (
  * @param {string} difficulty The difficulty.
  * @param {Array} groups The group sizes.
  * @param {Set} tiles The set of tiles to replace.
- * @param {Set} previousSubmissions The set of previously submitted tiles.
- * @param {Set} selectedTiles The set of currently selected tiles.
- * @param {Set} remainngTiles The set of remaining tiles.
- * @param {Array} completedGroups The array of completed groups.
+ * @param {Object} gameState The game state object.
  * @param {Array} positions The array of positions for the tiles.
  */
 export const resetGame = async (
   SupabaseClient,
   difficulty,
   groups,
-  tiles,
-  previousSubmissions,
-  selectedTiles,
-  remainngTiles,
-  completedGroups,
+  gameState,
   positions
 ) => {
   // If won but not by solving automatically
-  if (remainngTiles.size === 0 && TOAST_WINNER.timeOutVal) {
+  if (gameState.remainingTiles.size === 0 && TOAST_WINNER.timeOutVal) {
     TOAST_WINNER.hideToast();
   }
 
   // Reset game state
 
-  previousSubmissions.clear();
-  selectedTiles.clear();
-  remainngTiles.clear();
+  gameState.previousSubmissions.clear();
+  gameState.selectedTiles.clear();
+  gameState.remainingTiles.clear();
 
-  for (let i = 0; i < completedGroups.length; i++) {
-    completedGroups[i].tiles.length = 0;
+  for (let i = 0; i < gameState.completedGroups.length; i++) {
+    gameState.completedGroups[i].tiles.length = 0;
   }
 
   // Get new tiles
@@ -270,28 +265,21 @@ export const resetGame = async (
   positions.push(...makePositions(rows, cols));
 
   // Keep the same tiles set as before, but replace the contents
-  updateTiles(tiles, newTiles);
+  updateTiles(gameState.allTiles, newTiles);
 
-  for (const tile of tiles) {
-    remainngTiles.add(tile);
+  for (const tile of gameState.allTiles) {
+    gameState.remainingTiles.add(tile);
   }
 };
 
-export const completeGroup = (
-  groupIndex,
-  completedGroups,
-  selectedTiles,
-  remainngTiles,
-  positions,
-  groups
-) => {
-  completedGroups[groupIndex].tiles = [];
+export const completeGroup = (groupIndex, gameState, positions, groups) => {
+  gameState.completedGroups[groupIndex].tiles = [];
 
   // Move and then hide the tiles in that group
-  for (let tile of selectedTiles) {
-    completedGroups[groupIndex].tiles.push(tile);
-    remainngTiles.delete(tile);
-    selectedTiles.delete(tile);
+  for (let tile of gameState.selectedTiles) {
+    gameState.completedGroups[groupIndex].tiles.push(tile);
+    gameState.remainingTiles.delete(tile);
+    gameState.selectedTiles.delete(tile);
 
     tile.button.classList.remove("selected");
     tile.button.classList.add("hidden");
@@ -303,7 +291,7 @@ export const completeGroup = (
 
   const rows = groups.length;
   const cols = groups[groups.length - 1];
-  const numOfCompletedGroups = completedGroups.filter(
+  const numOfCompletedGroups = gameState.completedGroups.filter(
     (group) => group.tiles.length > 0
   ).length;
 
@@ -312,18 +300,12 @@ export const completeGroup = (
   positions.push(...makePositions(rows - numOfCompletedGroups, cols));
 };
 
-export const solveNextGroup = (
-  completedGroups,
-  groups,
-  selectedTiles,
-  remainingTiles,
-  positions
-) => {
+export const solveNextGroup = (groups, gameState, positions) => {
   let groupIndex = -1;
 
   // Find the last unsolved group
-  for (let i = 0; i < completedGroups.length; i++) {
-    if (completedGroups[i].tiles.length === 0) {
+  for (let i = 0; i < gameState.completedGroups.length; i++) {
+    if (gameState.completedGroups[i].tiles.length === 0) {
       groupIndex = i;
     }
   }
@@ -333,23 +315,16 @@ export const solveNextGroup = (
   }
 
   // Deselect all tiles
-  clickDeselect(selectedTiles);
+  clickDeselect(gameState.selectedTiles);
 
   // Select all tiles in that group
-  for (let tile of remainingTiles) {
+  for (let tile of gameState.remainingTiles) {
     if (tile.groupIndex === groupIndex) {
-      selectedTiles.add(tile);
+      gameState.selectedTiles.add(tile);
     }
   }
 
-  completeGroup(
-    groupIndex,
-    completedGroups,
-    selectedTiles,
-    remainingTiles,
-    positions,
-    groups
-  );
+  completeGroup(groupIndex, gameState, positions, groups);
 
   return true;
 };

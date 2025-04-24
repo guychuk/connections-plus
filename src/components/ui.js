@@ -262,8 +262,7 @@ export const drawTiles = (
  * Draws the board with the remaining tiles and completed groups.
  * @param {HTMLCanvasElement} board The canvas element.
  * @param {Array} positions An array of positions for the tiles.
- * @param {Set} remainingTiles The set of remaining tiles.
- * @param {Array} completedGroups An array of completed groups.
+ * @param {Object} gameState The game state object containing completed groups and remaining tiles.
  * @param {Object} tileSize An object containing the height and width of the tile.
  * @param {Object} gaps An object containing the horizontal and vertical gaps between tiles.
  * @param {number} rows The number of rows in the grid.
@@ -272,8 +271,7 @@ export const drawTiles = (
 export const drawBoard = (
   board,
   positions,
-  remainingTiles,
-  completedGroups,
+  gameState,
   tileSize,
   gaps,
   rows,
@@ -287,10 +285,10 @@ export const drawBoard = (
   }
 
   // Draw the banners
-  drawBanners(board, completedGroups, tileSize, gaps, rows, cols);
+  drawBanners(board, gameState.completedGroups, tileSize, gaps, rows, cols);
 
   // Draw the remaining tiles
-  drawTiles(positions, remainingTiles, tileSize, gaps, cols, layout);
+  drawTiles(positions, gameState.remainingTiles, tileSize, gaps, cols, layout);
 };
 
 /**
@@ -346,24 +344,22 @@ export const updateTiles = (tiles, newTiles) => {
  * Creates buttons for the tiles and put them on the board.
  * @param {HTMLCanvasElement} board The board element containing the tiles.
  * @param {Array} positions An array of positions for the tiles.
- * @param {Set} tiles A set of tile objects.
+ * @param {Object} gameState The game state object.
  * @param {Object} tileSize An object containing the height and width of the tile.
  * @param {Object} gaps An object containing the horizontal and vertical gaps between tiles.
- * @param {Set} selectedTiles A set of selected tiles.
  * @param {number} maxSelections The maximum number of tiles that can be selected.
  */
 export const createButtons = (
   board,
   positions,
-  tiles,
+  gameState,
   tileSize,
   gaps,
-  selectedTiles,
   maxSelections
 ) => {
   let i = 0;
 
-  for (const tile of tiles) {
+  for (const tile of gameState.allTiles) {
     const button = document.createElement("button");
     const { x, y } = getPositionOnCanvas(positions[i++], tileSize, gaps);
 
@@ -379,12 +375,12 @@ export const createButtons = (
     tile.button = button; // Bind to a tile
 
     button.addEventListener("click", () => {
-      if (selectedTiles.has(tile)) {
+      if (gameState.selectedTiles.has(tile)) {
         button.classList.remove("selected");
-        selectedTiles.delete(tile);
-      } else if (selectedTiles.size < maxSelections) {
+        gameState.selectedTiles.delete(tile);
+      } else if (gameState.selectedTiles.size < maxSelections) {
         button.classList.add("selected");
-        selectedTiles.add(tile);
+        gameState.selectedTiles.add(tile);
       } else {
         makeTooManyToast(maxSelections).showToast();
       }
@@ -433,13 +429,12 @@ export const enableButtons = (buttons) => {
 
 /**
  * Creates a Toastify message for submitting a set of tiles.
- * @param {Set} selectedTiles The set of currently selected tiles.
- * @param {Set} previousSubmissions The set of previously submitted tiles.
+ * @param {Object} gameState The game state object.
  * @param {Array} groups An array of group sizes in the game, sorted.
  * @returns {Object} A Toastify message object and the newly completed group.
  */
-export const submitToast = (selectedTiles, previousSubmissions, groups) => {
-  const group = selectedTiles.size;
+export const submitToast = (gameState, groups) => {
+  const group = gameState.selectedTiles.size;
 
   let toast = null;
 
@@ -448,20 +443,20 @@ export const submitToast = (selectedTiles, previousSubmissions, groups) => {
   if (group < groups[0]) {
     toast = makeTooFewToast(groups[0]);
   } else {
-    const selectedTilesHashed = hashTilesSet(selectedTiles);
+    const selectedTilesHashed = hashTilesSet(gameState.selectedTiles);
 
-    if (previousSubmissions.has(selectedTilesHashed)) {
+    if (gameState.previousSubmissions.has(selectedTilesHashed)) {
       toast = TOAST_DUPLICATE;
     } else {
-      previousSubmissions.add(selectedTilesHashed);
+      gameState.previousSubmissions.add(selectedTilesHashed);
 
-      const correctTiles = Array.from(selectedTiles).reduce(
+      const correctTiles = Array.from(gameState.selectedTiles).reduce(
         (acc, tile) => (tile.groupSize === group ? acc + 1 : acc),
         0
       );
 
       if (correctTiles === group) {
-        newlyCompletedGroup = [...selectedTiles];
+        newlyCompletedGroup = [...gameState.selectedTiles];
         toast = TOAST_CORRECT;
       } else if (2 * correctTiles > group) {
         // ? Maybe give other info (largest group of common categoty, or something else)

@@ -23,12 +23,9 @@ import { delay, makePositions } from "../core/utils";
  * Handles the submit button being clicked.
  * @param {Event} event The event being handled.
  * @param {HTMLElement} board The board element.
- * @param {Set<Tile>} remainngTiles The set of remaining tiles.
- * @param {Set<Tile>} selectedTiles The set of currently selected tiles.
- * @param {Set<number>} previousSubmissions A set of previously submitted tile sets, represented by a number that is the hash of the set.
- * @param {Array<Group>} completedGroups An array of completed groups, with the last group being the most recently submitted one.
- * @param {Array<number>} groups The array of group sizes in the game, sorted.
- * @param {Array<Position>} positions The array of positions on the board, where each position is an object with x and y properties.
+ * @param {Object} gameState The game state object.
+ * @param {Array} groups The array of group sizes in the game, sorted.
+ * @param {Array} positions The array of positions on the board, where each position is an object with x and y properties.
  * @param {number} tileSize The size of each tile, in pixels.
  * @param {Object} gaps An object containing the horizontal and vertical gaps between tiles.
  * @param {HTMLButtonElement} shuffleButton The shuffle button element.
@@ -38,10 +35,7 @@ import { delay, makePositions } from "../core/utils";
 export const clickSubmit = (
   event,
   board,
-  remainngTiles,
-  selectedTiles,
-  previousSubmissions,
-  completedGroups,
+  gameState,
   groups,
   positions,
   tileSize,
@@ -52,11 +46,7 @@ export const clickSubmit = (
 ) => {
   const submitButton = event.currentTarget;
 
-  const { toast, newlyCompletedGroup } = submitToast(
-    selectedTiles,
-    previousSubmissions,
-    groups
-  );
+  const { toast, newlyCompletedGroup } = submitToast(gameState, groups);
 
   // Should never happen
   if (toast === null) {
@@ -71,9 +61,7 @@ export const clickSubmit = (
   if (newlyCompletedGroup !== null) {
     completeGroup(
       newlyCompletedGroup[0].groupIndex,
-      completedGroups,
-      selectedTiles,
-      remainngTiles,
+      gameState,
       positions,
       groups
     );
@@ -81,22 +69,13 @@ export const clickSubmit = (
     const rows = groups.length;
     const cols = groups[groups.length - 1];
 
-    drawBoard(
-      board,
-      positions,
-      remainngTiles,
-      completedGroups,
-      tileSize,
-      gaps,
-      rows,
-      cols
-    );
+    drawBoard(board, positions, gameState, tileSize, gaps, rows, cols);
   }
 
   // When pressing the button fast enough, the toasts get stuck.
   submitButton.disabled = true;
 
-  if (remainngTiles.size > 0) {
+  if (gameState.remainingTiles.size > 0) {
     setTimeout(() => {
       submitButton.disabled = false;
     }, toast.options.duration + 100);
@@ -135,13 +114,9 @@ export const clickDifficulty = (event) => {
  * @param {HTMLElement} difficultyButton The difficulty button.
  * @param {HTMLElement} newGameButton The new game button.
  * @param {HTMLElement} solveButton The solve button.
- * @param {Array} completedGroups The array of completed groups.
+ * @param {Object} gameState The game state object.
  * @param {SupabaseClient} supabaseClient The Supabase client.
- * @param {Set} remainngTiles The set of remaining tiles.
  * @param {Array} groups The array of group sizes.
- * @param {Array} allTiles The array of all tiles.
- * @param {Set} previousSubmissions The set of previously submitted tiles.
- * @param {Set} selectedTiles The set of selected tiles.
  * @param {Array} positions The array of positions for the tiles.
  * @param {HTMLCanvasElement} board The board element.
  * @param {Object} tileSize The tile size object.
@@ -156,13 +131,9 @@ export const clickNewGame = async (
   difficultyButton,
   newGameButton,
   solveButton,
-  completedGroups,
+  gameState,
   supabaseClient,
-  remainngTiles,
   groups,
-  allTiles,
-  previousSubmissions,
-  selectedTiles,
   positions,
   board,
   tileSize,
@@ -180,30 +151,17 @@ export const clickNewGame = async (
     solveButton,
   ]);
 
-  clearBanners(completedGroups);
+  clearBanners(gameState.completedGroups);
 
   await resetGame(
     supabaseClient,
     difficultyButton.dataset.difficulty,
     groups,
-    allTiles,
-    previousSubmissions,
-    selectedTiles,
-    remainngTiles,
-    completedGroups,
+    gameState,
     positions
   );
 
-  clickShuffle(
-    remainngTiles,
-    positions,
-    board,
-    completedGroups,
-    tileSize,
-    gaps,
-    rows,
-    cols
-  );
+  clickShuffle(positions, board, gameState, tileSize, gaps, rows, cols);
 
   // Enable the buttons
   enableButtons([
@@ -218,37 +176,26 @@ export const clickNewGame = async (
 
 /**
  * Shuffles the remaining tiles and redraws the board.
- * @param {Set} remainngTiles A set of remaining tiles.
  * @param {Array} positions An array of positions to shuffle.
  * @param {HTMLCanvasElement} board The board element containing the tiles.
- * @param {Array} completedGroups An array of completed groups.
+ * @param {Object} gameState The game state object.
  * @param {Object} tileSize An object containing the height and width of the tile.
  * @param {Object} gaps An object containing the horizontal and vertical gaps between tiles.
  * @param {number} rows The number of rows on the board.
  * @param {number} cols The number of columns on the board.
  */
 export const clickShuffle = (
-  remainngTiles,
   positions,
   board,
-  completedGroups,
+  gameState,
   tileSize,
   gaps,
   rows,
   cols
 ) => {
-  shuffleBoard(remainngTiles, positions, getLayout());
+  shuffleBoard(gameState.remainingTiles, positions, getLayout());
 
-  drawBoard(
-    board,
-    positions,
-    remainngTiles,
-    completedGroups,
-    tileSize,
-    gaps,
-    rows,
-    cols
-  );
+  drawBoard(board, positions, gameState, tileSize, gaps, rows, cols);
 };
 
 /**
@@ -268,9 +215,7 @@ export const clickDeselect = (selectedTiles) => {
  * Solves the game by repeatedly calling solveNextGroup until all tiles are
  * cleared, and then enables the new game button.
  * @param {HTMLCanvasElement} board The board element containing the tiles.
- * @param {Set} remainngTiles The set of remaining tiles.
- * @param {Set} selectedTiles The set of currently selected tiles.
- * @param {Array} completedGroups The array of completed groups.
+ * @param {Object} gameState The game state object.
  * @param {Array} groups The array of group sizes.
  * @param {Array} positions The array of positions for the tiles.
  * @param {Object} tileSize The tile size object.
@@ -280,9 +225,7 @@ export const clickDeselect = (selectedTiles) => {
  */
 export const clickSolve = async (
   board,
-  remainngTiles,
-  selectedTiles,
-  completedGroups,
+  gameState,
   groups,
   positions,
   tileSize,
@@ -297,29 +240,14 @@ export const clickSolve = async (
   disableButtons(buttonsToDisable);
 
   const iteration = async () => {
-    solveNextGroup(
-      completedGroups,
-      groups,
-      selectedTiles,
-      remainngTiles,
-      positions
-    );
+    solveNextGroup(groups, gameState, positions);
 
-    drawBoard(
-      board,
-      positions,
-      remainngTiles,
-      completedGroups,
-      tileSize,
-      gaps,
-      rows,
-      cols
-    );
+    drawBoard(board, positions, gameState, tileSize, gaps, rows, cols);
 
     await delay(1000);
   };
 
-  while (remainngTiles.size > 0) {
+  while (gameState.remainingTiles.size > 0) {
     await iteration();
   }
 
@@ -350,10 +278,9 @@ export const clickSettings = (event) => {
 
 /**
  * Applies the selected layout and shuffles the board if the layout changed.
- * @param {Set} remainngTiles A set of remaining tiles.
  * @param {Array} positions An array of positions for the tiles.
  * @param {HTMLCanvasElement} board The board element containing the tiles.
- * @param {Array} completedGroups An array of completed groups.
+ * @param {Object} gameState The game state object.
  * @param {Object} tileSize An object containing the height and width of the tile.
  * @param {Object} gaps An object containing the horizontal and vertical gaps between tiles.
  * @param {number} rows The number of rows on the board.
@@ -362,10 +289,9 @@ export const clickSettings = (event) => {
 export const clickApply = (
   settingsPanel,
   blurOverlay,
-  remainngTiles,
   positions,
   board,
-  completedGroups,
+  gameState,
   tileSize,
   gaps,
   rows,
@@ -378,7 +304,7 @@ export const clickApply = (
   if (layout !== oldLayout) {
     setLayout(layout);
 
-    const numOfCompletedGroups = completedGroups.reduce(
+    const numOfCompletedGroups = gameState.completedGroups.reduce(
       (acc, group) => (group.tiles.length > 0 ? acc + 1 : acc),
       0
     );
@@ -387,16 +313,7 @@ export const clickApply = (
     positions.length = 0;
     positions.push(...makePositions(rows - numOfCompletedGroups, cols));
 
-    clickShuffle(
-      remainngTiles,
-      positions,
-      board,
-      completedGroups,
-      tileSize,
-      gaps,
-      rows,
-      cols
-    );
+    clickShuffle(positions, board, gameState, tileSize, gaps, rows, cols);
   }
 
   // Close settings panel
