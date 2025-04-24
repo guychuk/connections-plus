@@ -5,28 +5,25 @@ import {
   drawBoard,
   setLayout,
 } from "./components/ui";
-import { containsDulpicates } from "./core/utils";
+import { assert, containsDulpicates } from "./core/utils";
 import config from "./config/config.json";
 import { createClient } from "@supabase/supabase-js";
 import { initializeGame } from "./core/gameLogic";
-import {
-  clickSubmit,
-  clickDifficulty,
-  clickSettings,
-  clickError,
-  clickApply,
-  clickShuffle,
-  clickNewGame,
-  clickSolve,
-  clickDeselect,
-} from "./events/events";
+import * as events from "./events/events";
 
-// Supabase connection
+/* ------------------------
+    INITIALIZE SUPABASE
+  ------------------------ */
+
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_KEY;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Set the theme togggle button functionality and the initial text based on the current theme
+/* ------------------------
+    INITIALIZE GAME UI
+  ------------------------ */
+
+/* --- Initialize theme toggle button --- */
 
 const themeToggleButton = document.getElementById("theme-toggle-button");
 themeToggleButton.addEventListener("click", () => {
@@ -43,13 +40,15 @@ window
     setThemeBasedOnPreference();
   });
 
-// Set the spin functionality
+/* --- Initialize error and settings buttons --- */
 
 const errorEmojiButton = document.getElementById("error-button");
 const settingsButton = document.getElementById("settings-button");
 
-errorEmojiButton.addEventListener("click", clickError);
-settingsButton.addEventListener("click", clickSettings);
+errorEmojiButton.addEventListener("click", events.clickError);
+settingsButton.addEventListener("click", events.clickSettings);
+
+/* --- Initialize settings panel --- */
 
 const blurOverlay = document.getElementById("blur-overlay");
 const settingsPanel = document.getElementById("settings-panel");
@@ -60,35 +59,35 @@ blurOverlay.addEventListener("click", () => {
   settingsPanel.classList.remove("blurred");
 });
 
-// Read game configuration
+/* ------------------------
+    INITIALIZE THE GAME 
+  ------------------------ */
 
-/** Number of tiles in each group */
-const GROUPS = config["groups"].sort((a, b) => a - b);
-const ROWS = GROUPS.length;
-const COLS = GROUPS[ROWS - 1];
+/* --- Initialize groups --- */
 
-if (containsDulpicates(GROUPS)) {
-  throw new Error("Groups contain duplicates");
-}
+const groups = config["groups"].sort((a, b) => a - b);
+assert(!containsDulpicates(groups), "Groups contain duplicates");
 
-// Update subtitle to show the group sizes
+const rows = groups.length;
+const cols = groups[rows - 1];
+
+// Update groups paragraph/subtitle
 const groupsParagraph = document.getElementById("subtitle");
-groupsParagraph.textContent = `Group Sizes are ${GROUPS.join(", ")}`;
+groupsParagraph.textContent = `Group Sizes are ${groups.join(", ")}`;
 
-// Initialize the game
+/* --- Initialize board --- */
 
 const board = document.getElementById("board");
 const boardCSS = getComputedStyle(board);
 
-/** The The horizontal gap between tiles. */
-const H_GAP = parseFloat(boardCSS.columnGap);
+const horizontalGap = parseFloat(boardCSS.columnGap);
+const verticalGap = parseFloat(boardCSS.rowGap);
+const gaps = { horizontal: horizontalGap, vertical: verticalGap };
 
-/** The The vertical gap between tiles. */
-const V_GAP = parseFloat(boardCSS.rowGap);
+/* --- Initialize difficulty and difficulty button --- */
 
-// Set default difficulty and this button's functionality
 const difficultyButton = document.getElementById("difficulty-button");
-difficultyButton.dataset.difficulty = "easy";
+difficultyButton.dataset.difficulty = config["defaultDifficulty"];
 difficultyButton.textContent = getTextForDifficultyButton(
   difficultyButton.dataset.difficulty
 );
@@ -107,10 +106,9 @@ if (!initialLayout) {
   let result = await initializeGame(
     supabaseClient,
     difficultyButton.dataset.difficulty,
-    GROUPS,
+    groups,
     board,
-    H_GAP,
-    V_GAP
+    gaps
   );
 
   // Tiles
@@ -132,10 +130,9 @@ if (!initialLayout) {
     remainngTiles,
     completedGroups,
     tileSize,
-    H_GAP,
-    V_GAP,
-    ROWS,
-    COLS
+    gaps,
+    rows,
+    cols
   );
 
   /* ---- Set the game control button events ---- */
@@ -147,21 +144,20 @@ if (!initialLayout) {
   const solveButton = document.getElementById("solve-button");
 
   shuffleButton.addEventListener("click", () => {
-    clickShuffle(
+    events.clickShuffle(
       remainngTiles,
       positions,
       board,
       completedGroups,
       tileSize,
-      H_GAP,
-      V_GAP,
-      ROWS,
-      COLS
+      gaps,
+      rows,
+      cols
     );
   });
 
   newGameButton.addEventListener("click", async () => {
-    clickNewGame(
+    events.clickNewGame(
       shuffleButton,
       submitButton,
       deselectButton,
@@ -171,37 +167,35 @@ if (!initialLayout) {
       completedGroups,
       supabaseClient,
       remainngTiles,
-      GROUPS,
+      groups,
       allTiles,
       previousSubmissions,
       selectedTiles,
       positions,
       board,
       tileSize,
-      H_GAP,
-      V_GAP,
-      ROWS,
-      COLS
+      gaps,
+      rows,
+      cols
     );
   });
 
   deselectButton.addEventListener("click", () => {
-    clickDeselect(selectedTiles);
+    events.clickDeselect(selectedTiles);
   });
 
   submitButton.addEventListener("click", (event) => {
-    clickSubmit(
+    events.clickSubmit(
       event,
       board,
       remainngTiles,
       selectedTiles,
       previousSubmissions,
       completedGroups,
-      GROUPS,
+      groups,
       positions,
       tileSize,
-      H_GAP,
-      V_GAP,
+      gaps,
       shuffleButton,
       deselectButton,
       difficultyButton
@@ -209,21 +203,20 @@ if (!initialLayout) {
   });
 
   difficultyButton.addEventListener("click", (event) => {
-    clickDifficulty(event);
+    events.clickDifficulty(event);
     newGameButton.click();
   });
 
   solveButton.addEventListener("click", () => {
-    clickSolve(
+    events.clickSolve(
       board,
       remainngTiles,
       selectedTiles,
       completedGroups,
-      GROUPS,
+      groups,
       positions,
       tileSize,
-      H_GAP,
-      V_GAP,
+      gaps,
       [
         solveButton,
         shuffleButton,
@@ -240,7 +233,7 @@ if (!initialLayout) {
   const applyButton = document.getElementById("apply-button");
 
   applyButton.addEventListener("click", () => {
-    clickApply(
+    events.clickApply(
       settingsPanel,
       blurOverlay,
       remainngTiles,
@@ -248,10 +241,9 @@ if (!initialLayout) {
       board,
       completedGroups,
       tileSize,
-      H_GAP,
-      V_GAP,
-      ROWS,
-      COLS
+      gaps,
+      rows,
+      cols
     );
   });
 })();

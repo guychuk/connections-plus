@@ -104,7 +104,18 @@ export const assertNotNullOrUndefined = (values) => {
  * @param {number} ms The number of milliseconds to delay.
  * @returns {Promise<void>} A promise that resolves after the specified delay.
  */
-
 export const delay = async (ms) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
+};
+
+/**
+ * Throw an error if the condition is false.
+ * @param {boolean} condition The condition to check.
+ * @param {string} message The message to display when the condition is false.
+ */
+export const assert = (condition, message) => {
+  if (!condition) {
+    console.error("Assertion failed:", message);
+    showErrorScreen();
+  }
 };

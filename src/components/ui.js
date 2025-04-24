@@ -26,20 +26,19 @@ import { confettiDuration } from "../config/config.json";
  * @param {HTMLCanvasElement} canvas The canvas element.
  * @param {number} rows Number of rows in the grid.
  * @param {number} cols Number of columns in the grid.
- * @param {number} hgap Horizontal gap between tiles.
- * @param {number} vgap Vertical gap between tiles.
+ * @param {Object} gaps An object containing the horizontal and vertical gaps between tiles.
  * @returns {Object} An object containing the tile height and width.
  */
-export const calculateTileSize = (canvas, rows, cols, hgap, vgap) => {
+export const calculateTileSize = (canvas, rows, cols, gaps) => {
   const boardWidth = canvas.clientWidth;
   const boardHeight = canvas.clientHeight;
 
-  const vgaps = vgap * (rows - 1);
-  const hgaps = hgap * (cols - 1);
+  const totalVerticalGaps = gaps.vertical * (rows - 1);
+  const totlaHorizontalGaps = gaps.horizontal * (cols - 1);
 
   return {
-    height: Math.floor((boardHeight - vgaps) / rows),
-    width: Math.floor((boardWidth - hgaps) / cols),
+    height: Math.floor((boardHeight - totalVerticalGaps) / rows),
+    width: Math.floor((boardWidth - totlaHorizontalGaps) / cols),
   };
 };
 
@@ -47,14 +46,13 @@ export const calculateTileSize = (canvas, rows, cols, hgap, vgap) => {
  * Calculates the position of a tile on the canvas based on its row and column indices.
  * @param {Object} pos An object containing the row and column indices of the tile.
  * @param {Object} tileSize An object containing the height and width of the tile.
- * @param {number} hgap Horizontal gap between tiles.
- * @param {number} vgap Vertical gap between tiles.
+ * @param {Object} gaps An object containing the horizontal and vertical gaps between tiles.
  * @returns {Object} An object containing the x and y coordinates of the tile on the canvas.
  */
-const getPositionOnCanvas = (pos, tileSize, hgap, vgap) => {
+const getPositionOnCanvas = (pos, tileSize, gaps) => {
   return {
-    x: pos.col * (tileSize.width + hgap),
-    y: pos.row * (tileSize.height + vgap),
+    x: pos.col * (tileSize.width + gaps.horizontal),
+    y: pos.row * (tileSize.height + gaps.vertical),
   };
 };
 
@@ -65,8 +63,7 @@ const getPositionOnCanvas = (pos, tileSize, hgap, vgap) => {
  * @param {number} group The group size of the tile.
  * @param {number} largestGroup The largest group size in the game.
  * @param {Object} tileSize An object containing the height and width of the tile.
- * @param {number} hgap Horizontal gap between tiles.
- * @param {number} vgap Vertical gap between tiles.
+ * @param {Object} gaps An object containing the horizontal and vertical gaps between tiles.
  * @returns {Object} An object containing the x and y coordinates of the tile on the canvas.
  */
 const getPositionOnCanvasCentered = (
@@ -74,15 +71,14 @@ const getPositionOnCanvasCentered = (
   group,
   largestGroup,
   tileSize,
-  hgap,
-  vgap
+  gaps
 ) => {
-  const { x, y } = getPositionOnCanvas(pos, tileSize, hgap, vgap);
+  const { x, y } = getPositionOnCanvas(pos, tileSize, gaps);
 
   return {
     // If the group is a and the largest one is b, then the row "misses" (b - a) tiles and gaps.
     // We want to put everything in the middle, so we need to add half of it to the x value.
-    x: x + ((tileSize.width + hgap) * (largestGroup - group)) / 2,
+    x: x + ((tileSize.width + gaps.horizontal) * (largestGroup - group)) / 2,
     y,
   };
 };
@@ -123,8 +119,7 @@ export const setLayout = (layout) => {
  * @param {HTMLCanvasElement} board The canvas element.
  * @param {Array} completedGroups The completed groups.
  * @param {Object} tileSize The size of each tile.
- * @param {number} hgap The horizontal gap between tiles.
- * @param {number} vgap The vertical gap between tiles.
+ * @param {Object} gaps The gaps between tiles.
  * @param {number} rows The number of rows in the grid.
  * @param {number} cols The number of columns in the grid.
  */
@@ -132,8 +127,7 @@ export const drawBanners = (
   board,
   completedGroups,
   tileSize,
-  hgap,
-  vgap,
+  gaps,
   rows,
   cols
 ) => {
@@ -159,8 +153,7 @@ export const drawBanners = (
           groupSize,
           cols,
           tileSize,
-          hgap,
-          vgap
+          gaps
         );
 
         tile.button.style.left = `${x}px`;
@@ -173,8 +166,7 @@ export const drawBanners = (
         groupSize,
         cols,
         tileSize,
-        hgap,
-        vgap
+        gaps
       );
 
       if (banner) {
@@ -191,7 +183,9 @@ export const drawBanners = (
         banner.classList.add(`group-${i + 1}`);
         banner.classList.add(`completed`);
 
-        banner.style.width = `${groupSize * (tileSize.width + hgap) - hgap}px`;
+        banner.style.width = `${
+          groupSize * (tileSize.width + gaps.horizontal) - gaps.horizontal
+        }px`;
         banner.style.height = `${tileSize.height}px`;
 
         banner.style.position = "absolute";
@@ -216,8 +210,7 @@ export const drawBanners = (
  * @param {Array<Object>} positions An array of objects containing row and column indices of the tiles.
  * @param {Set<Object>} remainingTiles A Set of objects containing information about the tiles to be drawn.
  * @param {Object} tileSize An object containing the height and width of the tile.
- * @param {number} hgap The horizontal gap between tiles.
- * @param {number} vgap The vertical gap between tiles.
+ * @param {Object} gaps An object containing the horizontal and vertical gaps between tiles.
  * @param {number} cols The number of columns on the board.
  * @param {string} layout The layout of the board. Must be either "spacious" or "compact".
  */
@@ -225,8 +218,7 @@ export const drawTiles = (
   positions,
   remainingTiles,
   tileSize,
-  hgap,
-  vgap,
+  gaps,
   cols,
   layout
 ) => {
@@ -253,11 +245,10 @@ export const drawTiles = (
         remainder,
         cols,
         tileSize,
-        hgap,
-        vgap
+        gaps
       );
     } else {
-      posXY = getPositionOnCanvas({ row, col }, tileSize, hgap, vgap);
+      posXY = getPositionOnCanvas({ row, col }, tileSize, gaps);
     }
 
     button.style.left = `${posXY.x}px`;
@@ -274,8 +265,7 @@ export const drawTiles = (
  * @param {Set} remainingTiles The set of remaining tiles.
  * @param {Array} completedGroups An array of completed groups.
  * @param {Object} tileSize An object containing the height and width of the tile.
- * @param {number} hgap The horizontal gap between tiles.
- * @param {number} vgap The vertical gap between tiles.
+ * @param {Object} gaps An object containing the horizontal and vertical gaps between tiles.
  * @param {number} rows The number of rows in the grid.
  * @param {number} cols The number of columns in the grid.
  */
@@ -285,8 +275,7 @@ export const drawBoard = (
   remainingTiles,
   completedGroups,
   tileSize,
-  hgap,
-  vgap,
+  gaps,
   rows,
   cols
 ) => {
@@ -298,10 +287,10 @@ export const drawBoard = (
   }
 
   // Draw the banners
-  drawBanners(board, completedGroups, tileSize, hgap, vgap, rows, cols);
+  drawBanners(board, completedGroups, tileSize, gaps, rows, cols);
 
   // Draw the remaining tiles
-  drawTiles(positions, remainingTiles, tileSize, hgap, vgap, cols, layout);
+  drawTiles(positions, remainingTiles, tileSize, gaps, cols, layout);
 };
 
 /**
@@ -359,8 +348,7 @@ export const updateTiles = (tiles, newTiles) => {
  * @param {Array} positions An array of positions for the tiles.
  * @param {Set} tiles A set of tile objects.
  * @param {Object} tileSize An object containing the height and width of the tile.
- * @param {number} hgap The horizontal gap between tiles.
- * @param {number} vgap The vertical gap between tiles.
+ * @param {Object} gaps An object containing the horizontal and vertical gaps between tiles.
  * @param {Set} selectedTiles A set of selected tiles.
  * @param {number} maxSelections The maximum number of tiles that can be selected.
  */
@@ -369,8 +357,7 @@ export const createButtons = (
   positions,
   tiles,
   tileSize,
-  hgap,
-  vgap,
+  gaps,
   selectedTiles,
   maxSelections
 ) => {
@@ -378,7 +365,7 @@ export const createButtons = (
 
   for (const tile of tiles) {
     const button = document.createElement("button");
-    const { x, y } = getPositionOnCanvas(positions[i++], tileSize, hgap, vgap);
+    const { x, y } = getPositionOnCanvas(positions[i++], tileSize, gaps);
 
     // Create the button
     button.classList.add("tile");

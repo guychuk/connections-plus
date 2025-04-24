@@ -1,5 +1,4 @@
 .env
-steps.txt
 node_modules/
 data/*
 !data/populate_db.py
