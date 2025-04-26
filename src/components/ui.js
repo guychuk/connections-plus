@@ -45,14 +45,18 @@ export const calculateTileSize = (canvas, rows, cols, gaps) => {
 /**
  * Calculates the position of a tile on the canvas based on its row and column indices.
  * @param {Object} pos An object containing the row and column indices of the tile.
- * @param {Object} tileSize An object containing the height and width of the tile.
- * @param {Object} gaps An object containing the horizontal and vertical gaps between tiles.
+ * @param {Object} boardConfig The board configuration object.
  * @returns {Object} An object containing the x and y coordinates of the tile on the canvas.
  */
-const getPositionOnCanvas = (pos, tileSize, gaps) => {
+const getPositionOnCanvas = (pos, boardConfig) => {
+  const tileWidth = boardConfig.tileSize.width;
+  const tileHeight = boardConfig.tileSize.height;
+  const horizontalGap = boardConfig.gaps.horizontal;
+  const verticalGap = boardConfig.gaps.vertical;
+
   return {
-    x: pos.col * (tileSize.width + gaps.horizontal),
-    y: pos.row * (tileSize.height + gaps.vertical),
+    x: pos.col * (tileWidth + horizontalGap),
+    y: pos.row * (tileHeight + verticalGap),
   };
 };
 
@@ -61,24 +65,20 @@ const getPositionOnCanvas = (pos, tileSize, gaps) => {
  * placing it in the center of the board (not on the left).
  * @param {Object} pos An object containing the row and column indices of the tile.
  * @param {number} group The group size of the tile.
- * @param {number} largestGroup The largest group size in the game.
- * @param {Object} tileSize An object containing the height and width of the tile.
- * @param {Object} gaps An object containing the horizontal and vertical gaps between tiles.
+ * @param {Object} boardConfig The board configuration object.
  * @returns {Object} An object containing the x and y coordinates of the tile on the canvas.
  */
-const getPositionOnCanvasCentered = (
-  pos,
-  group,
-  largestGroup,
-  tileSize,
-  gaps
-) => {
-  const { x, y } = getPositionOnCanvas(pos, tileSize, gaps);
+const getPositionOnCanvasCentered = (pos, group, boardConfig) => {
+  const { x, y } = getPositionOnCanvas(pos, boardConfig);
+
+  const tileWidth = boardConfig.tileSize.width;
+  const horizontalGap = boardConfig.gaps.horizontal;
+  const columns = boardConfig.cols;
 
   return {
     // If the group is a and the largest one is b, then the row "misses" (b - a) tiles and gaps.
     // We want to put everything in the middle, so we need to add half of it to the x value.
-    x: x + ((tileSize.width + gaps.horizontal) * (largestGroup - group)) / 2,
+    x: x + ((tileWidth + horizontalGap) * (columns - group)) / 2,
     y,
   };
 };
@@ -116,24 +116,16 @@ export const setLayout = (layout) => {
 
 /**
  * Draws the completed groups as banners on the board.
- * @param {HTMLCanvasElement} board The canvas element.
  * @param {Array} solvedGroups  The completed groups.
- * @param {Object} tileSize The size of each tile.
- * @param {Object} gaps The gaps between tiles.
- * @param {number} rows The number of rows in the grid.
- * @param {number} cols The number of columns in the grid.
+ * @param {Object} boardConfig The board configuration object.
  */
-export const drawBanners = (
-  board,
-  solvedGroups,
-  tileSize,
-  gaps,
-  rows,
-  cols
-) => {
-  let currentRow = rows - 1; // Start from the last row
+export const drawBanners = (solvedGroups, boardConfig) => {
+  let currentRow = boardConfig.rows - 1; // Start from the last row
+  const tileWidth = boardConfig.tileSize.width;
+  const tileHeight = boardConfig.tileSize.height;
+  const horizontalGap = boardConfig.gaps.horizontal;
 
-  for (let i = rows - 1; i >= 0; i--) {
+  for (let i = currentRow; i >= 0; i--) {
     const group = solvedGroups[i];
     const tiles = group.tiles;
     const groupSize = tiles.length;
@@ -151,9 +143,7 @@ export const drawBanners = (
         const { x, y } = getPositionOnCanvasCentered(
           { row: currentRow, col: column },
           groupSize,
-          cols,
-          tileSize,
-          gaps
+          boardConfig
         );
 
         tile.button.style.left = `${x}px`;
@@ -164,9 +154,7 @@ export const drawBanners = (
       const { x, y } = getPositionOnCanvasCentered(
         { row: currentRow, col: 0 },
         groupSize,
-        cols,
-        tileSize,
-        gaps
+        boardConfig
       );
 
       if (banner) {
@@ -184,9 +172,9 @@ export const drawBanners = (
         banner.classList.add(`completed`);
 
         banner.style.width = `${
-          groupSize * (tileSize.width + gaps.horizontal) - gaps.horizontal
+          groupSize * (tileWidth + horizontalGap) - horizontalGap
         }px`;
-        banner.style.height = `${tileSize.height}px`;
+        banner.style.height = `${tileHeight}px`;
 
         banner.style.position = "absolute";
         banner.style.left = `${x}px`;
@@ -207,25 +195,18 @@ export const drawBanners = (
 
 /**
  * Draws the tiles on the board.
- * @param {Array<Object>} positions An array of objects containing row and column indices of the tiles.
- * @param {Set<Object>} unsolvedTiles A Set of objects containing information about the tiles to be drawn.
- * @param {Object} tileSize An object containing the height and width of the tile.
- * @param {Object} gaps An object containing the horizontal and vertical gaps between tiles.
- * @param {number} cols The number of columns on the board.
+ * @param {Array} positions An array of objects containing row and column indices of the tiles.
+ * @param {Set} unsolvedTiles A Set of objects containing information about the tiles to be drawn.
+ * @param {Object} boardConfig The board configuration object.
  * @param {string} layout The layout of the board. Must be either "spacious" or "compact".
  */
-export const drawTiles = (
-  positions,
-  unsolvedTiles,
-  tileSize,
-  gaps,
-  cols,
-  layout
-) => {
+export const drawTiles = (positions, unsolvedTiles, boardConfig, layout) => {
   if (layout !== "spacious" && layout !== "compact") {
     console.error("Layout must be either 'spacious' or 'compact'");
     showErrorScreen();
   }
+
+  const cols = boardConfig.cols;
 
   const rowsIfCompact = Math.ceil(unsolvedTiles.size / cols);
 
@@ -240,15 +221,9 @@ export const drawTiles = (
 
     // Center the last row of compact layout
     if (layout === "compact" && remainder > 0 && row === rowsIfCompact - 1) {
-      posXY = getPositionOnCanvasCentered(
-        { row, col },
-        remainder,
-        cols,
-        tileSize,
-        gaps
-      );
+      posXY = getPositionOnCanvasCentered({ row, col }, remainder, boardConfig);
     } else {
-      posXY = getPositionOnCanvas({ row, col }, tileSize, gaps);
+      posXY = getPositionOnCanvas({ row, col }, boardConfig);
     }
 
     button.style.left = `${posXY.x}px`;
@@ -260,23 +235,11 @@ export const drawTiles = (
 
 /**
  * Draws the board with the remaining tiles and completed groups.
- * @param {HTMLCanvasElement} board The canvas element.
  * @param {Array} positions An array of positions for the tiles.
  * @param {Object} gameState The game state object containing completed groups and remaining tiles.
- * @param {Object} tileSize An object containing the height and width of the tile.
- * @param {Object} gaps An object containing the horizontal and vertical gaps between tiles.
- * @param {number} rows The number of rows in the grid.
- * @param {number} cols The number of columns in the grid.
+ * @param {Object} boardConfig The board configuration object.
  */
-export const drawBoard = (
-  board,
-  positions,
-  gameState,
-  tileSize,
-  gaps,
-  rows,
-  cols
-) => {
+export const drawBoard = (positions, gameState, boardConfig) => {
   const layout = getLayout();
 
   if (layout !== "spacious" && layout !== "compact") {
@@ -284,11 +247,14 @@ export const drawBoard = (
     showErrorScreen();
   }
 
+  const solvedGroups = gameState.solvedGroups;
+  const unsolvedTiles = gameState.unsolvedTiles;
+
   // Draw the banners
-  drawBanners(board, gameState.solvedGroups, tileSize, gaps, rows, cols);
+  drawBanners(solvedGroups, boardConfig);
 
   // Draw the remaining tiles
-  drawTiles(positions, gameState.unsolvedTiles, tileSize, gaps, cols, layout);
+  drawTiles(positions, unsolvedTiles, boardConfig, layout);
 };
 
 /**
@@ -342,26 +308,19 @@ export const updateTiles = (tiles, newTiles) => {
 
 /**
  * Creates buttons for the tiles and put them on the board.
- * @param {HTMLCanvasElement} board The board element containing the tiles.
  * @param {Array} positions An array of positions for the tiles.
  * @param {Object} gameState The game state object.
- * @param {Object} tileSize An object containing the height and width of the tile.
- * @param {Object} gaps An object containing the horizontal and vertical gaps between tiles.
- * @param {number} maxSelections The maximum number of tiles that can be selected.
+ * @param {Object} boardConfig The board configuration object.
  */
-export const createButtons = (
-  board,
-  positions,
-  gameState,
-  tileSize,
-  gaps,
-  maxSelections
-) => {
+export const createButtons = (positions, gameState, boardConfig) => {
   let i = 0;
+
+  const tileSize = boardConfig.tileSize;
+  const maxSelections = boardConfig.cols;
 
   for (const tile of gameState.tileSet) {
     const button = document.createElement("button");
-    const { x, y } = getPositionOnCanvas(positions[i++], tileSize, gaps);
+    const { x, y } = getPositionOnCanvas(positions[i++], boardConfig);
 
     // Create the button
     button.classList.add("tile");

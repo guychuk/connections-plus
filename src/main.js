@@ -103,7 +103,7 @@ if (!initialLayout) {
 (async () => {
   /* ---- Initialize the game ---- */
 
-  let { gameState, positions, tileSize } = await initializeGame(
+  let { gameState, positions, boardConfig } = await initializeGame(
     supabaseClient,
     difficultyButton.dataset.difficulty,
     groups,
@@ -111,7 +111,7 @@ if (!initialLayout) {
     gaps
   );
 
-  drawBoard(board, positions, gameState, tileSize, gaps, rows, cols);
+  drawBoard(positions, gameState, boardConfig);
 
   /* ---- Set the game control button events ---- */
 
@@ -122,15 +122,7 @@ if (!initialLayout) {
   const solveButton = document.getElementById("solve-button");
 
   shuffleButton.addEventListener("click", () => {
-    events.clickShuffle(
-      positions,
-      board,
-      gameState,
-      tileSize,
-      gaps,
-      rows,
-      cols
-    );
+    events.clickShuffle(positions, gameState, boardConfig);
   });
 
   newGameButton.addEventListener("click", async () => {
@@ -145,11 +137,7 @@ if (!initialLayout) {
       supabaseClient,
       groups,
       positions,
-      board,
-      tileSize,
-      gaps,
-      rows,
-      cols
+      boardConfig
     );
   });
 
@@ -160,12 +148,10 @@ if (!initialLayout) {
   submitButton.addEventListener("click", (event) => {
     events.clickSubmit(
       event,
-      board,
       gameState,
       groups,
       positions,
-      tileSize,
-      gaps,
+      boardConfig,
       shuffleButton,
       deselectButton,
       difficultyButton,
@@ -180,12 +166,10 @@ if (!initialLayout) {
 
   solveButton.addEventListener("click", async () => {
     await events.clickSolve(
-      board,
       gameState,
       groups,
       positions,
-      tileSize,
-      gaps,
+      boardConfig,
       [
         solveButton,
         shuffleButton,
@@ -206,12 +190,8 @@ if (!initialLayout) {
       settingsPanel,
       blurOverlay,
       positions,
-      board,
       gameState,
-      tileSize,
-      gaps,
-      rows,
-      cols
+      boardConfig
     );
   });
 })();

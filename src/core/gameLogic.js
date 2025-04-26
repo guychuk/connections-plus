@@ -205,14 +205,16 @@ export const initializeGame = async (
     gameOver: false,
   };
 
-  createButtons(
-    board,
-    positions,
-    gameState,
-    tileSize,
-    gaps,
-    cols // max selections
-  );
+  const boardConfig = {
+    board: board,
+    freePositions: positions,
+    tileSize: tileSize,
+    gaps: gaps,
+    rows: rows,
+    cols: cols,
+  };
+
+  createButtons(positions, gameState, boardConfig);
 
   // Shuffle board
   shuffleBoard(tileSet, positions, getLayout());
@@ -220,7 +222,7 @@ export const initializeGame = async (
   return {
     gameState,
     positions,
-    tileSize,
+    boardConfig,
   };
 };
 
