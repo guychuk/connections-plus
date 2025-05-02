@@ -1,0 +1,13 @@
+{
+  "functions": {
+    "api/ping_supabase.py": {
+      "runtime": "python3.9"
+    }
+  },
+  "cron": [
+    {
+      "path": "/api/ping_supabase",
+      "schedule": "0 0 */6 * *"
+    }
+  ]
+}
