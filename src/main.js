@@ -84,14 +84,6 @@ const horizontalGap = parseFloat(boardCSS.columnGap);
 const verticalGap = parseFloat(boardCSS.rowGap);
 const gaps = { horizontal: horizontalGap, vertical: verticalGap };
 
-/* --- Initialize difficulty and difficulty button --- */
-
-const difficultyButton = document.getElementById("difficulty-button");
-difficultyButton.dataset.difficulty = config["defaultDifficulty"];
-difficultyButton.textContent = getTextForDifficultyButton(
-  difficultyButton.dataset.difficulty
-);
-
 // Set initial layout
 
 let initialLayout = getLayout();
@@ -100,12 +92,23 @@ if (!initialLayout) {
   initialLayout = setLayout(config["layout"]);
 }
 
+// Get the buttons
+
+const gameControlButtons = {
+  deselect: document.getElementById("deselect-all-button"),
+  difficulty: document.getElementById("difficulty-button"),
+  newGame: document.getElementById("new-game-button"),
+  shuffle: document.getElementById("shuffle-button"),
+  solve: document.getElementById("solve-button"),
+  submit: document.getElementById("submit-button"),
+};
+
 (async () => {
   /* ---- Initialize the game ---- */
 
   let { gameState, positions, boardConfig } = await initializeGame(
     supabaseClient,
-    difficultyButton.dataset.difficulty,
+    config["defaultDifficulty"],
     groups,
     board,
     gaps
@@ -115,24 +118,19 @@ if (!initialLayout) {
 
   /* ---- Set the game control button events ---- */
 
-  const shuffleButton = document.getElementById("shuffle-button");
-  const newGameButton = document.getElementById("new-game-button");
-  const deselectButton = document.getElementById("deselect-all-button");
-  const submitButton = document.getElementById("submit-button");
-  const solveButton = document.getElementById("solve-button");
+  gameControlButtons.difficulty.dataset.difficulty =
+    config["defaultDifficulty"];
+  gameControlButtons.difficulty.textContent = getTextForDifficultyButton(
+    config["defaultDifficulty"]
+  );
 
-  shuffleButton.addEventListener("click", () => {
+  gameControlButtons.shuffle.addEventListener("click", () => {
     events.clickShuffle(positions, gameState, boardConfig);
   });
 
-  newGameButton.addEventListener("click", async () => {
+  gameControlButtons.newGame.addEventListener("click", async () => {
     events.clickNewGame(
-      shuffleButton,
-      submitButton,
-      deselectButton,
-      difficultyButton,
-      newGameButton,
-      solveButton,
+      gameControlButtons,
       gameState,
       supabaseClient,
       groups,
@@ -141,44 +139,33 @@ if (!initialLayout) {
     );
   });
 
-  deselectButton.addEventListener("click", () => {
+  gameControlButtons.deselect.addEventListener("click", () => {
     events.clickDeselect(gameState.activeTiles);
   });
 
-  submitButton.addEventListener("click", (event) => {
+  gameControlButtons.submit.addEventListener("click", () => {
     events.clickSubmit(
-      event,
       gameState,
       groups,
       positions,
       boardConfig,
-      shuffleButton,
-      deselectButton,
-      difficultyButton,
-      solveButton
+      gameControlButtons
     );
   });
 
-  difficultyButton.addEventListener("click", (event) => {
-    events.clickDifficulty(event);
-    newGameButton.click();
-  });
-
-  solveButton.addEventListener("click", async () => {
+  gameControlButtons.solve.addEventListener("click", async () => {
     await events.clickSolve(
       gameState,
       groups,
       positions,
       boardConfig,
-      [
-        solveButton,
-        shuffleButton,
-        submitButton,
-        deselectButton,
-        difficultyButton,
-      ],
-      newGameButton
+      gameControlButtons
     );
+  });
+
+  gameControlButtons.difficulty.addEventListener("click", (event) => {
+    events.clickDifficulty(event);
+    gameControlButtons.newGame.click();
   });
 
   /* ---- Set the game's apply settings button events ---- */

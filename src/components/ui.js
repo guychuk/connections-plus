@@ -502,10 +502,15 @@ export function celebrate(duration) {
 
 /**
  * Show the win toast and celebrate with confetti.
- * @param {Array} buttons The buttons to disable.
+ * @param {Object} gameControlButtons The game control buttons object.
  */
-export function win(buttons) {
-  disableButtons(buttons);
+export function win(gameControlButtons) {
+  const gameControlButtonsArray = Object.values(gameControlButtons);
+  const toDisable = gameControlButtonsArray.filter(
+    (button) => button !== gameControlButtons.newGame
+  );
+
+  disableButtons(toDisable);
   TOAST_WINNER.showToast();
   celebrate(confettiDuration);
 }

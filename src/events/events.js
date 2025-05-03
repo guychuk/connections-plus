@@ -21,29 +21,19 @@ import { delay, makePositions } from "../core/utils";
 
 /**
  * Handles the submit button being clicked.
- * @param {Event} event The event being handled.
  * @param {Object} gameState The game state object.
  * @param {Array} groups The array of group sizes in the game, sorted.
  * @param {Array} positions The array of positions on the board, where each position is an object with x and y properties.
  * @param {Object} boardConfig The board configuration object.
- * @param {HTMLButtonElement} shuffleButton The shuffle button element.
- * @param {HTMLButtonElement} deselectButton The deselect button element.
- * @param {HTMLButtonElement} difficultyButton The difficulty button element.
- * @param {HTMLButtonElement} solveButton The solve button element.
+ * @param {Object} gameControlButtons The game control buttons object.
  */
 export const clickSubmit = (
-  event,
   gameState,
   groups,
   positions,
   boardConfig,
-  shuffleButton,
-  deselectButton,
-  difficultyButton,
-  solveButton
+  gameControlButtons
 ) => {
-  const submitButton = event.currentTarget;
-
   const { toast, newlyCompletedGroup } = submitToast(gameState, groups);
 
   // Should never happen
@@ -57,17 +47,15 @@ export const clickSubmit = (
 
   // Update completed groups
   if (newlyCompletedGroup !== null) {
-    completeGroup(
-      newlyCompletedGroup[0].groupIndex,
-      gameState,
-      positions,
-      groups
-    );
+    const groupIndex = newlyCompletedGroup[0].groupIndex;
+
+    completeGroup(groupIndex, gameState, positions, groups);
 
     drawBoard(positions, gameState, boardConfig);
   }
 
   // When pressing the button fast enough, the toasts get stuck.
+  const submitButton = gameControlButtons.submit;
   submitButton.disabled = true;
 
   if (gameState.unsolvedTiles.size > 0) {
@@ -78,13 +66,7 @@ export const clickSubmit = (
     gameState.gameWon = true;
     gameState.gameOver = true;
 
-    win([
-      shuffleButton,
-      submitButton,
-      solveButton,
-      deselectButton,
-      difficultyButton,
-    ]);
+    win(gameControlButtons);
   }
 };
 
@@ -112,12 +94,7 @@ export const clickDifficulty = (event) => {
 
 /**
  * Event handler for the new game button.
- * @param {HTMLElement} shuffleButton The shuffle button.
- * @param {HTMLElement} submitButton The submit button.
- * @param {HTMLElement} deselectButton The deselect all button.
- * @param {HTMLElement} difficultyButton The difficulty button.
- * @param {HTMLElement} newGameButton The new game button.
- * @param {HTMLElement} solveButton The solve button.
+ * @param {Object} gameControlButtons The game control buttons object.
  * @param {Object} gameState The game state object.
  * @param {SupabaseClient} supabaseClient The Supabase client.
  * @param {Array} groups The array of group sizes.
@@ -125,29 +102,21 @@ export const clickDifficulty = (event) => {
  * @param {Object} boardConfig The board configuration object.
  */
 export const clickNewGame = async (
-  shuffleButton,
-  submitButton,
-  deselectButton,
-  difficultyButton,
-  newGameButton,
-  solveButton,
+  gameControlButtons,
   gameState,
   supabaseClient,
   groups,
   positions,
   boardConfig
 ) => {
+  const gameControlButtonsArray = Object.values(gameControlButtons);
+
   // Disable the buttons until the game is reset
-  disableButtons([
-    shuffleButton,
-    submitButton,
-    deselectButton,
-    difficultyButton,
-    newGameButton,
-    solveButton,
-  ]);
+  disableButtons(gameControlButtonsArray);
 
   clearBanners(gameState.solvedGroups);
+
+  const difficultyButton = gameControlButtons.difficulty;
 
   await resetGame(
     supabaseClient,
@@ -160,14 +129,7 @@ export const clickNewGame = async (
   clickShuffle(positions, gameState, boardConfig);
 
   // Enable the buttons
-  enableButtons([
-    shuffleButton,
-    submitButton,
-    deselectButton,
-    difficultyButton,
-    newGameButton,
-    solveButton,
-  ]);
+  enableButtons(gameControlButtonsArray);
 };
 
 /**
@@ -202,19 +164,18 @@ export const clickDeselect = (activeTiles) => {
  * @param {Array} groups The array of group sizes.
  * @param {Array} positions The array of positions for the tiles.
  * @param {Object} boardConfig The board configuration object.
- * @param {Array} buttonsToDisable An array of buttons to disable during the solve process.
- * @param {HTMLButtonElement} newGameButton The new game button to enable after the solve process.
+ * @param {Object} gameControlButtons The game control buttons object.
  */
 export const clickSolve = async (
   gameState,
   groups,
   positions,
   boardConfig,
-  buttonsToDisable,
-  newGameButton
+  gameControlButtons
 ) => {
-  disableButtons([newGameButton]);
-  disableButtons(buttonsToDisable);
+  const gameControlButtonsArray = Object.values(gameControlButtons);
+
+  disableButtons(gameControlButtonsArray);
 
   const iteration = async () => {
     solveNextGroup(groups, gameState, positions);
@@ -231,7 +192,7 @@ export const clickSolve = async (
   gameState.gameWon = false;
   gameState.gameOver = true;
 
-  enableButtons([newGameButton]);
+  enableButtons([gameControlButtons.newGame]);
 };
 
 /* ------------------------
