@@ -1,7 +1,7 @@
 # Connectons+
 
 <p align="center">
-  <img src="public/icon-pink.png" alt="Logo" width="100" height="100">
+  <img src="public/icon.png" alt="Logo" width="100" height="100">
 </p>
 
 <p align="center">
@@ -76,7 +76,8 @@ You can play it right here:
 ### Prerequisites
 - [Node.js](https://nodejs.org/) (v14 or higher)
 - npm (comes with Node)
-- Supabase account (for database features)
+- [Supabase](https://supabase.com/) account (for database features)
+- [Python 3.8](https://www.python.org/) (or higher)
 
 ### Local Development
 
@@ -86,14 +87,34 @@ You can play it right here:
    cd connections_plus
    ```
 
-2. **Install dependencies**
+2. **Set up a Python virtual environment (for the DB scripts)**
+   - Create a virtual environment:
+     ```bash
+     python -m venv venv
+     ```
+   - Activate the virtual environment:
+     - On Windows:
+       ```bash
+       venv\Scripts\activate
+       ```
+     - On macOS/Linux:
+       ```bash
+       source venv/bin/activate
+       ```
+
+3. **Install Python dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Install Node.js dependencies**
    ```bash
    npm install
    ```
 
-3. **Configure Supabase**
+5. **Configure Supabase**
    - Create an account at [Supabase](https://supabase.com/) and start a new project.
-   - Create the necessary tables, edge functions and RLS (find them in `/data`).
+   - Create the necessary tables, edge functions, and RLS (find them in `/data`).
    - In the project settings, grab your Project URL and anon public key.
    - Create a `.env` file in the root directory.
    - Add your Supabase URL and anon key:
@@ -102,13 +123,13 @@ You can play it right here:
      VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
      ```
 
-4. **Start the development server**
+6. **Start the development server**
    ```bash
    npm run dev
    ```
 
-5. **Open your browser** and navigate to:
-   ```
+7. **Open your browser** and navigate to:
+   ```bash
    http://localhost:5173
    ```
 

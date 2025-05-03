@@ -1,9 +1,6 @@
 .env
 node_modules/
-data/*
-!data/populate_db.py
-!data/scheme.sql
-!data/functions
-!data/rls_policies
+data/categories.txt
 dist/
-icons.pptx
+.venv
+.vercel
