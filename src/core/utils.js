@@ -6,7 +6,7 @@ import { showErrorScreen } from "../components/ui";
  * @param {number} k Number of choices (0 <= k <= n) [pass -1 for k=n which is the default].
  * @returns {Array} An array with k random choices from [1, n].
  */
-export const getRandomNums = (n, k = -1) => {
+const getRandomNums = (n, k = -1) => {
   let options = Array.from({ length: n }, (_, index) => index + 1);
   let chosen = 0;
 

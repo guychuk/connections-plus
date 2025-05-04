@@ -12,7 +12,7 @@ import { delay, makePositions } from "../core/utils";
  * @param {Object} boardConfig The board configuration object.
  * @param {Object} gameControlButtons The game control buttons object.
  */
-export const clickSubmit = (
+const clickSubmit = (
   gameState,
   groups,
   positions,
@@ -59,7 +59,7 @@ export const clickSubmit = (
  * Event handler for the difficulty button.
  * @param {MouseEvent} event The event when the user clicks the difficulty button.
  */
-export const clickDifficulty = (event) => {
+const clickDifficulty = (event) => {
   const button = event.currentTarget;
 
   switch (button.dataset.difficulty) {
@@ -86,7 +86,7 @@ export const clickDifficulty = (event) => {
  * @param {Array} positions The array of positions for the tiles.
  * @param {Object} boardConfig The board configuration object.
  */
-export const clickNewGame = async (
+const clickNewGame = async (
   gameControlButtons,
   gameState,
   supabaseClient,
@@ -123,7 +123,7 @@ export const clickNewGame = async (
  * @param {Object} gameState The game state object.
  * @param {Object} boardConfig The board configuration object.
  */
-export const clickShuffle = (positions, gameState, boardConfig) => {
+const clickShuffle = (positions, gameState, boardConfig) => {
   UI.shuffleBoard(gameState.unsolvedTiles, positions, UI.getLayout());
 
   UI.drawBoard(positions, gameState, boardConfig);
@@ -151,7 +151,7 @@ export const clickDeselect = (activeTiles) => {
  * @param {Object} boardConfig The board configuration object.
  * @param {Object} gameControlButtons The game control buttons object.
  */
-export const clickSolve = async (
+const clickSolve = async (
   gameState,
   groups,
   positions,
@@ -263,7 +263,7 @@ export const clickSettings = (event) => {
  * @param {Object} gameState The game state object.
  * @param {Object} boardConfig The board configuration object.
  */
-export const clickApply = (
+const clickApply = (
   settingsPanel,
   blurOverlay,
   positions,

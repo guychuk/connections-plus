@@ -61,7 +61,7 @@ const makeTile = (id, term, category, groupSize, groupIndex, button) => {
  * @param {string} difficulty difficulty
  * @returns {Set} set of tiles.
  */
-export const getNewTiles = async (client, groups, difficulty) => {
+const getNewTiles = async (client, groups, difficulty) => {
   const numGroups = groups.length;
   const numTags = getNumOfTags(difficulty, numGroups);
 

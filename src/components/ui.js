@@ -103,7 +103,7 @@ export const setLayout = (layout) => {
  * @param {Array} solvedGroups  The completed groups.
  * @param {Object} boardConfig The board configuration object.
  */
-export const drawBanners = (solvedGroups, boardConfig) => {
+const drawBanners = (solvedGroups, boardConfig) => {
   let currentRow = boardConfig.rows - 1; // Start from the last row
   const tileWidth = boardConfig.tileSize.width;
   const tileHeight = boardConfig.tileSize.height;
@@ -201,7 +201,7 @@ export function clearBanners(solvedGroups) {
  * @param {Object} boardConfig The board configuration object.
  * @param {string} layout The layout of the board. Must be either "spacious" or "compact".
  */
-export const drawTiles = (positions, unsolvedTiles, boardConfig, layout) => {
+const drawTiles = (positions, unsolvedTiles, boardConfig, layout) => {
   if (layout !== "spacious" && layout !== "compact") {
     console.error("Layout must be either 'spacious' or 'compact'");
     showErrorScreen();
@@ -460,7 +460,7 @@ export function showErrorScreen() {
  * Celebrate with confetti.
  * @param {number} duration The duration of the celebration in milliseconds.
  */
-export function celebrate(duration) {
+function celebrate(duration) {
   const isMobile = window.innerWidth <= 768;
 
   var animationEnd = Date.now() + duration;
@@ -540,7 +540,7 @@ export function spin(event) {
 /**
  * Set the theme based on the user's preference.
  */
-export function setThemeBasedOnPreference() {
+function setThemeBasedOnPreference() {
   const prefersDarkScheme = window.matchMedia(
     "(prefers-color-scheme: dark)"
   ).matches;
@@ -558,7 +558,7 @@ export function setThemeBasedOnPreference() {
  * Listens to changes in the user's preferred color scheme and
  * updates the theme accordingly.
  */
-export function setInitialTheme() {
+function setInitialTheme() {
   setThemeBasedOnPreference();
   window
     .matchMedia("(prefers-color-scheme: dark)")
