@@ -6,9 +6,8 @@ import { clickScreenButton, clickSettings } from "../events/events.js";
 
 export const CLASS_BLURRED = "blurred";
 export const CLASS_DARK_THEME = "dark-theme";
-const MISTAKE_SYMBOL = "💔";
-const REMAINIG_MISTAKE_LIGHT = "🤍";
-const REMAINIG_MISTAKE_DARK = "🩶";
+const MISTAKE_SYMBOL = "☠️";
+const REMAINIG_MISTAKE = "❤️";
 
 /* --- Tile Position & Size --- */
 
@@ -520,8 +519,6 @@ function setThemeBasedOnPreference() {
   } else {
     document.body.classList.remove(CLASS_DARK_THEME);
   }
-
-  updateMistakesColor();
 }
 
 /**
@@ -536,8 +533,6 @@ function setInitialTheme() {
     .addEventListener("change", setThemeBasedOnPreference);
 }
 
-const isDarkTheme = () => document.body.classList.contains(CLASS_DARK_THEME);
-
 /* --- Mistakes --- */
 
 /**
@@ -547,20 +542,19 @@ export const addMistake = () => {
   const mistakesElement = document.getElementById("mistakes");
   const currentText = mistakesElement.textContent;
 
-  const remaining = isDarkTheme()
-    ? REMAINIG_MISTAKE_DARK
-    : REMAINIG_MISTAKE_LIGHT;
-
   let newText = "";
 
   let foundRemainig = false;
 
-  for (const char of currentText) {
-    if (!foundRemainig && char === remaining) {
+  const segmenter = new Intl.Segmenter(undefined, { granularity: "grapheme" });
+  const graphemes = [...segmenter.segment(currentText)];
+
+  for (const { segment } of graphemes) {
+    if (!foundRemainig && segment === REMAINIG_MISTAKE) {
       newText += MISTAKE_SYMBOL;
       foundRemainig = true;
     } else {
-      newText += char;
+      newText += segment;
     }
   }
 
@@ -568,42 +562,13 @@ export const addMistake = () => {
 };
 
 /**
- * Updates the color of the mistakes counter UI based on the current theme.
- * @function
- */
-function updateMistakesColor() {
-  const mistakesElement = document.getElementById("mistakes");
-  if (!mistakesElement) return;
-
-  const currentText = mistakesElement.textContent || "";
-  const remaining = isDarkTheme()
-    ? REMAINIG_MISTAKE_DARK
-    : REMAINIG_MISTAKE_LIGHT;
-
-  let newText = "";
-
-  for (const char of currentText) {
-    if (char === MISTAKE_SYMBOL) {
-      newText += char;
-    } else {
-      newText += remaining;
-    }
-  }
-
-  mistakesElement.textContent = newText;
-}
-
-/**
  * Resets the mistakes counter UI by repeating the remaining mistake symbol for the specified number of allowed mistakes.
  * @param {number} mistakesAllowed The number of mistakes allowed in the game.
  */
 export function resetMistakes(mistakesAllowed) {
   const mistakesElement = document.getElementById("mistakes");
-  const remaining = isDarkTheme()
-    ? REMAINIG_MISTAKE_DARK
-    : REMAINIG_MISTAKE_LIGHT;
 
-  mistakesElement.textContent = remaining.repeat(mistakesAllowed);
+  mistakesElement.textContent = REMAINIG_MISTAKE.repeat(mistakesAllowed);
 }
 
 /* --- General --- */
@@ -620,7 +585,6 @@ export function initializeGameUI(config) {
   const themeToggleButton = document.getElementById("theme-toggle-button");
   themeToggleButton.addEventListener("click", () => {
     document.body.classList.toggle(CLASS_DARK_THEME);
-    updateMistakesColor();
   });
 
   // Set the theme based on the user's preference
