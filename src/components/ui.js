@@ -2,10 +2,13 @@ import * as utils from "../core/utils.js";
 import * as toasts from "./toasts.js";
 import confetti from "canvas-confetti";
 import { confettiDuration } from "../config/config.json";
-import { clickError, clickSettings } from "../events/events.js";
+import { clickScreenButton, clickSettings } from "../events/events.js";
 
 export const CLASS_BLURRED = "blurred";
 export const CLASS_DARK_THEME = "dark-theme";
+const MISTAKE_SYMBOL = "💔";
+const REMAINIG_MISTAKE_LIGHT = "🤍";
+const REMAINIG_MISTAKE_DARK = "🩶";
 
 /* --- Tile Position & Size --- */
 
@@ -384,54 +387,11 @@ export const enableButtons = (buttons) => {
 /* --- Toasts --- */
 
 /**
- * Creates a Toastify message for submitting a set of tiles.
- * @param {Object} gameState The game state object.
- * @param {Array} groups An array of group sizes in the game, sorted.
- * @returns {Object} A Toastify message object and the newly completed group.
- */
-export const submitToast = (gameState, groups) => {
-  const group = gameState.activeTiles.size;
-
-  let toast = null;
-
-  let newlyCompletedGroup = null;
-
-  if (group < groups[0]) {
-    toast = toasts.makeTooFewToast(groups[0]);
-  } else {
-    const activeTilesHashed = utils.hashTilesSet(gameState.activeTiles);
-
-    if (gameState.submissionHistory.has(activeTilesHashed)) {
-      toast = toasts.makeDuplicateToast();
-    } else {
-      gameState.submissionHistory.add(activeTilesHashed);
-
-      const correctTiles = Array.from(gameState.activeTiles).reduce(
-        (acc, tile) => (tile.groupSize === group ? acc + 1 : acc),
-        0
-      );
-
-      if (correctTiles === group) {
-        newlyCompletedGroup = [...gameState.activeTiles];
-        toast = toasts.makeCorrectToast();
-      } else if (2 * correctTiles > group) {
-        // ? Maybe give other info (largest group of common categoty, or something else)
-        toast = toasts.makePartialToast(correctTiles, group);
-      } else {
-        toast = toasts.makeIncorrectToast();
-      }
-    }
-  }
-
-  return { toast, newlyCompletedGroup };
-};
-
-/**
  * Removes all Toastify messages from the DOM.
  */
 export const clearToasts = () => {
-  const toasts = document.querySelectorAll(".toastify");
-  toasts.forEach((toast) => toast.remove());
+  const allToasts = document.querySelectorAll(".toastify");
+  allToasts.forEach((toast) => toast.remove());
 };
 
 /* --- Settings Panel --- */
@@ -445,21 +405,44 @@ export const closeSettingsPanel = (settingsPanel, blurOverlay) => {
 
 /**
  * Displays the error screen by hiding all other elements except the theme toggle button.
- * Triggers an error toast notification.
  */
 export function showErrorScreen() {
-  // Hide all body children
+  // Hide all body children except the header
   [...document.body.children].forEach((child) => {
-    if (child.id !== "error-screen" && child.id !== "theme-toggle-button") {
+    if (child.id !== "error-screen" && child.tagName !== "HEADER") {
       child.style.display = "none";
     }
   });
 
+  // Hide Settings button
+  const settingsButton = document.getElementById("settings-button");
+  settingsButton.style.display = "none";
+
   // Show error screen
   const errorScreen = document.getElementById("error-screen");
   errorScreen.style.display = "flex";
+}
 
-  toasts.makeErrorToast().showToast();
+/* --- Loser Screen --- */
+
+/**
+ * Displays the loser screen by hiding all other elements except the theme toggle button.
+ */
+export function showLoserScreen() {
+  // Hide all body children except the header
+  [...document.body.children].forEach((child) => {
+    if (child.id !== "loser-screen" && child.tagName !== "HEADER") {
+      child.style.display = "none";
+    }
+  });
+
+  // Hide Settings button
+  const settingsButton = document.getElementById("settings-button");
+  settingsButton.style.display = "none";
+
+  // Show loser screen
+  const loserScreen = document.getElementById("loser-screen");
+  loserScreen.style.display = "flex";
 }
 
 /* --- Effects --- */
@@ -555,10 +538,12 @@ function setThemeBasedOnPreference() {
 
   // Apply dark theme if preferred
   if (prefersDarkScheme) {
-    document.body.classList.add("dark-theme");
+    document.body.classList.add(CLASS_DARK_THEME);
   } else {
-    document.body.classList.remove("dark-theme");
+    document.body.classList.remove(CLASS_DARK_THEME);
   }
+
+  updateMistakesColor();
 }
 
 /**
@@ -572,6 +557,77 @@ function setInitialTheme() {
     .matchMedia("(prefers-color-scheme: dark)")
     .addEventListener("change", setThemeBasedOnPreference);
 }
+
+const isDarkTheme = () => document.body.classList.contains(CLASS_DARK_THEME);
+
+/* --- Mistakes --- */
+
+
+/**
+ * Updates the mistakes counter UI by adding a mistake symbol.
+ */
+export const addMistake = () => {
+  const mistakesElement = document.getElementById("mistakes");
+  const currentText = mistakesElement.textContent;
+
+  const remaining = isDarkTheme()
+    ? REMAINIG_MISTAKE_DARK
+    : REMAINIG_MISTAKE_LIGHT;
+
+  let newText = "";
+
+  let foundRemainig = false;
+
+  for (const char of currentText) {
+    if (!foundRemainig && char === remaining) {
+      newText += MISTAKE_SYMBOL;
+      foundRemainig = true;
+    } else {
+      newText += char;
+    }
+  }
+
+  mistakesElement.textContent = newText;
+};
+
+/**
+ * Updates the color of the mistakes counter UI based on the current theme.
+ * @function
+ */
+function updateMistakesColor(){
+  const mistakesElement = document.getElementById("mistakes");
+  if (!mistakesElement) return;
+
+  const currentText = mistakesElement.textContent || "";
+  const remaining = isDarkTheme()
+    ? REMAINIG_MISTAKE_DARK
+    : REMAINIG_MISTAKE_LIGHT;
+
+  let newText = "";
+
+  for (const char of currentText) {
+    if (char === MISTAKE_SYMBOL) {
+      newText += char;
+    } else {
+      newText += remaining;
+    }
+  }
+
+  mistakesElement.textContent = newText;
+};
+
+/**
+ * Resets the mistakes counter UI by repeating the remaining mistake symbol for the specified number of allowed mistakes.
+ * @param {number} mistakesAllowed The number of mistakes allowed in the game.
+ */
+export function resetMistakes(mistakesAllowed){
+  const mistakesElement = document.getElementById("mistakes");
+  const remaining = isDarkTheme()
+    ? REMAINIG_MISTAKE_DARK
+    : REMAINIG_MISTAKE_LIGHT;
+
+  mistakesElement.textContent = remaining.repeat(mistakesAllowed);
+};
 
 /* --- General --- */
 
@@ -587,6 +643,7 @@ export function initializeGameUI(config) {
   const themeToggleButton = document.getElementById("theme-toggle-button");
   themeToggleButton.addEventListener("click", () => {
     document.body.classList.toggle(CLASS_DARK_THEME);
+    updateMistakesColor();
   });
 
   // Set the theme based on the user's preference
@@ -595,9 +652,11 @@ export function initializeGameUI(config) {
   /* --- Initialize error and settings buttons --- */
 
   const errorEmojiButton = document.getElementById("error-button");
+  const loserEmojiButton = document.getElementById("loser-button");
   const settingsButton = document.getElementById("settings-button");
 
-  errorEmojiButton.addEventListener("click", clickError);
+  errorEmojiButton.addEventListener("click", clickScreenButton);
+  loserEmojiButton.addEventListener("click", clickScreenButton);
   settingsButton.addEventListener("click", clickSettings);
 
   /* --- Initialize settings panel --- */
@@ -626,6 +685,9 @@ export function initializeGameUI(config) {
   const horizontalGap = parseFloat(boardCSS.columnGap);
   const verticalGap = parseFloat(boardCSS.rowGap);
   const gaps = { horizontal: horizontalGap, vertical: verticalGap };
+
+  /* --- Initialize mistakes --- */
+  resetMistakes(config["mistakesAllowed"]);
 
   // Set initial layout
 

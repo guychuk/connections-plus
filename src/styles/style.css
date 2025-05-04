@@ -31,6 +31,7 @@ body {
   /* Z-indexes */
   --z-index-toggle-theme: 4; /* Highest - Always on top */
   --z-index-settings-panel: 3;
+  --z-index-big-screen: 3;
   --z-index-blur-overlay: 2;
   --z-index-toast: 1;
 
@@ -67,6 +68,10 @@ body {
   /* Error Screen */
   --theme-error-screen-bg: #8b0000;
   --theme-error-screen-text: #f0f0f0;
+
+  /* Loser Screen */
+  --theme-loser-screen-bg: #fff8e1;
+  --theme-loser-screen-text: #7b5b00;
 
   /* Game Controls */
   --theme-game-controls-bg: #e0e0e0;
@@ -176,6 +181,10 @@ body.dark-theme {
 
   /* Error Screen */
   --theme-error-screen-bg: #4b0000;
+
+  /* Loser Screen */
+  --theme-loser-screen-bg: #5c4813;
+  --theme-loser-screen-text: #ffe082;
 
   /* Game Controls */
   --theme-game-controls-bg: #4d4d4d;
@@ -472,9 +481,10 @@ body.dark-theme {
 }
 
 /* ------------------------
-   ERROR HANDLING
+   BIG SCREEN
 ------------------------ */
-.error-container {
+
+.screen-container {
   display: none;
   flex-direction: column;
   justify-content: center;
@@ -482,23 +492,22 @@ body.dark-theme {
   width: 100%;
   height: 100%;
   font-family: Inter, sans-serif;
-  background: var(--theme-error-screen-bg);
-  color: var(--theme-error-screen-text);
   opacity: 1;
   transition: background-color var(--animation-speed-color-change) ease,
     opacity var(--animation-speed-color-change) ease,
     max-height var(--animation-speed-color-change) ease;
+  z-index: var(--z-index-screen);
 }
 
-#error-message {
+.screen-message {
   font-size: 3rem;
 }
 
-#error-message-refresh {
+.screen-message-refresh {
   font-size: 1rem;
 }
 
-#error-button {
+.screen-button {
   font-family: Inter, sans-serif;
   font-size: 15rem;
   margin-top: 10px;
@@ -506,8 +515,24 @@ body.dark-theme {
   animation: pulse 1s infinite;
 }
 
-#error-button.spin {
+.screen-button.spin {
   animation: spin var(--animation-speed-spin) linear forwards;
+}
+
+/* ------------------------
+   ERROR SCREEN
+------------------------ */
+#error-screen {
+  background: var(--theme-error-screen-bg);
+  color: var(--theme-error-screen-text);
+}
+
+/* ------------------------
+   LOSER SCREEN
+------------------------ */
+#loser-screen {
+  background: var(--theme-loser-screen-bg);
+  color: var(--theme-loser-screen-text);
 }
 
 /* ------------------------

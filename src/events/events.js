@@ -1,5 +1,10 @@
 import * as UI from "../components/ui";
-import { resetGame, completeGroup, solveNextGroup } from "../core/gameLogic";
+import {
+  resetGame,
+  completeGroup,
+  solveNextGroup,
+  submitToast,
+} from "../core/gameLogic";
 import { delay, makePositions } from "../core/utils";
 
 /* --- Game Controls --- */
@@ -19,7 +24,7 @@ const clickSubmit = (
   boardConfig,
   gameControlButtons
 ) => {
-  const { toast, newlyCompletedGroup } = UI.submitToast(gameState, groups);
+  const { toast, newlyCompletedGroup } = submitToast(gameState, groups);
 
   // Should never happen
   if (toast === null) {
@@ -304,14 +309,14 @@ export function initializeSettings(positions, gameState, boardConfig) {
   });
 }
 
-/* --- Error Page --- */
+/* --- Big Screens --- */
 
 /**
  * Event handler for the error button.
  * Spins the button and reloads the page after the spin animation finishes.
  * @param {MouseEvent} event The event when the user clicks the error button.
  */
-export const clickError = (event) => {
+export const clickScreenButton = (event) => {
   const rootStyles = getComputedStyle(document.documentElement);
   const spinDuration = rootStyles
     .getPropertyValue("--animation-speed-spin")
