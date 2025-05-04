@@ -1,7 +1,5 @@
 .env
 node_modules/
 data/categories.txt
-dist/
 .venv
 .vercel
-TODO
