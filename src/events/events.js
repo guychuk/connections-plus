@@ -1,23 +1,8 @@
-import {
-  submitToast,
-  showErrorScreen,
-  win,
-  getTextForDifficultyButton,
-  spin,
-  setLayout,
-  drawBoard,
-  getLayout,
-  shuffleBoard,
-  disableButtons,
-  enableButtons,
-  clearBanners,
-} from "../components/ui";
+import * as UI from "../components/ui";
 import { resetGame, completeGroup, solveNextGroup } from "../core/gameLogic";
 import { delay, makePositions } from "../core/utils";
 
-/* ------------------------
-      GAME CONTROLS
-  ------------------------ */
+/* --- Game Controls --- */
 
 /**
  * Handles the submit button being clicked.
@@ -34,12 +19,12 @@ export const clickSubmit = (
   boardConfig,
   gameControlButtons
 ) => {
-  const { toast, newlyCompletedGroup } = submitToast(gameState, groups);
+  const { toast, newlyCompletedGroup } = UI.submitToast(gameState, groups);
 
   // Should never happen
   if (toast === null) {
     console.error("Toast is null");
-    showErrorScreen;
+    UI.showErrorScreen();
     return;
   }
 
@@ -51,7 +36,7 @@ export const clickSubmit = (
 
     completeGroup(groupIndex, gameState, positions, groups);
 
-    drawBoard(positions, gameState, boardConfig);
+    UI.drawBoard(positions, gameState, boardConfig);
   }
 
   // When pressing the button fast enough, the toasts get stuck.
@@ -66,7 +51,7 @@ export const clickSubmit = (
     gameState.gameWon = true;
     gameState.gameOver = true;
 
-    win(gameControlButtons);
+    UI.win(gameControlButtons);
   }
 };
 
@@ -89,7 +74,7 @@ export const clickDifficulty = (event) => {
       break;
   }
 
-  button.textContent = getTextForDifficultyButton(button.dataset.difficulty);
+  button.textContent = UI.getTextForDifficultyButton(button.dataset.difficulty);
 };
 
 /**
@@ -112,9 +97,9 @@ export const clickNewGame = async (
   const gameControlButtonsArray = Object.values(gameControlButtons);
 
   // Disable the buttons until the game is reset
-  disableButtons(gameControlButtonsArray);
+  UI.disableButtons(gameControlButtonsArray);
 
-  clearBanners(gameState.solvedGroups);
+  UI.clearBanners(gameState.solvedGroups);
 
   const difficultyButton = gameControlButtons.difficulty;
 
@@ -129,7 +114,7 @@ export const clickNewGame = async (
   clickShuffle(positions, gameState, boardConfig);
 
   // Enable the buttons
-  enableButtons(gameControlButtonsArray);
+  UI.enableButtons(gameControlButtonsArray);
 };
 
 /**
@@ -139,9 +124,9 @@ export const clickNewGame = async (
  * @param {Object} boardConfig The board configuration object.
  */
 export const clickShuffle = (positions, gameState, boardConfig) => {
-  shuffleBoard(gameState.unsolvedTiles, positions, getLayout());
+  UI.shuffleBoard(gameState.unsolvedTiles, positions, UI.getLayout());
 
-  drawBoard(positions, gameState, boardConfig);
+  UI.drawBoard(positions, gameState, boardConfig);
 };
 
 /**
@@ -175,12 +160,12 @@ export const clickSolve = async (
 ) => {
   const gameControlButtonsArray = Object.values(gameControlButtons);
 
-  disableButtons(gameControlButtonsArray);
+  UI.disableButtons(gameControlButtonsArray);
 
   const iteration = async () => {
     solveNextGroup(groups, gameState, positions);
 
-    drawBoard(positions, gameState, boardConfig);
+    UI.drawBoard(positions, gameState, boardConfig);
 
     await delay(750);
   };
@@ -192,12 +177,65 @@ export const clickSolve = async (
   gameState.gameWon = false;
   gameState.gameOver = true;
 
-  enableButtons([gameControlButtons.newGame]);
+  UI.enableButtons([gameControlButtons.newGame]);
 };
 
-/* ------------------------
-          SETTINGS
-  ------------------------ */
+export function initializeGameControls(
+  gameState,
+  boardConfig,
+  positions,
+  groups,
+  supabaseClient
+) {
+  const controlButtons = {
+    deselect: document.getElementById("deselect-all-button"),
+    difficulty: document.getElementById("difficulty-button"),
+    newGame: document.getElementById("new-game-button"),
+    shuffle: document.getElementById("shuffle-button"),
+    solve: document.getElementById("solve-button"),
+    submit: document.getElementById("submit-button"),
+  };
+
+  // Difficulty Button
+  controlButtons.difficulty.addEventListener("click", (event) => {
+    clickDifficulty(event);
+    controlButtons.newGame.click();
+  });
+
+  // Shuffle Button
+  controlButtons.shuffle.addEventListener("click", () => {
+    clickShuffle(positions, gameState, boardConfig);
+  });
+
+  // New Game Button
+  controlButtons.newGame.addEventListener("click", async () => {
+    clickNewGame(
+      controlButtons,
+      gameState,
+      supabaseClient,
+      groups,
+      positions,
+      boardConfig
+    );
+  });
+
+  // Deselect Button
+  controlButtons.deselect.addEventListener("click", () => {
+    clickDeselect(gameState.activeTiles);
+  });
+
+  // Submit Button
+  controlButtons.submit.addEventListener("click", () => {
+    clickSubmit(gameState, groups, positions, boardConfig, controlButtons);
+  });
+
+  // Solve Button
+  controlButtons.solve.addEventListener("click", async () => {
+    await clickSolve(gameState, groups, positions, boardConfig, controlButtons);
+  });
+}
+
+/* --- Settings --- */
 
 /**
  * Event handler for the settings button.
@@ -205,16 +243,16 @@ export const clickSolve = async (
  * @param {MouseEvent} event The event when the user clicks the settings button.
  */
 export const clickSettings = (event) => {
-  spin(event);
+  UI.spin(event);
 
   const settingsPanel = document.getElementById("settings-panel");
   const selectLayout = document.getElementById("select-layout");
   const blurOverlay = document.getElementById("blur-overlay");
 
-  blurOverlay.classList.toggle("blurred");
-  settingsPanel.classList.toggle("blurred");
+  blurOverlay.classList.toggle(UI.CLASS_BLURRED);
+  settingsPanel.classList.toggle(UI.CLASS_BLURRED);
 
-  selectLayout.value = getLayout();
+  selectLayout.value = UI.getLayout();
 };
 
 /**
@@ -234,12 +272,12 @@ export const clickApply = (
 ) => {
   const selectLayout = document.getElementById("select-layout");
   const layout = selectLayout.value;
-  const oldLayout = getLayout();
+  const oldLayout = UI.getLayout();
   const rows = boardConfig.rows;
   const cols = boardConfig.cols;
 
   if (layout !== oldLayout) {
-    setLayout(layout);
+    UI.setLayout(layout);
 
     const numOfsolvedGroups = gameState.solvedGroups.reduce(
       (acc, group) => (group.tiles.length > 0 ? acc + 1 : acc),
@@ -253,14 +291,20 @@ export const clickApply = (
     clickShuffle(positions, gameState, boardConfig);
   }
 
-  // Close settings panel
-  blurOverlay.classList.remove("blurred");
-  settingsPanel.classList.remove("blurred");
+  UI.closeSettingsPanel(settingsPanel, blurOverlay);
 };
 
-/* ------------------------
-        ERROR PAGE
-  ------------------------ */
+export function initializeSettings(positions, gameState, boardConfig) {
+  const settingsPanel = document.getElementById("settings-panel");
+  const blurOverlay = document.getElementById("blur-overlay");
+  const applyButton = document.getElementById("apply-button");
+
+  applyButton.addEventListener("click", () => {
+    clickApply(settingsPanel, blurOverlay, positions, gameState, boardConfig);
+  });
+}
+
+/* --- Error Page --- */
 
 /**
  * Event handler for the error button.
@@ -273,7 +317,7 @@ export const clickError = (event) => {
     .getPropertyValue("--animation-speed-spin")
     .trim();
 
-  spin(event);
+  UI.spin(event);
 
   setTimeout(() => {
     location.reload();

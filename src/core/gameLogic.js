@@ -1,9 +1,4 @@
-import {
-  getTags,
-  getCategories,
-  getCategoryName,
-  getTerms,
-} from "../services/supabase";
+import * as supabase from "../services/supabase";
 import { makePositions } from "../core/utils";
 import {
   calculateTileSize,
@@ -11,14 +6,13 @@ import {
   shuffleBoard,
   updateTiles,
   getLayout,
+  getTextForDifficultyButton,
 } from "../components/ui";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { TOAST_WINNER } from "../components/toasts";
 import { clickDeselect } from "../events/events";
 
-/* ------------------------
-      GAME PROPERTIES
-  ------------------------ */
+/* --- Game Properties --- */
 
 /**
  * Get the number of tags for a given difficulty and number of groups.
@@ -37,9 +31,7 @@ const getNumOfTags = (difficulty, numGroups) => {
   }
 };
 
-/* -------------------------
-            TILES
-   ------------------------- */
+/* --- Tiles --- */
 
 /**
  * Make a tile object.
@@ -79,7 +71,9 @@ export const getNewTiles = async (client, groups, difficulty) => {
   var iterations = 0;
 
   while (iterations < 30) {
-    const tags = (await getTags(client, numTags)).map((tag) => tag.tag);
+    const tags = (await supabase.getTags(client, numTags)).map(
+      (tag) => tag.tag
+    );
 
     let i = groups.length;
 
@@ -89,7 +83,7 @@ export const getNewTiles = async (client, groups, difficulty) => {
     // Test this choice of Tags
     while (0 < i) {
       const newCategories = (
-        await getCategories(client, tags, groups[i - 1])
+        await supabase.getCategories(client, tags, groups[i - 1])
       ).filter((category) => !categoriesSet.has(category.cat_id));
 
       // If no categories were found, try again with different tags
@@ -115,7 +109,7 @@ export const getNewTiles = async (client, groups, difficulty) => {
     // Get categories names
 
     const categoriesNamesPromises = categories.map((category) =>
-      getCategoryName(client, category.cat_id)
+      supabase.getCategoryName(client, category.cat_id)
     );
 
     const categoriesNames = await Promise.all(categoriesNamesPromises);
@@ -123,9 +117,11 @@ export const getNewTiles = async (client, groups, difficulty) => {
     // Get terms
 
     const fetchTermsPromises = groups.map((groupSize, index) =>
-      getTerms(client, categories[index].cat_id, groupSize).then((terms) => {
-        return terms.map((term) => term.term);
-      })
+      supabase
+        .getTerms(client, categories[index].cat_id, groupSize)
+        .then((terms) => {
+          return terms.map((term) => term.term);
+        })
     );
 
     const allTerms = await Promise.all(fetchTermsPromises);
@@ -158,9 +154,7 @@ export const getNewTiles = async (client, groups, difficulty) => {
   }
 };
 
-/* -------------------------
-  GAME INITIALIZATION AND RESET
-   ------------------------- */
+/* --- Game Initialization --- */
 
 /**
  * Initialize the game board with tiles.
@@ -191,6 +185,11 @@ export const initializeGame = async (
     tiles: [],
     banner: null,
   }));
+
+  const difficultyButton = document.getElementById("difficulty-button");
+
+  difficultyButton.dataset.difficulty = difficulty;
+  difficultyButton.textContent = getTextForDifficultyButton(difficulty);
 
   const tileSet = await getNewTiles(client, groups, difficulty);
 
@@ -279,6 +278,15 @@ export const resetGame = async (
   gameState.gameOver = false;
 };
 
+/* --- Complete Group Logic --- */
+
+/**
+ * Complete a group of tiles.
+ * @param {number} groupIndex The index of the group to complete.
+ * @param {Object} gameState The game state object.
+ * @param {Array} positions The array of positions for the tiles.
+ * @param {Array} groups The array of group sizes.
+ */
 export const completeGroup = (groupIndex, gameState, positions, groups) => {
   gameState.solvedGroups[groupIndex].tiles = [];
 
@@ -307,6 +315,13 @@ export const completeGroup = (groupIndex, gameState, positions, groups) => {
   positions.push(...makePositions(rows - numOfsolvedGroups, cols));
 };
 
+/**
+ * Solves the next group of tiles.
+ * @param {Array} groups The array of group sizes.
+ * @param {Object} gameState The game state object.
+ * @param {Array} positions The array of positions for the tiles.
+ * @returns {boolean} True if a group was solved, false if all groups were solved.
+ */
 export const solveNextGroup = (groups, gameState, positions) => {
   let groupIndex = -1;
 

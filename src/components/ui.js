@@ -1,25 +1,13 @@
-import {
-  shuffleArray,
-  hashTilesSet,
-  randomNum,
-  assertNotNullOrUndefined,
-} from "../core/utils.js";
-import {
-  TOAST_DUPLICATE,
-  TOAST_CORRECT,
-  TOAST_INCORRECT,
-  TOAST_WINNER,
-  TOAST_ERROR,
-  makeTooFewToast,
-  makeTooManyToast,
-  makePartialToast,
-} from "./toasts.js";
+import * as utils from "../core/utils.js";
+import * as toasts from "./toasts.js";
 import confetti from "canvas-confetti";
 import { confettiDuration } from "../config/config.json";
+import { clickError, clickSettings } from "../events/events.js";
 
-/* ------------------------
-    TILE POSITION & SIZE
-  ------------------------ */
+export const CLASS_BLURRED = "blurred";
+export const CLASS_DARK_THEME = "dark-theme";
+
+/* --- Tile Position & Size --- */
 
 /**
  * Calculates the tile size based on the canvas size and the number of rows and columns.
@@ -83,9 +71,7 @@ const getPositionOnCanvasCentered = (pos, group, boardConfig) => {
   };
 };
 
-/* -------------------------
-            Layout
-   ------------------------- */
+/* --- Layout --- */
 
 /**
  * Gets the layout from local storage, or returns the default layout if no value is stored.
@@ -110,9 +96,7 @@ export const setLayout = (layout) => {
   return getLayout();
 };
 
-/* -------------------------
-      DRAWING ON THE BOARD
-   ------------------------- */
+/* --- Drawing on the Board --- */
 
 /**
  * Draws the completed groups as banners on the board.
@@ -194,6 +178,23 @@ export const drawBanners = (solvedGroups, boardConfig) => {
 };
 
 /**
+ * Clear the banners (colored boxes over completed groups).
+ * @param {Array} solvedGroups  The completed groups array.
+ */
+export function clearBanners(solvedGroups) {
+  for (const group of solvedGroups) {
+    if (group.banner) {
+      group.banner.classList.add("hidden");
+
+      setTimeout(() => {
+        group.banner.remove();
+        group.banner = null;
+      }, 500);
+    }
+  }
+}
+
+/**
  * Draws the tiles on the board.
  * @param {Array} positions An array of objects containing row and column indices of the tiles.
  * @param {Set} unsolvedTiles A Set of objects containing information about the tiles to be drawn.
@@ -271,9 +272,9 @@ export const shuffleBoard = (tiles, positions) => {
   }
 
   if (layout === "compact") {
-    shuffleArray(positions, tiles.size);
+    utils.shuffleArray(positions, tiles.size);
   } else {
-    shuffleArray(positions);
+    utils.shuffleArray(positions);
   }
 };
 
@@ -283,7 +284,7 @@ export const shuffleBoard = (tiles, positions) => {
  * @param {Set} newTiles The new tiles array.
  */
 export const updateTiles = (tiles, newTiles) => {
-  assertNotNullOrUndefined([tiles, newTiles]);
+  utils.assertNotNullOrUndefined([tiles, newTiles]);
 
   const tilesArray = Array.from(tiles);
   const newTilesArray = Array.from(newTiles);
@@ -302,9 +303,7 @@ export const updateTiles = (tiles, newTiles) => {
   }
 };
 
-/* -------------------------
-          BUTTONS
-   ------------------------- */
+/* --- Buttons --- */
 
 /**
  * Creates buttons for the tiles and put them on the board.
@@ -341,7 +340,7 @@ export const createButtons = (positions, gameState, boardConfig) => {
         button.classList.add("selected");
         gameState.activeTiles.add(tile);
       } else {
-        makeTooManyToast(maxSelections).showToast();
+        toasts.makeTooManyToast(maxSelections).showToast();
       }
     });
 
@@ -382,9 +381,7 @@ export const enableButtons = (buttons) => {
   buttons.forEach((button) => (button.disabled = false));
 };
 
-/* -------------------------
-           TOASTS
-   ------------------------- */
+/* --- Toasts --- */
 
 /**
  * Creates a Toastify message for submitting a set of tiles.
@@ -400,12 +397,12 @@ export const submitToast = (gameState, groups) => {
   let newlyCompletedGroup = null;
 
   if (group < groups[0]) {
-    toast = makeTooFewToast(groups[0]);
+    toast = toasts.makeTooFewToast(groups[0]);
   } else {
-    const activeTilesHashed = hashTilesSet(gameState.activeTiles);
+    const activeTilesHashed = utils.hashTilesSet(gameState.activeTiles);
 
     if (gameState.submissionHistory.has(activeTilesHashed)) {
-      toast = TOAST_DUPLICATE;
+      toast = toasts.TOAST_DUPLICATE;
     } else {
       gameState.submissionHistory.add(activeTilesHashed);
 
@@ -416,12 +413,12 @@ export const submitToast = (gameState, groups) => {
 
       if (correctTiles === group) {
         newlyCompletedGroup = [...gameState.activeTiles];
-        toast = TOAST_CORRECT;
+        toast = toasts.TOAST_CORRECT;
       } else if (2 * correctTiles > group) {
         // ? Maybe give other info (largest group of common categoty, or something else)
-        toast = makePartialToast(correctTiles, group);
+        toast = toasts.makePartialToast(correctTiles, group);
       } else {
-        toast = TOAST_INCORRECT;
+        toast = toasts.TOAST_INCORRECT;
       }
     }
   }
@@ -429,9 +426,14 @@ export const submitToast = (gameState, groups) => {
   return { toast, newlyCompletedGroup };
 };
 
-/* -------------------------
-      ERRORS AND EFFECTS
-   ------------------------- */
+/* --- Settings Panel --- */
+
+export const closeSettingsPanel = (settingsPanel, blurOverlay) => {
+  blurOverlay.classList.remove("blurred");
+  settingsPanel.classList.remove("blurred");
+};
+
+/* --- Error Screen --- */
 
 /**
  * Displays the error screen by hiding all other elements except the theme toggle button.
@@ -449,8 +451,10 @@ export function showErrorScreen() {
   const errorScreen = document.getElementById("error-screen");
   errorScreen.style.display = "flex";
 
-  TOAST_ERROR.showToast();
+  toasts.TOAST_ERROR.showToast();
 }
+
+/* --- Effects --- */
 
 /**
  * Celebrate with confetti.
@@ -490,12 +494,12 @@ export function celebrate(duration) {
     confetti({
       ...confettiDefaults,
       particleCount,
-      origin: { x: randomNum(0.1, 0.3), y: Math.random() - 0.2 },
+      origin: { x: utils.randomNum(0.1, 0.3), y: Math.random() - 0.2 },
     });
     confetti({
       ...confettiDefaults,
       particleCount,
-      origin: { x: randomNum(0.7, 0.9), y: Math.random() - 0.2 },
+      origin: { x: utils.randomNum(0.7, 0.9), y: Math.random() - 0.2 },
     });
   }, 250);
 }
@@ -511,9 +515,27 @@ export function win(gameControlButtons) {
   );
 
   disableButtons(toDisable);
-  TOAST_WINNER.showToast();
+  toasts.TOAST_WINNER.showToast();
   celebrate(confettiDuration);
 }
+
+/**
+ * Spin an emoji button.
+ * @param {MouseEvent} event The event when the user clicks the tile.
+ */
+export function spin(event) {
+  const rootStyles = getComputedStyle(document.documentElement);
+  const spinDuration = rootStyles
+    .getPropertyValue("--animation-speed-spin")
+    .trim();
+
+  event.target.classList.add("spin");
+  setTimeout(() => {
+    event.target.classList.remove("spin");
+  }, parseFloat(spinDuration) * 1000);
+}
+
+/* --- Theme --- */
 
 /**
  * Set the theme based on the user's preference.
@@ -532,34 +554,78 @@ export function setThemeBasedOnPreference() {
 }
 
 /**
- * Clear the banners (colored boxes over completed groups).
- * @param {Array} solvedGroups  The completed groups array.
+ * Sets the theme based on the user's preference at page load.
+ * Listens to changes in the user's preferred color scheme and
+ * updates the theme accordingly.
  */
-export function clearBanners(solvedGroups) {
-  for (const group of solvedGroups) {
-    if (group.banner) {
-      group.banner.classList.add("hidden");
-
-      setTimeout(() => {
-        group.banner.remove();
-        group.banner = null;
-      }, 500);
-    }
-  }
+export function setInitialTheme() {
+  setThemeBasedOnPreference();
+  window
+    .matchMedia("(prefers-color-scheme: dark)")
+    .addEventListener("change", setThemeBasedOnPreference);
 }
 
-/**
- * Spin an emoji button.
- * @param {MouseEvent} event The event when the user clicks the tile.
- */
-export function spin(event) {
-  const rootStyles = getComputedStyle(document.documentElement);
-  const spinDuration = rootStyles
-    .getPropertyValue("--animation-speed-spin")
-    .trim();
+/* --- General --- */
 
-  event.target.classList.add("spin");
-  setTimeout(() => {
-    event.target.classList.remove("spin");
-  }, parseFloat(spinDuration) * 1000);
+/**
+ * Initializes the game UI components, including theme toggle, error and settings buttons, settings panel, and game board.
+ * Sets up event listeners for user interactions and configures the initial settings based on user preferences and configuration.
+ * @param {Object} config The game configuration object.
+ * @returns {Object} An object containing the sorted group sizes, the board element, and the gaps object for board layout.
+ */
+export function initializeGameUI(config) {
+  /* --- Initialize theme toggle button --- */
+
+  const themeToggleButton = document.getElementById("theme-toggle-button");
+  themeToggleButton.addEventListener("click", () => {
+    document.body.classList.toggle(CLASS_DARK_THEME);
+  });
+
+  // Set the theme based on the user's preference
+  setInitialTheme();
+
+  /* --- Initialize error and settings buttons --- */
+
+  const errorEmojiButton = document.getElementById("error-button");
+  const settingsButton = document.getElementById("settings-button");
+
+  errorEmojiButton.addEventListener("click", clickError);
+  settingsButton.addEventListener("click", clickSettings);
+
+  /* --- Initialize settings panel --- */
+
+  const blurOverlay = document.getElementById("blur-overlay");
+  const settingsPanel = document.getElementById("settings-panel");
+
+  // Close settings panel when clicking the blur overlay
+  blurOverlay.addEventListener("click", () => {
+    closeSettingsPanel(settingsPanel, blurOverlay);
+  });
+
+  /* --- Initialize board --- */
+  const groups = config["groups"].sort((a, b) => a - b);
+  utils.assert(!utils.containsDulpicates(groups), "Groups contain duplicates");
+
+  // Update groups paragraph/subtitle
+  const groupsParagraph = document.getElementById("subtitle");
+  groupsParagraph.textContent = `Group Sizes are ${groups.join(", ")}`;
+
+  /* --- Initialize board --- */
+
+  const board = document.getElementById("board");
+  const boardCSS = getComputedStyle(board);
+
+  const horizontalGap = parseFloat(boardCSS.columnGap);
+  const verticalGap = parseFloat(boardCSS.rowGap);
+  const gaps = { horizontal: horizontalGap, vertical: verticalGap };
+
+  // Set initial layout
+
+  let initialLayout = getLayout();
+
+  if (!initialLayout) {
+    initialLayout = setLayout(config["layout"]);
+  }
+
+  return { groups, board, gaps };
 }
