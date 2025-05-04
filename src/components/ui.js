@@ -240,7 +240,7 @@ const drawTiles = (positions, unsolvedTiles, boardConfig, layout) => {
  * @param {Object} gameState The game state object containing completed groups and remaining tiles.
  * @param {Object} boardConfig The board configuration object.
  */
-export const drawBoard = (positions, gameState, boardConfig) => {
+export function drawBoard(positions, gameState, boardConfig) {
   const layout = getLayout();
 
   if (layout !== "spacious" && layout !== "compact") {
@@ -256,7 +256,7 @@ export const drawBoard = (positions, gameState, boardConfig) => {
 
   // Draw the remaining tiles
   drawTiles(positions, unsolvedTiles, boardConfig, layout);
-};
+}
 
 /**
  * Shuffles the positions of the tiles on the board.
@@ -311,7 +311,7 @@ export const updateTiles = (tiles, newTiles) => {
  * @param {Object} gameState The game state object.
  * @param {Object} boardConfig The board configuration object.
  */
-export const createButtons = (positions, gameState, boardConfig) => {
+export function createButtons(positions, gameState, boardConfig) {
   let i = 0;
 
   const tileSize = boardConfig.tileSize;
@@ -346,7 +346,7 @@ export const createButtons = (positions, gameState, boardConfig) => {
 
     board.appendChild(button);
   }
-};
+}
 
 /**
  * Get the text for the difficulty button based on the difficulty.
@@ -402,7 +402,7 @@ export const submitToast = (gameState, groups) => {
     const activeTilesHashed = utils.hashTilesSet(gameState.activeTiles);
 
     if (gameState.submissionHistory.has(activeTilesHashed)) {
-      toast = toasts.TOAST_DUPLICATE;
+      toast = toasts.makeDuplicateToast();
     } else {
       gameState.submissionHistory.add(activeTilesHashed);
 
@@ -413,17 +413,25 @@ export const submitToast = (gameState, groups) => {
 
       if (correctTiles === group) {
         newlyCompletedGroup = [...gameState.activeTiles];
-        toast = toasts.TOAST_CORRECT;
+        toast = toasts.makeCorrectToast();
       } else if (2 * correctTiles > group) {
         // ? Maybe give other info (largest group of common categoty, or something else)
         toast = toasts.makePartialToast(correctTiles, group);
       } else {
-        toast = toasts.TOAST_INCORRECT;
+        toast = toasts.makeIncorrectToast();
       }
     }
   }
 
   return { toast, newlyCompletedGroup };
+};
+
+/**
+ * Removes all Toastify messages from the DOM.
+ */
+export const clearToasts = () => {
+  const toasts = document.querySelectorAll(".toastify");
+  toasts.forEach((toast) => toast.remove());
 };
 
 /* --- Settings Panel --- */
@@ -451,7 +459,7 @@ export function showErrorScreen() {
   const errorScreen = document.getElementById("error-screen");
   errorScreen.style.display = "flex";
 
-  toasts.TOAST_ERROR.showToast();
+  toasts.makeErrorToast().showToast();
 }
 
 /* --- Effects --- */
@@ -515,7 +523,7 @@ export function win(gameControlButtons) {
   );
 
   disableButtons(toDisable);
-  toasts.TOAST_WINNER.showToast();
+  toasts.makeWinnerToast().showToast();
   celebrate(confettiDuration);
 }
 

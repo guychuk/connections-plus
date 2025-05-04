@@ -7,9 +7,9 @@ import {
   updateTiles,
   getLayout,
   getTextForDifficultyButton,
+  clearToasts,
 } from "../components/ui";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { TOAST_WINNER } from "../components/toasts";
 import { clickDeselect } from "../events/events";
 
 /* --- Game Properties --- */
@@ -61,7 +61,7 @@ const makeTile = (id, term, category, groupSize, groupIndex, button) => {
  * @param {string} difficulty difficulty
  * @returns {Set} set of tiles.
  */
-const getNewTiles = async (client, groups, difficulty) => {
+async function getNewTiles(client, groups, difficulty) {
   const numGroups = groups.length;
   const numTags = getNumOfTags(difficulty, numGroups);
 
@@ -152,7 +152,7 @@ const getNewTiles = async (client, groups, difficulty) => {
 
     return tiles;
   }
-};
+}
 
 /* --- Game Initialization --- */
 
@@ -165,13 +165,7 @@ const getNewTiles = async (client, groups, difficulty) => {
  * @param {Object} gaps The gaps object containing horizontal and vertical gaps.
  * @returns {Object} An object containing the game state, positions array and tile size object.
  */
-export const initializeGame = async (
-  client,
-  difficulty,
-  groups,
-  board,
-  gaps
-) => {
+export async function initializeGame(client, difficulty, groups, board, gaps) {
   // Get board grid layout
   const rows = groups.length;
   const cols = groups[groups.length - 1];
@@ -223,7 +217,7 @@ export const initializeGame = async (
     positions,
     boardConfig,
   };
-};
+}
 
 /**
  * Reset the game state and fetch new tiles.
@@ -234,16 +228,16 @@ export const initializeGame = async (
  * @param {Object} gameState The game state object.
  * @param {Array} positions The array of positions for the tiles.
  */
-export const resetGame = async (
-  SupabaseClient,
+export async function resetGame(
+  supabaseClient,
   difficulty,
   groups,
   gameState,
   positions
-) => {
+) {
   // If won but not by solving automatically
   if (gameState.gameWon) {
-    TOAST_WINNER.hideToast();
+    clearToasts();
   }
 
   // Reset game state
@@ -257,7 +251,7 @@ export const resetGame = async (
   }
 
   // Get new tiles
-  const newTiles = await getNewTiles(SupabaseClient, groups, difficulty);
+  const newTiles = await getNewTiles(supabaseClient, groups, difficulty);
 
   // Get new list of positions
 
@@ -276,7 +270,7 @@ export const resetGame = async (
 
   gameState.gameWon = false;
   gameState.gameOver = false;
-};
+}
 
 /* --- Complete Group Logic --- */
 

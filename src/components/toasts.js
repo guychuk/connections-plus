@@ -55,28 +55,20 @@ export const makePartialToast = (correct, group) =>
     `🚀 You got ${correct} out of ${group} correct!`
   );
 
-export const TOAST_ERROR = makeToast(
-  ["toastify-rounded", "toastify-error"],
-  "🫠 Something went wrong"
-);
+export const makeErrorToast = () =>
+  makeToast(["toastify-rounded", "toastify-error"], "🫠 Something went wrong");
 
-export const TOAST_DUPLICATE = makeToast(
-  ["toastify-rounded", "toastify-duplicate"],
-  `🚫 You already submitted that`
-);
+export const makeDuplicateToast = () =>
+  makeToast(
+    ["toastify-rounded", "toastify-duplicate"],
+    `🚫 You already submitted that`
+  );
 
-export const TOAST_CORRECT = makeToast(
-  ["toastify-rounded", "toastify-correct"],
-  "🎉 You got it!"
-);
+export const makeCorrectToast = () =>
+  makeToast(["toastify-rounded", "toastify-correct"], "🎉 You got it!");
 
-export const TOAST_INCORRECT = makeToast(
-  ["toastify-rounded", "toastify-incorrect"],
-  "❌ That's not it..."
-);
+export const makeIncorrectToast = () =>
+  makeToast(["toastify-rounded", "toastify-incorrect"], "❌ That's not it...");
 
-export const TOAST_WINNER = makeToast(
-  ["toastify-rounded", "toastify-winner"],
-  "🎉 You won!",
-  -1
-);
+export const makeWinnerToast = () =>
+  makeToast(["toastify-rounded", "toastify-winner"], "🎉 You won!", -1);
