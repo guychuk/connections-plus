@@ -398,14 +398,20 @@ export const submitToast = (
         0
       );
 
+      // Correct!
       if (correctTiles === group) {
         newlyCompletedGroup = [...gameState.activeTiles];
         toast = toasts.makeCorrectToast();
-      } else if (2 * correctTiles > group) {
-        // ? Maybe give other info (largest group of common categoty, or something else)
-        toast = toasts.makePartialToast(correctTiles, group);
       } else {
-        toast = toasts.makeIncorrectToast();
+        // Incorrect
+
+        if (2 * correctTiles > group) {
+          // ? Maybe give other info (largest group of common categoty, or something else)
+          toast = toasts.makePartialToast(correctTiles, group);
+        } else {
+          toast = toasts.makeIncorrectToast();
+        }
+
         makeMistake(
           gameState,
           groups,
