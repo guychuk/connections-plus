@@ -6,7 +6,7 @@ import { showErrorScreen } from "../components/ui";
  * @param {number} k Number of choices (0 <= k <= n) [pass -1 for k=n which is the default].
  * @returns {Array} An array with k random choices from [1, n].
  */
-export const getRandomNums = (n, k = -1) => {
+function getRandomNums(n, k = -1) {
   let options = Array.from({ length: n }, (_, index) => index + 1);
   let chosen = 0;
 
@@ -26,7 +26,7 @@ export const getRandomNums = (n, k = -1) => {
   }
 
   return options.slice(0, k);
-};
+}
 
 /**
  * Get a random number in [min, max).
@@ -42,7 +42,7 @@ export const randomNum = (min, max) =>
  * @param {Array} array An array to shuffle.
  * @param {number} limit The number of elements to shuffle (defaults -1 to the entire array).
  */
-export const shuffleArray = (array, limit = -1) => {
+export function shuffleArray(array, limit = -1) {
   const n = limit === -1 ? array.length : limit;
 
   const perm = getRandomNums(n);
@@ -50,7 +50,7 @@ export const shuffleArray = (array, limit = -1) => {
   for (let i = 0; i < n; i++) {
     [array[i], array[perm[i] - 1]] = [array[perm[i] - 1], array[i]];
   }
-};
+}
 
 /**
  * Check if an array contains duplicates.
@@ -104,7 +104,18 @@ export const assertNotNullOrUndefined = (values) => {
  * @param {number} ms The number of milliseconds to delay.
  * @returns {Promise<void>} A promise that resolves after the specified delay.
  */
-
 export const delay = async (ms) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
+};
+
+/**
+ * Throw an error if the condition is false.
+ * @param {boolean} condition The condition to check.
+ * @param {string} message The message to display when the condition is false.
+ */
+export const assert = (condition, message) => {
+  if (!condition) {
+    console.error("Assertion failed:", message);
+    showErrorScreen();
+  }
 };

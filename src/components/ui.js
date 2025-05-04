@@ -1,60 +1,50 @@
-import {
-  shuffleArray,
-  hashTilesSet,
-  randomNum,
-  assertNotNullOrUndefined,
-} from "../core/utils.js";
-import {
-  TOAST_DUPLICATE,
-  TOAST_CORRECT,
-  TOAST_INCORRECT,
-  TOAST_WINNER,
-  TOAST_ERROR,
-  makeTooFewToast,
-  makeTooManyToast,
-  makePartialToast,
-} from "./toasts.js";
+import * as utils from "../core/utils.js";
+import * as toasts from "./toasts.js";
 import confetti from "canvas-confetti";
 import { confettiDuration } from "../config/config.json";
+import { clickError, clickSettings } from "../events/events.js";
 
-/* ------------------------
-    TILE POSITION & SIZE
-  ------------------------ */
+export const CLASS_BLURRED = "blurred";
+export const CLASS_DARK_THEME = "dark-theme";
+
+/* --- Tile Position & Size --- */
 
 /**
  * Calculates the tile size based on the canvas size and the number of rows and columns.
  * @param {HTMLCanvasElement} canvas The canvas element.
  * @param {number} rows Number of rows in the grid.
  * @param {number} cols Number of columns in the grid.
- * @param {number} hgap Horizontal gap between tiles.
- * @param {number} vgap Vertical gap between tiles.
+ * @param {Object} gaps An object containing the horizontal and vertical gaps between tiles.
  * @returns {Object} An object containing the tile height and width.
  */
-export const calculateTileSize = (canvas, rows, cols, hgap, vgap) => {
+export const calculateTileSize = (canvas, rows, cols, gaps) => {
   const boardWidth = canvas.clientWidth;
   const boardHeight = canvas.clientHeight;
 
-  const vgaps = vgap * (rows - 1);
-  const hgaps = hgap * (cols - 1);
+  const totalVerticalGaps = gaps.vertical * (rows - 1);
+  const totlaHorizontalGaps = gaps.horizontal * (cols - 1);
 
   return {
-    height: Math.floor((boardHeight - vgaps) / rows),
-    width: Math.floor((boardWidth - hgaps) / cols),
+    height: Math.floor((boardHeight - totalVerticalGaps) / rows),
+    width: Math.floor((boardWidth - totlaHorizontalGaps) / cols),
   };
 };
 
 /**
  * Calculates the position of a tile on the canvas based on its row and column indices.
  * @param {Object} pos An object containing the row and column indices of the tile.
- * @param {Object} tileSize An object containing the height and width of the tile.
- * @param {number} hgap Horizontal gap between tiles.
- * @param {number} vgap Vertical gap between tiles.
+ * @param {Object} boardConfig The board configuration object.
  * @returns {Object} An object containing the x and y coordinates of the tile on the canvas.
  */
-const getPositionOnCanvas = (pos, tileSize, hgap, vgap) => {
+const getPositionOnCanvas = (pos, boardConfig) => {
+  const tileWidth = boardConfig.tileSize.width;
+  const tileHeight = boardConfig.tileSize.height;
+  const horizontalGap = boardConfig.gaps.horizontal;
+  const verticalGap = boardConfig.gaps.vertical;
+
   return {
-    x: pos.col * (tileSize.width + hgap),
-    y: pos.row * (tileSize.height + vgap),
+    x: pos.col * (tileWidth + horizontalGap),
+    y: pos.row * (tileHeight + verticalGap),
   };
 };
 
@@ -63,33 +53,25 @@ const getPositionOnCanvas = (pos, tileSize, hgap, vgap) => {
  * placing it in the center of the board (not on the left).
  * @param {Object} pos An object containing the row and column indices of the tile.
  * @param {number} group The group size of the tile.
- * @param {number} largestGroup The largest group size in the game.
- * @param {Object} tileSize An object containing the height and width of the tile.
- * @param {number} hgap Horizontal gap between tiles.
- * @param {number} vgap Vertical gap between tiles.
+ * @param {Object} boardConfig The board configuration object.
  * @returns {Object} An object containing the x and y coordinates of the tile on the canvas.
  */
-const getPositionOnCanvasCentered = (
-  pos,
-  group,
-  largestGroup,
-  tileSize,
-  hgap,
-  vgap
-) => {
-  const { x, y } = getPositionOnCanvas(pos, tileSize, hgap, vgap);
+const getPositionOnCanvasCentered = (pos, group, boardConfig) => {
+  const { x, y } = getPositionOnCanvas(pos, boardConfig);
+
+  const tileWidth = boardConfig.tileSize.width;
+  const horizontalGap = boardConfig.gaps.horizontal;
+  const columns = boardConfig.cols;
 
   return {
     // If the group is a and the largest one is b, then the row "misses" (b - a) tiles and gaps.
     // We want to put everything in the middle, so we need to add half of it to the x value.
-    x: x + ((tileSize.width + hgap) * (largestGroup - group)) / 2,
+    x: x + ((tileWidth + horizontalGap) * (columns - group)) / 2,
     y,
   };
 };
 
-/* -------------------------
-            Layout
-   ------------------------- */
+/* --- Layout --- */
 
 /**
  * Gets the layout from local storage, or returns the default layout if no value is stored.
@@ -114,33 +96,21 @@ export const setLayout = (layout) => {
   return getLayout();
 };
 
-/* -------------------------
-      DRAWING ON THE BOARD
-   ------------------------- */
+/* --- Drawing on the Board --- */
 
 /**
  * Draws the completed groups as banners on the board.
- * @param {HTMLCanvasElement} board The canvas element.
- * @param {Array} completedGroups The completed groups.
- * @param {Object} tileSize The size of each tile.
- * @param {number} hgap The horizontal gap between tiles.
- * @param {number} vgap The vertical gap between tiles.
- * @param {number} rows The number of rows in the grid.
- * @param {number} cols The number of columns in the grid.
+ * @param {Array} solvedGroups  The completed groups.
+ * @param {Object} boardConfig The board configuration object.
  */
-export const drawBanners = (
-  board,
-  completedGroups,
-  tileSize,
-  hgap,
-  vgap,
-  rows,
-  cols
-) => {
-  let currentRow = rows - 1; // Start from the last row
+const drawBanners = (solvedGroups, boardConfig) => {
+  let currentRow = boardConfig.rows - 1; // Start from the last row
+  const tileWidth = boardConfig.tileSize.width;
+  const tileHeight = boardConfig.tileSize.height;
+  const horizontalGap = boardConfig.gaps.horizontal;
 
-  for (let i = rows - 1; i >= 0; i--) {
-    const group = completedGroups[i];
+  for (let i = currentRow; i >= 0; i--) {
+    const group = solvedGroups[i];
     const tiles = group.tiles;
     const groupSize = tiles.length;
     let banner = group.banner;
@@ -157,10 +127,7 @@ export const drawBanners = (
         const { x, y } = getPositionOnCanvasCentered(
           { row: currentRow, col: column },
           groupSize,
-          cols,
-          tileSize,
-          hgap,
-          vgap
+          boardConfig
         );
 
         tile.button.style.left = `${x}px`;
@@ -171,10 +138,7 @@ export const drawBanners = (
       const { x, y } = getPositionOnCanvasCentered(
         { row: currentRow, col: 0 },
         groupSize,
-        cols,
-        tileSize,
-        hgap,
-        vgap
+        boardConfig
       );
 
       if (banner) {
@@ -191,8 +155,10 @@ export const drawBanners = (
         banner.classList.add(`group-${i + 1}`);
         banner.classList.add(`completed`);
 
-        banner.style.width = `${groupSize * (tileSize.width + hgap) - hgap}px`;
-        banner.style.height = `${tileSize.height}px`;
+        banner.style.width = `${
+          groupSize * (tileWidth + horizontalGap) - horizontalGap
+        }px`;
+        banner.style.height = `${tileHeight}px`;
 
         banner.style.position = "absolute";
         banner.style.left = `${x}px`;
@@ -212,52 +178,53 @@ export const drawBanners = (
 };
 
 /**
+ * Clear the banners (colored boxes over completed groups).
+ * @param {Array} solvedGroups  The completed groups array.
+ */
+export function clearBanners(solvedGroups) {
+  for (const group of solvedGroups) {
+    if (group.banner) {
+      group.banner.classList.add("hidden");
+
+      setTimeout(() => {
+        group.banner.remove();
+        group.banner = null;
+      }, 500);
+    }
+  }
+}
+
+/**
  * Draws the tiles on the board.
- * @param {Array<Object>} positions An array of objects containing row and column indices of the tiles.
- * @param {Set<Object>} remainingTiles A Set of objects containing information about the tiles to be drawn.
- * @param {Object} tileSize An object containing the height and width of the tile.
- * @param {number} hgap The horizontal gap between tiles.
- * @param {number} vgap The vertical gap between tiles.
- * @param {number} cols The number of columns on the board.
+ * @param {Array} positions An array of objects containing row and column indices of the tiles.
+ * @param {Set} unsolvedTiles A Set of objects containing information about the tiles to be drawn.
+ * @param {Object} boardConfig The board configuration object.
  * @param {string} layout The layout of the board. Must be either "spacious" or "compact".
  */
-export const drawTiles = (
-  positions,
-  remainingTiles,
-  tileSize,
-  hgap,
-  vgap,
-  cols,
-  layout
-) => {
+const drawTiles = (positions, unsolvedTiles, boardConfig, layout) => {
   if (layout !== "spacious" && layout !== "compact") {
     console.error("Layout must be either 'spacious' or 'compact'");
     showErrorScreen();
   }
 
-  const rowsIfCompact = Math.ceil(remainingTiles.size / cols);
+  const cols = boardConfig.cols;
 
-  const remainder = remainingTiles.size % cols;
+  const rowsIfCompact = Math.ceil(unsolvedTiles.size / cols);
+
+  const remainder = unsolvedTiles.size % cols;
 
   let i = 0;
 
-  for (const tile of remainingTiles) {
+  for (const tile of unsolvedTiles) {
     const button = tile.button;
     const { row, col } = positions[i];
     let posXY = null;
 
     // Center the last row of compact layout
     if (layout === "compact" && remainder > 0 && row === rowsIfCompact - 1) {
-      posXY = getPositionOnCanvasCentered(
-        { row, col },
-        remainder,
-        cols,
-        tileSize,
-        hgap,
-        vgap
-      );
+      posXY = getPositionOnCanvasCentered({ row, col }, remainder, boardConfig);
     } else {
-      posXY = getPositionOnCanvas({ row, col }, tileSize, hgap, vgap);
+      posXY = getPositionOnCanvas({ row, col }, boardConfig);
     }
 
     button.style.left = `${posXY.x}px`;
@@ -269,27 +236,11 @@ export const drawTiles = (
 
 /**
  * Draws the board with the remaining tiles and completed groups.
- * @param {HTMLCanvasElement} board The canvas element.
  * @param {Array} positions An array of positions for the tiles.
- * @param {Set} remainingTiles The set of remaining tiles.
- * @param {Array} completedGroups An array of completed groups.
- * @param {Object} tileSize An object containing the height and width of the tile.
- * @param {number} hgap The horizontal gap between tiles.
- * @param {number} vgap The vertical gap between tiles.
- * @param {number} rows The number of rows in the grid.
- * @param {number} cols The number of columns in the grid.
+ * @param {Object} gameState The game state object containing completed groups and remaining tiles.
+ * @param {Object} boardConfig The board configuration object.
  */
-export const drawBoard = (
-  board,
-  positions,
-  remainingTiles,
-  completedGroups,
-  tileSize,
-  hgap,
-  vgap,
-  rows,
-  cols
-) => {
+export function drawBoard(positions, gameState, boardConfig) {
   const layout = getLayout();
 
   if (layout !== "spacious" && layout !== "compact") {
@@ -297,12 +248,15 @@ export const drawBoard = (
     showErrorScreen();
   }
 
+  const solvedGroups = gameState.solvedGroups;
+  const unsolvedTiles = gameState.unsolvedTiles;
+
   // Draw the banners
-  drawBanners(board, completedGroups, tileSize, hgap, vgap, rows, cols);
+  drawBanners(solvedGroups, boardConfig);
 
   // Draw the remaining tiles
-  drawTiles(positions, remainingTiles, tileSize, hgap, vgap, cols, layout);
-};
+  drawTiles(positions, unsolvedTiles, boardConfig, layout);
+}
 
 /**
  * Shuffles the positions of the tiles on the board.
@@ -318,9 +272,9 @@ export const shuffleBoard = (tiles, positions) => {
   }
 
   if (layout === "compact") {
-    shuffleArray(positions, tiles.size);
+    utils.shuffleArray(positions, tiles.size);
   } else {
-    shuffleArray(positions);
+    utils.shuffleArray(positions);
   }
 };
 
@@ -330,7 +284,7 @@ export const shuffleBoard = (tiles, positions) => {
  * @param {Set} newTiles The new tiles array.
  */
 export const updateTiles = (tiles, newTiles) => {
-  assertNotNullOrUndefined([tiles, newTiles]);
+  utils.assertNotNullOrUndefined([tiles, newTiles]);
 
   const tilesArray = Array.from(tiles);
   const newTilesArray = Array.from(newTiles);
@@ -349,36 +303,23 @@ export const updateTiles = (tiles, newTiles) => {
   }
 };
 
-/* -------------------------
-          BUTTONS
-   ------------------------- */
+/* --- Buttons --- */
 
 /**
  * Creates buttons for the tiles and put them on the board.
- * @param {HTMLCanvasElement} board The board element containing the tiles.
  * @param {Array} positions An array of positions for the tiles.
- * @param {Set} tiles A set of tile objects.
- * @param {Object} tileSize An object containing the height and width of the tile.
- * @param {number} hgap The horizontal gap between tiles.
- * @param {number} vgap The vertical gap between tiles.
- * @param {Set} selectedTiles A set of selected tiles.
- * @param {number} maxSelections The maximum number of tiles that can be selected.
+ * @param {Object} gameState The game state object.
+ * @param {Object} boardConfig The board configuration object.
  */
-export const createButtons = (
-  board,
-  positions,
-  tiles,
-  tileSize,
-  hgap,
-  vgap,
-  selectedTiles,
-  maxSelections
-) => {
+export function createButtons(positions, gameState, boardConfig) {
   let i = 0;
 
-  for (const tile of tiles) {
+  const tileSize = boardConfig.tileSize;
+  const maxSelections = boardConfig.cols;
+
+  for (const tile of gameState.tileSet) {
     const button = document.createElement("button");
-    const { x, y } = getPositionOnCanvas(positions[i++], tileSize, hgap, vgap);
+    const { x, y } = getPositionOnCanvas(positions[i++], boardConfig);
 
     // Create the button
     button.classList.add("tile");
@@ -392,20 +333,20 @@ export const createButtons = (
     tile.button = button; // Bind to a tile
 
     button.addEventListener("click", () => {
-      if (selectedTiles.has(tile)) {
+      if (gameState.activeTiles.has(tile)) {
         button.classList.remove("selected");
-        selectedTiles.delete(tile);
-      } else if (selectedTiles.size < maxSelections) {
+        gameState.activeTiles.delete(tile);
+      } else if (gameState.activeTiles.size < maxSelections) {
         button.classList.add("selected");
-        selectedTiles.add(tile);
+        gameState.activeTiles.add(tile);
       } else {
-        makeTooManyToast(maxSelections).showToast();
+        toasts.makeTooManyToast(maxSelections).showToast();
       }
     });
 
     board.appendChild(button);
   }
-};
+}
 
 /**
  * Get the text for the difficulty button based on the difficulty.
@@ -440,47 +381,44 @@ export const enableButtons = (buttons) => {
   buttons.forEach((button) => (button.disabled = false));
 };
 
-/* -------------------------
-           TOASTS
-   ------------------------- */
+/* --- Toasts --- */
 
 /**
  * Creates a Toastify message for submitting a set of tiles.
- * @param {Set} selectedTiles The set of currently selected tiles.
- * @param {Set} previousSubmissions The set of previously submitted tiles.
+ * @param {Object} gameState The game state object.
  * @param {Array} groups An array of group sizes in the game, sorted.
  * @returns {Object} A Toastify message object and the newly completed group.
  */
-export const submitToast = (selectedTiles, previousSubmissions, groups) => {
-  const group = selectedTiles.size;
+export const submitToast = (gameState, groups) => {
+  const group = gameState.activeTiles.size;
 
   let toast = null;
 
   let newlyCompletedGroup = null;
 
   if (group < groups[0]) {
-    toast = makeTooFewToast(groups[0]);
+    toast = toasts.makeTooFewToast(groups[0]);
   } else {
-    const selectedTilesHashed = hashTilesSet(selectedTiles);
+    const activeTilesHashed = utils.hashTilesSet(gameState.activeTiles);
 
-    if (previousSubmissions.has(selectedTilesHashed)) {
-      toast = TOAST_DUPLICATE;
+    if (gameState.submissionHistory.has(activeTilesHashed)) {
+      toast = toasts.makeDuplicateToast();
     } else {
-      previousSubmissions.add(selectedTilesHashed);
+      gameState.submissionHistory.add(activeTilesHashed);
 
-      const correctTiles = Array.from(selectedTiles).reduce(
+      const correctTiles = Array.from(gameState.activeTiles).reduce(
         (acc, tile) => (tile.groupSize === group ? acc + 1 : acc),
         0
       );
 
       if (correctTiles === group) {
-        newlyCompletedGroup = [...selectedTiles];
-        toast = TOAST_CORRECT;
+        newlyCompletedGroup = [...gameState.activeTiles];
+        toast = toasts.makeCorrectToast();
       } else if (2 * correctTiles > group) {
         // ? Maybe give other info (largest group of common categoty, or something else)
-        toast = makePartialToast(correctTiles, group);
+        toast = toasts.makePartialToast(correctTiles, group);
       } else {
-        toast = TOAST_INCORRECT;
+        toast = toasts.makeIncorrectToast();
       }
     }
   }
@@ -488,9 +426,22 @@ export const submitToast = (selectedTiles, previousSubmissions, groups) => {
   return { toast, newlyCompletedGroup };
 };
 
-/* -------------------------
-      ERRORS AND EFFECTS
-   ------------------------- */
+/**
+ * Removes all Toastify messages from the DOM.
+ */
+export const clearToasts = () => {
+  const toasts = document.querySelectorAll(".toastify");
+  toasts.forEach((toast) => toast.remove());
+};
+
+/* --- Settings Panel --- */
+
+export const closeSettingsPanel = (settingsPanel, blurOverlay) => {
+  blurOverlay.classList.remove("blurred");
+  settingsPanel.classList.remove("blurred");
+};
+
+/* --- Error Screen --- */
 
 /**
  * Displays the error screen by hiding all other elements except the theme toggle button.
@@ -508,14 +459,16 @@ export function showErrorScreen() {
   const errorScreen = document.getElementById("error-screen");
   errorScreen.style.display = "flex";
 
-  TOAST_ERROR.showToast();
+  toasts.makeErrorToast().showToast();
 }
+
+/* --- Effects --- */
 
 /**
  * Celebrate with confetti.
  * @param {number} duration The duration of the celebration in milliseconds.
  */
-export function celebrate(duration) {
+function celebrate(duration) {
   const isMobile = window.innerWidth <= 768;
 
   var animationEnd = Date.now() + duration;
@@ -549,57 +502,29 @@ export function celebrate(duration) {
     confetti({
       ...confettiDefaults,
       particleCount,
-      origin: { x: randomNum(0.1, 0.3), y: Math.random() - 0.2 },
+      origin: { x: utils.randomNum(0.1, 0.3), y: Math.random() - 0.2 },
     });
     confetti({
       ...confettiDefaults,
       particleCount,
-      origin: { x: randomNum(0.7, 0.9), y: Math.random() - 0.2 },
+      origin: { x: utils.randomNum(0.7, 0.9), y: Math.random() - 0.2 },
     });
   }, 250);
 }
 
 /**
  * Show the win toast and celebrate with confetti.
- * @param {Array} buttons The buttons to disable.
+ * @param {Object} gameControlButtons The game control buttons object.
  */
-export function win(buttons) {
-  disableButtons(buttons);
-  TOAST_WINNER.showToast();
+export function win(gameControlButtons) {
+  const gameControlButtonsArray = Object.values(gameControlButtons);
+  const toDisable = gameControlButtonsArray.filter(
+    (button) => button !== gameControlButtons.newGame
+  );
+
+  disableButtons(toDisable);
+  toasts.makeWinnerToast().showToast();
   celebrate(confettiDuration);
-}
-
-/**
- * Set the theme based on the user's preference.
- */
-export function setThemeBasedOnPreference() {
-  const prefersDarkScheme = window.matchMedia(
-    "(prefers-color-scheme: dark)"
-  ).matches;
-
-  // Apply dark theme if preferred
-  if (prefersDarkScheme) {
-    document.body.classList.add("dark-theme");
-  } else {
-    document.body.classList.remove("dark-theme");
-  }
-}
-
-/**
- * Clear the banners (colored boxes over completed groups).
- * @param {Array} completedGroups The completed groups array.
- */
-export function clearBanners(completedGroups) {
-  for (const group of completedGroups) {
-    if (group.banner) {
-      group.banner.classList.add("hidden");
-
-      setTimeout(() => {
-        group.banner.remove();
-        group.banner = null;
-      }, 500);
-    }
-  }
 }
 
 /**
@@ -616,4 +541,99 @@ export function spin(event) {
   setTimeout(() => {
     event.target.classList.remove("spin");
   }, parseFloat(spinDuration) * 1000);
+}
+
+/* --- Theme --- */
+
+/**
+ * Set the theme based on the user's preference.
+ */
+function setThemeBasedOnPreference() {
+  const prefersDarkScheme = window.matchMedia(
+    "(prefers-color-scheme: dark)"
+  ).matches;
+
+  // Apply dark theme if preferred
+  if (prefersDarkScheme) {
+    document.body.classList.add("dark-theme");
+  } else {
+    document.body.classList.remove("dark-theme");
+  }
+}
+
+/**
+ * Sets the theme based on the user's preference at page load.
+ * Listens to changes in the user's preferred color scheme and
+ * updates the theme accordingly.
+ */
+function setInitialTheme() {
+  setThemeBasedOnPreference();
+  window
+    .matchMedia("(prefers-color-scheme: dark)")
+    .addEventListener("change", setThemeBasedOnPreference);
+}
+
+/* --- General --- */
+
+/**
+ * Initializes the game UI components, including theme toggle, error and settings buttons, settings panel, and game board.
+ * Sets up event listeners for user interactions and configures the initial settings based on user preferences and configuration.
+ * @param {Object} config The game configuration object.
+ * @returns {Object} An object containing the sorted group sizes, the board element, and the gaps object for board layout.
+ */
+export function initializeGameUI(config) {
+  /* --- Initialize theme toggle button --- */
+
+  const themeToggleButton = document.getElementById("theme-toggle-button");
+  themeToggleButton.addEventListener("click", () => {
+    document.body.classList.toggle(CLASS_DARK_THEME);
+  });
+
+  // Set the theme based on the user's preference
+  setInitialTheme();
+
+  /* --- Initialize error and settings buttons --- */
+
+  const errorEmojiButton = document.getElementById("error-button");
+  const settingsButton = document.getElementById("settings-button");
+
+  errorEmojiButton.addEventListener("click", clickError);
+  settingsButton.addEventListener("click", clickSettings);
+
+  /* --- Initialize settings panel --- */
+
+  const blurOverlay = document.getElementById("blur-overlay");
+  const settingsPanel = document.getElementById("settings-panel");
+
+  // Close settings panel when clicking the blur overlay
+  blurOverlay.addEventListener("click", () => {
+    closeSettingsPanel(settingsPanel, blurOverlay);
+  });
+
+  /* --- Initialize board --- */
+  const groups = config["groups"].sort((a, b) => a - b);
+  utils.assert(!utils.containsDulpicates(groups), "Groups contain duplicates");
+
+  // Update groups paragraph/subtitle
+  const groupsParagraph = document.getElementById("subtitle");
+  groupsParagraph.textContent = `Group Sizes are ${groups.join(", ")}`;
+
+  /* --- Initialize board --- */
+
+  const board = document.getElementById("board");
+  const boardCSS = getComputedStyle(board);
+
+  const horizontalGap = parseFloat(boardCSS.columnGap);
+  const verticalGap = parseFloat(boardCSS.rowGap);
+  const gaps = { horizontal: horizontalGap, vertical: verticalGap };
+
+  // Set initial layout
+
+  let initialLayout = getLayout();
+
+  if (!initialLayout) {
+    initialLayout = setLayout(config["layout"]);
+  }
+
+  return { groups, board, gaps };
 }

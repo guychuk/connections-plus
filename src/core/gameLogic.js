@@ -1,9 +1,4 @@
-import {
-  getTags,
-  getCategories,
-  getCategoryName,
-  getTerms,
-} from "../services/supabase";
+import * as supabase from "../services/supabase";
 import { makePositions } from "../core/utils";
 import {
   calculateTileSize,
@@ -11,14 +6,13 @@ import {
   shuffleBoard,
   updateTiles,
   getLayout,
+  getTextForDifficultyButton,
+  clearToasts,
 } from "../components/ui";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { TOAST_WINNER } from "../components/toasts";
 import { clickDeselect } from "../events/events";
 
-/* ------------------------
-      GAME PROPERTIES
-  ------------------------ */
+/* --- Game Properties --- */
 
 /**
  * Get the number of tags for a given difficulty and number of groups.
@@ -29,17 +23,15 @@ import { clickDeselect } from "../events/events";
 const getNumOfTags = (difficulty, numGroups) => {
   switch (difficulty) {
     case "easy":
-      return numGroups;
+      return Math.max(1, numGroups);
     case "medium":
-      return Math.floor(numGroups / 2);
+      return Math.max(1, Math.floor(numGroups / 2));
     case "hard":
-      return Math.floor(numGroups / 3);
+      return Math.max(1, Math.floor(numGroups / 3));
   }
 };
 
-/* -------------------------
-            TILES
-   ------------------------- */
+/* --- Tiles --- */
 
 /**
  * Make a tile object.
@@ -69,7 +61,7 @@ const makeTile = (id, term, category, groupSize, groupIndex, button) => {
  * @param {string} difficulty difficulty
  * @returns {Set} set of tiles.
  */
-export const getNewTiles = async (client, groups, difficulty) => {
+async function getNewTiles(client, groups, difficulty) {
   const numGroups = groups.length;
   const numTags = getNumOfTags(difficulty, numGroups);
 
@@ -78,8 +70,10 @@ export const getNewTiles = async (client, groups, difficulty) => {
 
   var iterations = 0;
 
-  while (iterations < 20) {
-    const tags = (await getTags(client, numTags)).map((tag) => tag.tag);
+  while (iterations < 30) {
+    const tags = (await supabase.getTags(client, numTags)).map(
+      (tag) => tag.tag
+    );
 
     let i = groups.length;
 
@@ -89,7 +83,7 @@ export const getNewTiles = async (client, groups, difficulty) => {
     // Test this choice of Tags
     while (0 < i) {
       const newCategories = (
-        await getCategories(client, tags, groups[i - 1])
+        await supabase.getCategories(client, tags, groups[i - 1])
       ).filter((category) => !categoriesSet.has(category.cat_id));
 
       // If no categories were found, try again with different tags
@@ -115,7 +109,7 @@ export const getNewTiles = async (client, groups, difficulty) => {
     // Get categories names
 
     const categoriesNamesPromises = categories.map((category) =>
-      getCategoryName(client, category.cat_id)
+      supabase.getCategoryName(client, category.cat_id)
     );
 
     const categoriesNames = await Promise.all(categoriesNamesPromises);
@@ -123,9 +117,11 @@ export const getNewTiles = async (client, groups, difficulty) => {
     // Get terms
 
     const fetchTermsPromises = groups.map((groupSize, index) =>
-      getTerms(client, categories[index].cat_id, groupSize).then((terms) => {
-        return terms.map((term) => term.term);
-      })
+      supabase
+        .getTerms(client, categories[index].cat_id, groupSize)
+        .then((terms) => {
+          return terms.map((term) => term.term);
+        })
     );
 
     const allTerms = await Promise.all(fetchTermsPromises);
@@ -156,11 +152,9 @@ export const getNewTiles = async (client, groups, difficulty) => {
 
     return tiles;
   }
-};
+}
 
-/* -------------------------
-  GAME INITIALIZATION AND RESET
-   ------------------------- */
+/* --- Game Initialization --- */
 
 /**
  * Initialize the game board with tiles.
@@ -168,60 +162,62 @@ export const getNewTiles = async (client, groups, difficulty) => {
  * @param {string} difficulty The difficulty.
  * @param {Array} groups An array of group sizes.
  * @param {HTMLCanvasElement} board The board element.
- * @param {number} hgap The horizontal gap between tiles.
- * @param {number} vgap The vertical gap between tiles.
- * @returns {Object} An object containing the tiles set, selected tiles set, positions array and tile size object.
+ * @param {Object} gaps The gaps object containing horizontal and vertical gaps.
+ * @returns {Object} An object containing the game state, positions array and tile size object.
  */
-export const initializeGame = async (
-  client,
-  difficulty,
-  groups,
-  board,
-  hgap,
-  vgap
-) => {
+export async function initializeGame(client, difficulty, groups, board, gaps) {
   // Get board grid layout
   const rows = groups.length;
   const cols = groups[groups.length - 1];
 
   // Tile size and positions
-  const tileSize = calculateTileSize(board, rows, cols, hgap, vgap);
+  const tileSize = calculateTileSize(board, rows, cols, gaps);
   const positions = makePositions(rows, cols);
 
   // Game state
-  const selectedTiles = new Set();
-  const previousSubmissions = new Set();
-  const completedGroups = Array.from({ length: groups.length }, () => ({
+  const solvedGroups = Array.from({ length: groups.length }, () => ({
     tiles: [],
     banner: null,
   }));
 
-  // Get tiles
-  const allTiles = await getNewTiles(client, groups, difficulty);
+  const difficultyButton = document.getElementById("difficulty-button");
 
-  createButtons(
-    board,
-    positions,
-    allTiles,
-    tileSize,
-    hgap,
-    vgap,
-    selectedTiles, // ref
-    cols // max selections
-  );
+  difficultyButton.dataset.difficulty = difficulty;
+  difficultyButton.textContent = getTextForDifficultyButton(difficulty);
+
+  const tileSet = await getNewTiles(client, groups, difficulty);
+
+  // Game state
+  const gameState = {
+    activeTiles: new Set(),
+    submissionHistory: new Set(),
+    solvedGroups: solvedGroups,
+    tileSet: tileSet,
+    unsolvedTiles: new Set(tileSet),
+    gameWon: false,
+    gameOver: false,
+  };
+
+  const boardConfig = {
+    board: board,
+    freePositions: positions,
+    tileSize: tileSize,
+    gaps: gaps,
+    rows: rows,
+    cols: cols,
+  };
+
+  createButtons(positions, gameState, boardConfig);
 
   // Shuffle board
-  shuffleBoard(allTiles, positions, getLayout());
+  shuffleBoard(tileSet, positions, getLayout());
 
   return {
-    allTiles,
-    selectedTiles,
-    previousSubmissions,
-    completedGroups,
+    gameState,
     positions,
-    tileSize,
+    boardConfig,
   };
-};
+}
 
 /**
  * Reset the game state and fetch new tiles.
@@ -229,40 +225,33 @@ export const initializeGame = async (
  * @param {string} difficulty The difficulty.
  * @param {Array} groups The group sizes.
  * @param {Set} tiles The set of tiles to replace.
- * @param {Set} previousSubmissions The set of previously submitted tiles.
- * @param {Set} selectedTiles The set of currently selected tiles.
- * @param {Set} remainngTiles The set of remaining tiles.
- * @param {Array} completedGroups The array of completed groups.
+ * @param {Object} gameState The game state object.
  * @param {Array} positions The array of positions for the tiles.
  */
-export const resetGame = async (
-  SupabaseClient,
+export async function resetGame(
+  supabaseClient,
   difficulty,
   groups,
-  tiles,
-  previousSubmissions,
-  selectedTiles,
-  remainngTiles,
-  completedGroups,
+  gameState,
   positions
-) => {
+) {
   // If won but not by solving automatically
-  if (remainngTiles.size === 0 && TOAST_WINNER.timeOutVal) {
-    TOAST_WINNER.hideToast();
+  if (gameState.gameWon) {
+    clearToasts();
   }
 
   // Reset game state
 
-  previousSubmissions.clear();
-  selectedTiles.clear();
-  remainngTiles.clear();
+  gameState.submissionHistory.clear();
+  gameState.activeTiles.clear();
+  gameState.unsolvedTiles.clear();
 
-  for (let i = 0; i < completedGroups.length; i++) {
-    completedGroups[i].tiles.length = 0;
+  for (let i = 0; i < gameState.solvedGroups.length; i++) {
+    gameState.solvedGroups[i].tiles.length = 0;
   }
 
   // Get new tiles
-  const newTiles = await getNewTiles(SupabaseClient, groups, difficulty);
+  const newTiles = await getNewTiles(supabaseClient, groups, difficulty);
 
   // Get new list of positions
 
@@ -273,28 +262,33 @@ export const resetGame = async (
   positions.push(...makePositions(rows, cols));
 
   // Keep the same tiles set as before, but replace the contents
-  updateTiles(tiles, newTiles);
+  updateTiles(gameState.tileSet, newTiles);
 
-  for (const tile of tiles) {
-    remainngTiles.add(tile);
+  for (const tile of gameState.tileSet) {
+    gameState.unsolvedTiles.add(tile);
   }
-};
 
-export const completeGroup = (
-  groupIndex,
-  completedGroups,
-  selectedTiles,
-  remainngTiles,
-  positions,
-  groups
-) => {
-  completedGroups[groupIndex].tiles = [];
+  gameState.gameWon = false;
+  gameState.gameOver = false;
+}
+
+/* --- Complete Group Logic --- */
+
+/**
+ * Complete a group of tiles.
+ * @param {number} groupIndex The index of the group to complete.
+ * @param {Object} gameState The game state object.
+ * @param {Array} positions The array of positions for the tiles.
+ * @param {Array} groups The array of group sizes.
+ */
+export const completeGroup = (groupIndex, gameState, positions, groups) => {
+  gameState.solvedGroups[groupIndex].tiles = [];
 
   // Move and then hide the tiles in that group
-  for (let tile of selectedTiles) {
-    completedGroups[groupIndex].tiles.push(tile);
-    remainngTiles.delete(tile);
-    selectedTiles.delete(tile);
+  for (let tile of gameState.activeTiles) {
+    gameState.solvedGroups[groupIndex].tiles.push(tile);
+    gameState.unsolvedTiles.delete(tile);
+    gameState.activeTiles.delete(tile);
 
     tile.button.classList.remove("selected");
     tile.button.classList.add("hidden");
@@ -306,27 +300,28 @@ export const completeGroup = (
 
   const rows = groups.length;
   const cols = groups[groups.length - 1];
-  const numOfCompletedGroups = completedGroups.filter(
+  const numOfsolvedGroups = gameState.solvedGroups.filter(
     (group) => group.tiles.length > 0
   ).length;
 
   // Update free positions
   positions.length = 0;
-  positions.push(...makePositions(rows - numOfCompletedGroups, cols));
+  positions.push(...makePositions(rows - numOfsolvedGroups, cols));
 };
 
-export const solveNextGroup = (
-  completedGroups,
-  groups,
-  selectedTiles,
-  remainingTiles,
-  positions
-) => {
+/**
+ * Solves the next group of tiles.
+ * @param {Array} groups The array of group sizes.
+ * @param {Object} gameState The game state object.
+ * @param {Array} positions The array of positions for the tiles.
+ * @returns {boolean} True if a group was solved, false if all groups were solved.
+ */
+export const solveNextGroup = (groups, gameState, positions) => {
   let groupIndex = -1;
 
   // Find the last unsolved group
-  for (let i = 0; i < completedGroups.length; i++) {
-    if (completedGroups[i].tiles.length === 0) {
+  for (let i = 0; i < gameState.solvedGroups.length; i++) {
+    if (gameState.solvedGroups[i].tiles.length === 0) {
       groupIndex = i;
     }
   }
@@ -336,23 +331,16 @@ export const solveNextGroup = (
   }
 
   // Deselect all tiles
-  clickDeselect(selectedTiles);
+  clickDeselect(gameState.activeTiles);
 
   // Select all tiles in that group
-  for (let tile of remainingTiles) {
+  for (let tile of gameState.unsolvedTiles) {
     if (tile.groupIndex === groupIndex) {
-      selectedTiles.add(tile);
+      gameState.activeTiles.add(tile);
     }
   }
 
-  completeGroup(
-    groupIndex,
-    completedGroups,
-    selectedTiles,
-    remainingTiles,
-    positions,
-    groups
-  );
+  completeGroup(groupIndex, gameState, positions, groups);
 
   return true;
 };
