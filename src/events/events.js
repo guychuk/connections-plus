@@ -24,10 +24,20 @@ const clickSubmit = (
   boardConfig,
   gameControlButtons
 ) => {
-  const { toast, newlyCompletedGroup } = submitToast(gameState, groups);
+  const { toast, newlyCompletedGroup } = submitToast(
+    gameState,
+    groups,
+    positions,
+    boardConfig,
+    gameControlButtons
+  );
 
-  // Should never happen
+  if (gameState.mistakesMade === gameState.mistakesAllowed) {
+    return;
+  }
+
   if (toast === null) {
+    // Should never happen
     console.error("Toast is null");
     UI.showErrorScreen();
     return;
@@ -48,7 +58,7 @@ const clickSubmit = (
   const submitButton = gameControlButtons.submit;
   submitButton.disabled = true;
 
-  if (gameState.unsolvedTiles.size > 0) {
+  if (gameState.unsolvedTiles.size) {
     setTimeout(() => {
       submitButton.disabled = gameState.gameOver;
     }, toast.options.duration + 100);
@@ -156,7 +166,7 @@ export const clickDeselect = (activeTiles) => {
  * @param {Object} boardConfig The board configuration object.
  * @param {Object} gameControlButtons The game control buttons object.
  */
-const clickSolve = async (
+export const clickSolve = async (
   gameState,
   groups,
   positions,

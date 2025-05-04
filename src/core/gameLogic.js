@@ -10,10 +10,9 @@ import {
   clearToasts,
   addMistake,
   resetMistakes,
-  showLoserScreen,
 } from "../components/ui";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { clickDeselect } from "../events/events";
+import { clickDeselect, clickSolve } from "../events/events";
 import * as toasts from "../components/toasts";
 
 /* --- Game Properties --- */
@@ -249,10 +248,7 @@ export async function resetGame(
   gameState,
   positions
 ) {
-  // If won but not by solving automatically
-  if (gameState.gameWon) {
-    clearToasts();
-  }
+  clearToasts();
 
   // Reset game state
 
@@ -369,9 +365,18 @@ export const solveNextGroup = (groups, gameState, positions) => {
  * Creates a Toastify message for submitting a set of tiles.
  * @param {Object} gameState The game state object.
  * @param {Array} groups An array of group sizes in the game, sorted.
+ * @param {Array} positions The array of positions for the tiles.
+ * @param {Object} boardConfig The board configuration object.
+ * @param {Object} gameControlButtons The game control buttons object.
  * @returns {Object} A Toastify message object and the newly completed group.
  */
-export const submitToast = (gameState, groups) => {
+export const submitToast = (
+  gameState,
+  groups,
+  positions,
+  boardConfig,
+  gameControlButtons
+) => {
   const group = gameState.activeTiles.size;
 
   let toast = null;
@@ -401,7 +406,13 @@ export const submitToast = (gameState, groups) => {
         toast = toasts.makePartialToast(correctTiles, group);
       } else {
         toast = toasts.makeIncorrectToast();
-        makeMistake(gameState);
+        makeMistake(
+          gameState,
+          groups,
+          positions,
+          boardConfig,
+          gameControlButtons
+        );
       }
     }
   }
@@ -409,11 +420,24 @@ export const submitToast = (gameState, groups) => {
   return { toast, newlyCompletedGroup };
 };
 
-const makeMistake = (gameState) => {
+/**
+ * Increments the mistakes counter by one and updates the mistakes counter UI.
+ * If the number of mistakes made is equal to the number of mistakes allowed,
+ * shows a toast message indicating that the player lost.
+ * @param {Object} gameState The game state object.
+ */
+const makeMistake = (
+  gameState,
+  groups,
+  positions,
+  boardConfig,
+  gameControlButtons
+) => {
   gameState.mistakesMade++;
   addMistake();
 
   if (gameState.mistakesMade === gameState.mistakesAllowed) {
-    showLoserScreen();
+    toasts.makeLoserToast().showToast();
+    clickSolve(gameState, groups, positions, boardConfig, gameControlButtons);
   }
 };

@@ -69,10 +69,6 @@ body {
   --theme-error-screen-bg: #8b0000;
   --theme-error-screen-text: #f0f0f0;
 
-  /* Loser Screen */
-  --theme-loser-screen-bg: #fff8e1;
-  --theme-loser-screen-text: #7b5b00;
-
   /* Game Controls */
   --theme-game-controls-bg: #e0e0e0;
   --theme-game-controls-text-color: #333333;
@@ -155,6 +151,10 @@ body {
   --theme-toast-winner-text: #4a0f66;
   --theme-toast-winner-border: #d6b3ff;
   --theme-toast-winner-shadow: rgba(74, 15, 102, 0.2);
+  --theme-toast-loser-text: #721c24;
+  --theme-toast-loser-bg: #f8d7da;
+  --theme-toast-loser-border: #f5c6cb;
+  --theme-toast-loser-shadow: rgba(0, 0, 0, 0.1);
 }
 
 /* ------------------------
@@ -181,10 +181,6 @@ body.dark-theme {
 
   /* Error Screen */
   --theme-error-screen-bg: #4b0000;
-
-  /* Loser Screen */
-  --theme-loser-screen-bg: #5c4813;
-  --theme-loser-screen-text: #ffe082;
 
   /* Game Controls */
   --theme-game-controls-bg: #4d4d4d;
@@ -272,6 +268,10 @@ body.dark-theme {
   --theme-toast-winner-bg: #2b183a;
   --theme-toast-winner-border: #7e4eb8;
   --theme-toast-winner-shadow: rgba(0, 0, 0, 0.3);
+  --theme-toast-loser-text: #f8d7da;
+  --theme-toast-loser-bg: #721c24;
+  --theme-toast-loser-border: #f5c6cb;
+  --theme-toast-loser-shadow: rgba(0, 0, 0, 0.3);
 }
 
 /* ------------------------
@@ -525,14 +525,6 @@ body.dark-theme {
 #error-screen {
   background: var(--theme-error-screen-bg);
   color: var(--theme-error-screen-text);
-}
-
-/* ------------------------
-   LOSER SCREEN
------------------------- */
-#loser-screen {
-  background: var(--theme-loser-screen-bg);
-  color: var(--theme-loser-screen-text);
 }
 
 /* ------------------------
@@ -822,6 +814,13 @@ body.dark-theme {
   background-color: var(--theme-toast-winner-bg);
   border-color: var(--theme-toast-winner-border);
   box-shadow: 0 2px 8px var(--theme-toast-winner-shadow);
+}
+
+.toastify-loser {
+  color: var(--theme-toast-loser-text);
+  background-color: var(--theme-toast-loser-bg);
+  border-color: var(--theme-toast-loser-border);
+  box-shadow: 0 2px 8px var(--theme-toast-loser-shadow);
 }
 
 /* ------------------------

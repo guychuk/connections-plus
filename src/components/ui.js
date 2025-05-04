@@ -423,28 +423,6 @@ export function showErrorScreen() {
   errorScreen.style.display = "flex";
 }
 
-/* --- Loser Screen --- */
-
-/**
- * Displays the loser screen by hiding all other elements except the theme toggle button.
- */
-export function showLoserScreen() {
-  // Hide all body children except the header
-  [...document.body.children].forEach((child) => {
-    if (child.id !== "loser-screen" && child.tagName !== "HEADER") {
-      child.style.display = "none";
-    }
-  });
-
-  // Hide Settings button
-  const settingsButton = document.getElementById("settings-button");
-  settingsButton.style.display = "none";
-
-  // Show loser screen
-  const loserScreen = document.getElementById("loser-screen");
-  loserScreen.style.display = "flex";
-}
-
 /* --- Effects --- */
 
 /**
@@ -562,7 +540,6 @@ const isDarkTheme = () => document.body.classList.contains(CLASS_DARK_THEME);
 
 /* --- Mistakes --- */
 
-
 /**
  * Updates the mistakes counter UI by adding a mistake symbol.
  */
@@ -594,7 +571,7 @@ export const addMistake = () => {
  * Updates the color of the mistakes counter UI based on the current theme.
  * @function
  */
-function updateMistakesColor(){
+function updateMistakesColor() {
   const mistakesElement = document.getElementById("mistakes");
   if (!mistakesElement) return;
 
@@ -614,20 +591,20 @@ function updateMistakesColor(){
   }
 
   mistakesElement.textContent = newText;
-};
+}
 
 /**
  * Resets the mistakes counter UI by repeating the remaining mistake symbol for the specified number of allowed mistakes.
  * @param {number} mistakesAllowed The number of mistakes allowed in the game.
  */
-export function resetMistakes(mistakesAllowed){
+export function resetMistakes(mistakesAllowed) {
   const mistakesElement = document.getElementById("mistakes");
   const remaining = isDarkTheme()
     ? REMAINIG_MISTAKE_DARK
     : REMAINIG_MISTAKE_LIGHT;
 
   mistakesElement.textContent = remaining.repeat(mistakesAllowed);
-};
+}
 
 /* --- General --- */
 
@@ -652,11 +629,9 @@ export function initializeGameUI(config) {
   /* --- Initialize error and settings buttons --- */
 
   const errorEmojiButton = document.getElementById("error-button");
-  const loserEmojiButton = document.getElementById("loser-button");
   const settingsButton = document.getElementById("settings-button");
 
   errorEmojiButton.addEventListener("click", clickScreenButton);
-  loserEmojiButton.addEventListener("click", clickScreenButton);
   settingsButton.addEventListener("click", clickSettings);
 
   /* --- Initialize settings panel --- */
