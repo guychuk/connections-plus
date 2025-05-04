@@ -1,5 +1,5 @@
 import * as supabase from "../services/supabase";
-import { makePositions } from "../core/utils";
+import { makePositions, hashTilesSet } from "../core/utils";
 import {
   calculateTileSize,
   createButtons,
@@ -8,9 +8,12 @@ import {
   getLayout,
   getTextForDifficultyButton,
   clearToasts,
+  addMistake,
+  resetMistakes,
 } from "../components/ui";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { clickDeselect } from "../events/events";
+import { clickDeselect, clickSolve } from "../events/events";
+import * as toasts from "../components/toasts";
 
 /* --- Game Properties --- */
 
@@ -70,7 +73,7 @@ async function getNewTiles(client, groups, difficulty) {
 
   var iterations = 0;
 
-  while (iterations < 30) {
+  while (iterations < 25) {
     const tags = (await supabase.getTags(client, numTags)).map(
       (tag) => tag.tag
     );
@@ -158,6 +161,7 @@ async function getNewTiles(client, groups, difficulty) {
 
 /**
  * Initialize the game board with tiles.
+ * @param {Object} config The config object.
  * @param {SupabaseClient} client The Supabase client.
  * @param {string} difficulty The difficulty.
  * @param {Array} groups An array of group sizes.
@@ -165,7 +169,14 @@ async function getNewTiles(client, groups, difficulty) {
  * @param {Object} gaps The gaps object containing horizontal and vertical gaps.
  * @returns {Object} An object containing the game state, positions array and tile size object.
  */
-export async function initializeGame(client, difficulty, groups, board, gaps) {
+export async function initializeGame(
+  config,
+  client,
+  difficulty,
+  groups,
+  board,
+  gaps
+) {
   // Get board grid layout
   const rows = groups.length;
   const cols = groups[groups.length - 1];
@@ -196,6 +207,8 @@ export async function initializeGame(client, difficulty, groups, board, gaps) {
     unsolvedTiles: new Set(tileSet),
     gameWon: false,
     gameOver: false,
+    mistakesAllowed: config["mistakesAllowed"],
+    mistakesMade: 0,
   };
 
   const boardConfig = {
@@ -235,10 +248,7 @@ export async function resetGame(
   gameState,
   positions
 ) {
-  // If won but not by solving automatically
-  if (gameState.gameWon) {
-    clearToasts();
-  }
+  clearToasts();
 
   // Reset game state
 
@@ -270,6 +280,10 @@ export async function resetGame(
 
   gameState.gameWon = false;
   gameState.gameOver = false;
+
+  gameState.mistakesMade = 0;
+
+  resetMistakes(gameState.mistakesAllowed);
 }
 
 /* --- Complete Group Logic --- */
@@ -343,4 +357,93 @@ export const solveNextGroup = (groups, gameState, positions) => {
   completeGroup(groupIndex, gameState, positions, groups);
 
   return true;
+};
+
+/* --- Toasts --- */
+
+/**
+ * Creates a Toastify message for submitting a set of tiles.
+ * @param {Object} gameState The game state object.
+ * @param {Array} groups An array of group sizes in the game, sorted.
+ * @param {Array} positions The array of positions for the tiles.
+ * @param {Object} boardConfig The board configuration object.
+ * @param {Object} gameControlButtons The game control buttons object.
+ * @returns {Object} A Toastify message object and the newly completed group.
+ */
+export const submitToast = (
+  gameState,
+  groups,
+  positions,
+  boardConfig,
+  gameControlButtons
+) => {
+  const group = gameState.activeTiles.size;
+
+  let toast = null;
+
+  let newlyCompletedGroup = null;
+
+  if (group < groups[0]) {
+    toast = toasts.makeTooFewToast(groups[0]);
+  } else {
+    const activeTilesHashed = hashTilesSet(gameState.activeTiles);
+
+    if (gameState.submissionHistory.has(activeTilesHashed)) {
+      toast = toasts.makeDuplicateToast();
+    } else {
+      gameState.submissionHistory.add(activeTilesHashed);
+
+      const correctTiles = Array.from(gameState.activeTiles).reduce(
+        (acc, tile) => (tile.groupSize === group ? acc + 1 : acc),
+        0
+      );
+
+      // Correct!
+      if (correctTiles === group) {
+        newlyCompletedGroup = [...gameState.activeTiles];
+        toast = toasts.makeCorrectToast();
+      } else {
+        // Incorrect
+
+        if (2 * correctTiles > group) {
+          // ? Maybe give other info (largest group of common categoty, or something else)
+          toast = toasts.makePartialToast(correctTiles, group);
+        } else {
+          toast = toasts.makeIncorrectToast();
+        }
+
+        makeMistake(
+          gameState,
+          groups,
+          positions,
+          boardConfig,
+          gameControlButtons
+        );
+      }
+    }
+  }
+
+  return { toast, newlyCompletedGroup };
+};
+
+/**
+ * Increments the mistakes counter by one and updates the mistakes counter UI.
+ * If the number of mistakes made is equal to the number of mistakes allowed,
+ * shows a toast message indicating that the player lost.
+ * @param {Object} gameState The game state object.
+ */
+const makeMistake = (
+  gameState,
+  groups,
+  positions,
+  boardConfig,
+  gameControlButtons
+) => {
+  gameState.mistakesMade++;
+  addMistake();
+
+  if (gameState.mistakesMade === gameState.mistakesAllowed) {
+    toasts.makeLoserToast().showToast();
+    clickSolve(gameState, groups, positions, boardConfig, gameControlButtons);
+  }
 };

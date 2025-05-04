@@ -19,6 +19,7 @@ const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_KEY;
   const defaultDifficulty = config["defaultDifficulty"];
 
   const { gameState, positions, boardConfig } = await initializeGame(
+    config,
     supabaseClient,
     defaultDifficulty,
     groups,

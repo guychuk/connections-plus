@@ -13,12 +13,7 @@
     <link rel="stylesheet" href="./src/styles/style.css" />
 
     <!-- Favicon -->
-    <link
-      rel="icon"
-      type="image/png"
-      href="./public/icon.png"
-      sizes="16x16"
-    />
+    <link rel="icon" type="image/png" href="./public/icon.png" sizes="16x16" />
 
     <title>Connections+</title>
   </head>
@@ -103,12 +98,27 @@
           class="game-button"
         ></button>
       </div>
+
+      <div class="game-mistakes">
+        <p id="mistakes"></p>
+      </div>
     </main>
 
-    <div id="error-screen" class="error-container">
-      <p id="error-message">An unexpected error occurred.</p>
-      <p id="error-button" aria-label="Refresh" title="Refresh">🫣</p>
-      <p id="error-message-refresh">Click the emoji to refresh</p>
+    <div id="error-screen" class="screen-container">
+      <p id="error-message" class="screen-message">
+        An unexpected error occurred.
+      </p>
+      <p
+        id="error-button"
+        aria-label="Refresh"
+        title="Refresh"
+        class="screen-button"
+      >
+        🫣
+      </p>
+      <p id="error-message-refresh" class="screen-message-refresh">
+        Click the emoji to refresh
+      </p>
     </div>
 
     <div id="blur-overlay" class="blur-overlay"></div>

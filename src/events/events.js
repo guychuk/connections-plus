@@ -1,5 +1,10 @@
 import * as UI from "../components/ui";
-import { resetGame, completeGroup, solveNextGroup } from "../core/gameLogic";
+import {
+  resetGame,
+  completeGroup,
+  solveNextGroup,
+  submitToast,
+} from "../core/gameLogic";
 import { delay, makePositions } from "../core/utils";
 
 /* --- Game Controls --- */
@@ -19,10 +24,20 @@ const clickSubmit = (
   boardConfig,
   gameControlButtons
 ) => {
-  const { toast, newlyCompletedGroup } = UI.submitToast(gameState, groups);
+  const { toast, newlyCompletedGroup } = submitToast(
+    gameState,
+    groups,
+    positions,
+    boardConfig,
+    gameControlButtons
+  );
 
-  // Should never happen
+  if (gameState.mistakesMade === gameState.mistakesAllowed) {
+    return;
+  }
+
   if (toast === null) {
+    // Should never happen
     console.error("Toast is null");
     UI.showErrorScreen();
     return;
@@ -43,7 +58,7 @@ const clickSubmit = (
   const submitButton = gameControlButtons.submit;
   submitButton.disabled = true;
 
-  if (gameState.unsolvedTiles.size > 0) {
+  if (gameState.unsolvedTiles.size) {
     setTimeout(() => {
       submitButton.disabled = gameState.gameOver;
     }, toast.options.duration + 100);
@@ -151,7 +166,7 @@ export const clickDeselect = (activeTiles) => {
  * @param {Object} boardConfig The board configuration object.
  * @param {Object} gameControlButtons The game control buttons object.
  */
-const clickSolve = async (
+export const clickSolve = async (
   gameState,
   groups,
   positions,
@@ -304,14 +319,14 @@ export function initializeSettings(positions, gameState, boardConfig) {
   });
 }
 
-/* --- Error Page --- */
+/* --- Big Screens --- */
 
 /**
  * Event handler for the error button.
  * Spins the button and reloads the page after the spin animation finishes.
  * @param {MouseEvent} event The event when the user clicks the error button.
  */
-export const clickError = (event) => {
+export const clickScreenButton = (event) => {
   const rootStyles = getComputedStyle(document.documentElement);
   const spinDuration = rootStyles
     .getPropertyValue("--animation-speed-spin")

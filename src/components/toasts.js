@@ -72,3 +72,6 @@ export const makeIncorrectToast = () =>
 
 export const makeWinnerToast = () =>
   makeToast(["toastify-rounded", "toastify-winner"], "🎉 You won!", -1);
+
+export const makeLoserToast = () =>
+  makeToast(["toastify-rounded", "toastify-loser"], "👎 You lost!", -1);

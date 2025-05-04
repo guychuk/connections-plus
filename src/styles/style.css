@@ -31,6 +31,7 @@ body {
   /* Z-indexes */
   --z-index-toggle-theme: 4; /* Highest - Always on top */
   --z-index-settings-panel: 3;
+  --z-index-big-screen: 3;
   --z-index-blur-overlay: 2;
   --z-index-toast: 1;
 
@@ -150,6 +151,10 @@ body {
   --theme-toast-winner-text: #4a0f66;
   --theme-toast-winner-border: #d6b3ff;
   --theme-toast-winner-shadow: rgba(74, 15, 102, 0.2);
+  --theme-toast-loser-text: #721c24;
+  --theme-toast-loser-bg: #f8d7da;
+  --theme-toast-loser-border: #f5c6cb;
+  --theme-toast-loser-shadow: rgba(0, 0, 0, 0.1);
 }
 
 /* ------------------------
@@ -263,6 +268,10 @@ body.dark-theme {
   --theme-toast-winner-bg: #2b183a;
   --theme-toast-winner-border: #7e4eb8;
   --theme-toast-winner-shadow: rgba(0, 0, 0, 0.3);
+  --theme-toast-loser-text: #f8d7da;
+  --theme-toast-loser-bg: #721c24;
+  --theme-toast-loser-border: #f5c6cb;
+  --theme-toast-loser-shadow: rgba(0, 0, 0, 0.3);
 }
 
 /* ------------------------
@@ -472,9 +481,10 @@ body.dark-theme {
 }
 
 /* ------------------------
-   ERROR HANDLING
+   BIG SCREEN
 ------------------------ */
-.error-container {
+
+.screen-container {
   display: none;
   flex-direction: column;
   justify-content: center;
@@ -482,23 +492,22 @@ body.dark-theme {
   width: 100%;
   height: 100%;
   font-family: Inter, sans-serif;
-  background: var(--theme-error-screen-bg);
-  color: var(--theme-error-screen-text);
   opacity: 1;
   transition: background-color var(--animation-speed-color-change) ease,
     opacity var(--animation-speed-color-change) ease,
     max-height var(--animation-speed-color-change) ease;
+  z-index: var(--z-index-screen);
 }
 
-#error-message {
+.screen-message {
   font-size: 3rem;
 }
 
-#error-message-refresh {
+.screen-message-refresh {
   font-size: 1rem;
 }
 
-#error-button {
+.screen-button {
   font-family: Inter, sans-serif;
   font-size: 15rem;
   margin-top: 10px;
@@ -506,8 +515,16 @@ body.dark-theme {
   animation: pulse 1s infinite;
 }
 
-#error-button.spin {
+.screen-button.spin {
   animation: spin var(--animation-speed-spin) linear forwards;
+}
+
+/* ------------------------
+   ERROR SCREEN
+------------------------ */
+#error-screen {
+  background: var(--theme-error-screen-bg);
+  color: var(--theme-error-screen-text);
 }
 
 /* ------------------------
@@ -797,6 +814,13 @@ body.dark-theme {
   background-color: var(--theme-toast-winner-bg);
   border-color: var(--theme-toast-winner-border);
   box-shadow: 0 2px 8px var(--theme-toast-winner-shadow);
+}
+
+.toastify-loser {
+  color: var(--theme-toast-loser-text);
+  background-color: var(--theme-toast-loser-bg);
+  border-color: var(--theme-toast-loser-border);
+  box-shadow: 0 2px 8px var(--theme-toast-loser-shadow);
 }
 
 /* ------------------------
