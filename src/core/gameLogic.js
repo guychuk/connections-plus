@@ -10,6 +10,7 @@ import {
   clearToasts,
   addMistake,
   resetMistakes,
+  updateSubtitle,
 } from "../components/ui";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { clickDeselect, clickSolve } from "../events/events";
@@ -196,6 +197,8 @@ export async function initializeGame(
   difficultyButton.dataset.difficulty = difficulty;
   difficultyButton.textContent = getTextForDifficultyButton(difficulty);
 
+  updateSubtitle(groups, solvedGroups);
+
   const tileSet = await getNewTiles(client, groups, difficulty);
 
   // Game state
@@ -259,6 +262,8 @@ export async function resetGame(
   for (let i = 0; i < gameState.solvedGroups.length; i++) {
     gameState.solvedGroups[i].tiles.length = 0;
   }
+
+  updateSubtitle(groups, gameState.solvedGroups);
 
   // Get new tiles
   const newTiles = await getNewTiles(supabaseClient, groups, difficulty);

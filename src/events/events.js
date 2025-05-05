@@ -52,6 +52,7 @@ const clickSubmit = (
     completeGroup(groupIndex, gameState, positions, groups);
 
     UI.drawBoard(positions, gameState, boardConfig);
+    UI.updateSubtitle(groups, gameState.solvedGroups);
   }
 
   // When pressing the button fast enough, the toasts get stuck.

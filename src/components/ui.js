@@ -571,6 +571,29 @@ export function resetMistakes(mistakesAllowed) {
   mistakesElement.textContent = REMAINIG_MISTAKE.repeat(mistakesAllowed);
 }
 
+/* --- Subtitle --- */
+
+/**
+ * Updates the game subtitle with the group sizes crossed if completed.
+ * @param {Array} groups The sorted group sizes array.
+ * @param {Array} solvedGroups The array of solved groups.
+ */
+export const updateSubtitle = (groups, solvedGroups) => {
+  const subtitle = document.getElementById("subtitle");
+
+  const groupTexts = [];
+
+  for (let i = 0; i < groups.length; i++) {
+    if (solvedGroups[i].tiles.length === 0) {
+      groupTexts.push(`${groups[i]}`);
+    } else {
+      groupTexts.push(`<del>${groups[i]}</del>`);
+    }
+  }
+
+  subtitle.innerHTML = `Group sizes are ${groupTexts.join(", ")}`;
+};
+
 /* --- General --- */
 
 /**
@@ -614,7 +637,8 @@ export function initializeGameUI(config) {
 
   // Update groups paragraph/subtitle
   const groupsParagraph = document.getElementById("subtitle");
-  groupsParagraph.textContent = `Group Sizes are ${groups.join(", ")}`;
+  groupsParagraph.textContent = `Group Sizes are `;
+  // groupsParagraph.textContent = `Group Sizes are ${groups.join(", ")}`;
 
   /* --- Initialize board --- */
 
