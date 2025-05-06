@@ -178,7 +178,7 @@ Choose your preferred tile arrangement:
 Future enhancements planned for Connectons+:
 
 - ~~**Limited Turns Mode**: For a little added pressure, like the original game.~~
-- **Hint System**: Implement a hint feature for players who are stuck.
+- ~~**Hint System**: Implement a hint feature for players who are stuck.~~
 - **Customizable Group Count**: Allow players to adjust the number of groups.
 - **Statistics Tracking**: Keep record of player performance over time.
 
