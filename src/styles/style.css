@@ -618,15 +618,49 @@ body.dark-theme {
   transition: background-color var(--animation-speed-color-change) ease;
 }
 
+/* .tile.hinted {
+  border: 3px dashed var(--theme-tile-text-selected);
+} */
+
 .tile:active,
-.tile.tile.selected {
+.tile.selected {
+  border: none;
   background-color: var(--theme-tile-bg-selected);
+  background-image: linear-gradient(
+      90deg,
+      var(--theme-tile-text-selected) 50%,
+      transparent 50%
+    ),
+    linear-gradient(90deg, var(--theme-tile-text-selected) 50%, transparent 50%),
+    linear-gradient(0deg, var(--theme-tile-text-selected) 50%, transparent 50%),
+    linear-gradient(0deg, var(--theme-tile-text-selected) 50%, transparent 50%);
+  background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
+  background-size: 15px 3px, 15px 3px, 3px 15px, 3px 15px;
+  background-position: 0 0, 0 100%, 0 0, 100% 0;
+  animation: border-dance 2s infinite linear;
+}
+
+.tile.hinted {
   border: 3px solid var(--theme-tile-text-selected);
+  background-image: none;
+  background-repeat: none;
+  background-size: none;
+  background-position: none;
+  animation: none;
   transition: background-color var(--animation-speed-color-change) ease,
     color var(--animation-speed-color-change) ease,
     border var(--animation-speed-color-change) ease,
     left var(--animation-speed-tile-movement) ease,
     top var(--animation-speed-tile-movement) ease;
+}
+
+@keyframes border-dance {
+  0% {
+    background-position: 0 0, 0 100%, 0 0, 100% 0;
+  }
+  100% {
+    background-position: 30px 0, -30px 100%, 0 -30px, 100% 30px;
+  }
 }
 
 .tile:disabled {

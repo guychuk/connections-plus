@@ -152,10 +152,10 @@ const clickShuffle = (positions, gameState, boardConfig) => {
  */
 export const clickDeselect = (activeTiles) => {
   for (const tile of activeTiles) {
+    if (tile.button.classList.contains("hinted")) continue;
     tile.button.classList.remove("selected");
+    activeTiles.delete(tile);
   }
-
-  activeTiles.clear();
 };
 
 /**
@@ -218,12 +218,11 @@ export const clickHint = (gameState, groups) => {
   // Deselect all cards
   clickDeselect(activeTiles);
 
-  console.log(unsolvedTiles);
-
   // Select cards as a hint
   for (const tile of unsolvedTiles) {
     if (tile.groupIndex === hintGroup) {
       tile.button.click();
+      tile.button.classList.add("hinted");
 
       if (activeTiles.size === cardsToShow) {
         break;

@@ -335,7 +335,10 @@ export function createButtons(positions, gameState, boardConfig) {
     tile.button = button; // Bind to a tile
 
     button.addEventListener("click", () => {
-      if (gameState.activeTiles.has(tile)) {
+      if (
+        gameState.activeTiles.has(tile) &&
+        !button.classList.contains("hinted")
+      ) {
         button.classList.remove("selected");
         gameState.activeTiles.delete(tile);
       } else if (gameState.activeTiles.size < maxSelections) {
