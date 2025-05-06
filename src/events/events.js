@@ -196,6 +196,42 @@ export const clickSolve = async (
   UI.enableButtons([gameControlButtons.newGame]);
 };
 
+export const clickHint = (gameState, groups) => {
+  const solvedGroups = gameState.solvedGroups;
+  const activeTiles = gameState.activeTiles;
+  const unsolvedTiles = gameState.unsolvedTiles;
+
+  let hintGroup;
+  let hintGroupSize;
+  let cardsToShow;
+
+  // Find the biggest group to not have been completed
+  for (let i = groups.length - 1; i >= 0; i--) {
+    if (solvedGroups[i].tiles.length === 0) {
+      hintGroup = i;
+      hintGroupSize = groups[i];
+      cardsToShow = Math.ceil(hintGroupSize / 2);
+      break;
+    }
+  }
+
+  // Deselect all cards
+  clickDeselect(activeTiles);
+
+  console.log(unsolvedTiles);
+
+  // Select cards as a hint
+  for (const tile of unsolvedTiles) {
+    if (tile.groupIndex === hintGroup) {
+      tile.button.click();
+
+      if (activeTiles.size === cardsToShow) {
+        break;
+      }
+    }
+  }
+};
+
 export function initializeGameControls(
   gameState,
   boardConfig,
@@ -204,12 +240,13 @@ export function initializeGameControls(
   supabaseClient
 ) {
   const controlButtons = {
-    deselect: document.getElementById("deselect-all-button"),
-    difficulty: document.getElementById("difficulty-button"),
     newGame: document.getElementById("new-game-button"),
+    deselect: document.getElementById("deselect-all-button"),
     shuffle: document.getElementById("shuffle-button"),
+    hint: document.getElementById("hint-button"),
     solve: document.getElementById("solve-button"),
     submit: document.getElementById("submit-button"),
+    difficulty: document.getElementById("difficulty-button"),
   };
 
   // Difficulty Button
@@ -248,6 +285,11 @@ export function initializeGameControls(
   // Solve Button
   controlButtons.solve.addEventListener("click", async () => {
     await clickSolve(gameState, groups, positions, boardConfig, controlButtons);
+  });
+
+  // Hint Button
+  controlButtons.hint.addEventListener("click", () => {
+    clickHint(gameState, groups);
   });
 }
 
