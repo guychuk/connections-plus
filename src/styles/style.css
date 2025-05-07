@@ -531,7 +531,7 @@ body.dark-theme {
    GAME CONTROLS
 ------------------------ */
 .game-controls .game-button {
-  width: 7vw;
+  width: calc(100vw / 7);
   color: var(--theme-game-controls-text-color);
   background-color: var(--theme-game-controls-bg);
   border-color: var(--theme-game-controls-border-color);
@@ -869,13 +869,15 @@ body.dark-theme {
 
   .game-controls {
     max-width: 90vw;
+    flex-wrap: wrap;
   }
 
   .game-controls .game-button {
     font-size: 0.6em;
     padding: 4px 8px;
     margin: 2px;
-    width: 15%;
+    flex: 1 1 calc(30%);
+    max-width: calc(30%);
   }
 
   .game-board {
