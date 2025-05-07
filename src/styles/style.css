@@ -158,120 +158,120 @@ body {
 }
 
 /* ------------------------
-   THEME: DARK
+    THEME: DARKER
 ------------------------ */
 body.dark-theme {
   /* General UI */
-  --theme-bg: #393939;
-  --theme-text-color: #f2f2f2;
+  --theme-bg: #222222;
+  --theme-text-color: #e0e0e0;
   --theme-toggle-theme-emoji: "🌞";
 
   /* Settings Panel */
-  --theme-settings-panel-bg: #1a1a1a;
-  --theme-settings-panel-text-color: #b0b0b0;
+  --theme-settings-panel-bg: #0d0d0d;
+  --theme-settings-panel-text-color: #999999;
   --theme-settings-panel-border: #333333;
-  --theme-settings-panel-header-bg: #262626;
-  --theme-settings-panel-header-text-color: #b0b0b0;
-  --theme-settings-panel-box-shadow: rgba(0, 0, 0, 0.4);
-  --theme-settings-button-bg: #2a2a2a;
-  --theme-settings-button-text-color: #e0e0e0;
-  --theme-settings-button-hover-bg: #3a3a3a;
-  --theme-settings-button-active-bg: #4a4a4a;
-  --theme-settings-button-border: #444444;
+  --theme-settings-panel-header-bg: #1a1a1a;
+  --theme-settings-panel-header-text-color: #999999;
+  --theme-settings-panel-box-shadow: rgba(0, 0, 0, 0.5);
+  --theme-settings-button-bg: #1e1e1e;
+  --theme-settings-button-text-color: #d0d0d0;
+  --theme-settings-button-hover-bg: #2e2e2e;
+  --theme-settings-button-active-bg: #3e3e3e;
+  --theme-settings-button-border: #333333;
 
   /* Error Screen */
-  --theme-error-screen-bg: #4b0000;
+  --theme-error-screen-bg: #330000;
 
   /* Game Controls */
-  --theme-game-controls-bg: #4d4d4d;
-  --theme-game-controls-text-color: #ffffff;
-  --theme-game-controls-border-color: #5a5a5a;
-  --theme-game-controls-bg-hover: #5a5a5a;
-  --theme-game-controls-bg-active: #383838;
-  --theme-game-controls-bg-disabled: #3a3a3a;
-  --theme-game-controls-text-disabled: #777777;
+  --theme-game-controls-bg: #1a1a1a; /* Even darker background */
+  --theme-game-controls-text-color: #e0e0e0; /* Slightly lighter text for contrast */
+  --theme-game-controls-border-color: #999999; /* Darker border */
+  --theme-game-controls-bg-hover: #3e3e3e; /* Darker hover */
+  --theme-game-controls-bg-active: #111111; /* Even darker active */
+  --theme-game-controls-bg-disabled: #303030; /* Slightly darker disabled background */
+  --theme-game-controls-text-disabled: #555555; /* Darker disabled text */
 
   /* Difficulty Button */
-  --theme-difficulty-bg-easy: #1e462b;
-  --theme-difficulty-bg-easy-hover: #275f3a;
-  --theme-difficulty-bg-easy-active: #2f7645;
-  --theme-difficulty-text-easy: #d4edda;
-  --theme-difficulty-bg-medium: #5c4813;
-  --theme-difficulty-bg-medium-hover: #6e5719;
-  --theme-difficulty-bg-medium-active: #83691e;
-  --theme-difficulty-text-medium: #fff3cd;
-  --theme-difficulty-bg-hard: #5c1f26;
-  --theme-difficulty-bg-hard-hover: #722532;
-  --theme-difficulty-bg-hard-active: #8a2d3d;
-  --theme-difficulty-text-hard: #f8d7da;
+  --theme-difficulty-bg-easy: #14331e;
+  --theme-difficulty-bg-easy-hover: #1b4a28;
+  --theme-difficulty-bg-easy-active: #225e31;
+  --theme-difficulty-text-easy: #c2e5c6;
+  --theme-difficulty-bg-medium: #40340d;
+  --theme-difficulty-bg-medium-hover: #4e3f11;
+  --theme-difficulty-bg-medium-active: #5d4b15;
+  --theme-difficulty-text-medium: #eee8b9;
+  --theme-difficulty-bg-hard: #40151b;
+  --theme-difficulty-bg-hard-hover: #541b23;
+  --theme-difficulty-bg-hard-active: #67222b;
+  --theme-difficulty-text-hard: #f4c8cb;
 
   /* Game Tiles - Base */
-  --theme-tile-bg: #2d2d2d;
-  --theme-tile-text: #f0f0f0;
-  --theme-tile-border: #525252;
-  --theme-tile-bg-hover: #444444;
-  --theme-tile-bg-selected: #1e1e1e;
-  --theme-tile-text-selected: #7a7a7a;
+  --theme-tile-bg: #1c1c1c;
+  --theme-tile-text: #e8e8e8;
+  --theme-tile-border: #aaaaaa;
+  --theme-tile-bg-hover: #2e2e2e;
+  --theme-tile-bg-selected: #010101;
+  --theme-tile-text-selected: #666666;
 
   /* Game Tiles - Completed Groups */
-  --theme-tile-bg-completed-1: #5d1a1a;
-  --theme-tile-text-completed-1: #ef9a9a;
-  --theme-tile-border-completed-1: #9e2a2a;
-  --theme-tile-bg-completed-2: #4a1a64;
-  --theme-tile-text-completed-2: #d1a7e0;
-  --theme-tile-border-completed-2: #7d3c98;
-  --theme-tile-bg-completed-3: #193c5d;
-  --theme-tile-text-completed-3: #90caf9;
-  --theme-tile-border-completed-3: #2e6da4;
-  --theme-tile-bg-completed-4: #1e4620;
-  --theme-tile-text-completed-4: #a5d6a7;
-  --theme-tile-border-completed-4: #357a38;
-  --theme-tile-bg-completed-5: #5d4037;
-  --theme-tile-text-completed-5: #ffe082;
-  --theme-tile-border-completed-5: #8d6e63;
-  --theme-tile-bg-completed-6: #1a413f;
-  --theme-tile-text-completed-6: #80cbc4;
-  --theme-tile-border-completed-6: #26756f;
-  --theme-tile-bg-completed-7: #5c1b3c;
-  --theme-tile-text-completed-7: #f48fb1;
-  --theme-tile-border-completed-7: #913063;
-  --theme-tile-bg-completed-8: #1a2250;
-  --theme-tile-text-completed-8: #9fa8da;
-  --theme-tile-border-completed-8: #303f9f;
+  --theme-tile-bg-completed-1: #3e1111;
+  --theme-tile-text-completed-1: #e58b8b;
+  --theme-tile-border-completed-1: #7f1d1d;
+  --theme-tile-bg-completed-2: #331147;
+  --theme-tile-text-completed-2: #c49ae0;
+  --theme-tile-border-completed-2: #652d89;
+  --theme-tile-bg-completed-3: #112a40;
+  --theme-tile-text-completed-3: #82b1f2;
+  --theme-tile-border-completed-3: #245389;
+  --theme-tile-bg-completed-4: #143317;
+  --theme-tile-text-completed-4: #98d79a;
+  --theme-tile-border-completed-4: #28642b;
+  --theme-tile-bg-completed-5: #3e2b25;
+  --theme-tile-text-completed-5: #ffd54f;
+  --theme-tile-border-completed-5: #6f4e37;
+  --theme-tile-bg-completed-6: #112f2d;
+  --theme-tile-text-completed-6: #76d2bb;
+  --theme-tile-border-completed-6: #1e5e58;
+  --theme-tile-bg-completed-7: #3f122a;
+  --theme-tile-text-completed-7: #f06292;
+  --theme-tile-border-completed-7: #7b234f;
+  --theme-tile-bg-completed-8: #111836;
+  --theme-tile-text-completed-8: #8c9eff;
+  --theme-tile-border-completed-8: #283593;
 
   /* Toast Notifications */
-  --theme-toast-error-text: #f8dada;
-  --theme-toast-error-bg: #5c1f26;
-  --theme-toast-error-border: #8b2a32;
-  --theme-toast-error-shadow: rgba(0, 0, 0, 0.3);
-  --theme-toast-correct-text: #d4edda;
-  --theme-toast-correct-bg: #1e462b;
-  --theme-toast-correct-border: #2a6339;
-  --theme-toast-correct-shadow: rgba(0, 0, 0, 0.3);
-  --theme-toast-incorrect-text: #f8d7da;
-  --theme-toast-incorrect-bg: #5c1f26;
-  --theme-toast-incorrect-border: #8b2a32;
-  --theme-toast-incorrect-shadow: rgba(0, 0, 0, 0.3);
-  --theme-toast-partial-text: #d1ecf1;
-  --theme-toast-partial-bg: #1a4a54;
-  --theme-toast-partial-border: #276974;
-  --theme-toast-partial-shadow: rgba(0, 0, 0, 0.3);
-  --theme-toast-duplicate-text: #ffe0b2;
-  --theme-toast-duplicate-bg: #552f05;
-  --theme-toast-duplicate-border: #7d4607;
-  --theme-toast-duplicate-shadow: rgba(0, 0, 0, 0.3);
-  --theme-toast-invalid-choice-text: #fff3cd;
-  --theme-toast-invalid-choice-bg: #5c4813;
-  --theme-toast-invalid-choice-border: #856a1d;
-  --theme-toast-invalid-choice-shadow: rgba(0, 0, 0, 0.3);
-  --theme-toast-winner-text: #e9d8ff;
-  --theme-toast-winner-bg: #2b183a;
-  --theme-toast-winner-border: #7e4eb8;
-  --theme-toast-winner-shadow: rgba(0, 0, 0, 0.3);
-  --theme-toast-loser-text: #f8d7da;
-  --theme-toast-loser-bg: #721c24;
-  --theme-toast-loser-border: #f5c6cb;
-  --theme-toast-loser-shadow: rgba(0, 0, 0, 0.3);
+  --theme-toast-error-text: #f4caca;
+  --theme-toast-error-bg: #4a151b;
+  --theme-toast-error-border: #7a2730;
+  --theme-toast-error-shadow: rgba(0, 0, 0, 0.4);
+  --theme-toast-correct-text: #bde7b8;
+  --theme-toast-correct-bg: #15331b;
+  --theme-toast-correct-border: #204d2b;
+  --theme-toast-correct-shadow: rgba(0, 0, 0, 0.4);
+  --theme-toast-incorrect-text: #f4caca;
+  --theme-toast-incorrect-bg: #4a151b;
+  --theme-toast-incorrect-border: #7a2730;
+  --theme-toast-incorrect-shadow: rgba(0, 0, 0, 0.4);
+  --theme-toast-partial-text: #b8e1e7;
+  --theme-toast-partial-bg: #11353d;
+  --theme-toast-partial-border: #1c515d;
+  --theme-toast-partial-shadow: rgba(0, 0, 0, 0.4);
+  --theme-toast-duplicate-text: #ffe57f;
+  --theme-toast-duplicate-bg: #3d2104;
+  --theme-toast-duplicate-border: #663806;
+  --theme-toast-duplicate-shadow: rgba(0, 0, 0, 0.4);
+  --theme-toast-invalid-choice-text: #eee8b9;
+  --theme-toast-invalid-choice-bg: #40340d;
+  --theme-toast-invalid-choice-border: #635014;
+  --theme-toast-invalid-choice-shadow: rgba(0, 0, 0, 0.4);
+  --theme-toast-winner-text: #e0c7ff;
+  --theme-toast-winner-bg: #1e112b;
+  --theme-toast-winner-border: #633ea8;
+  --theme-toast-winner-shadow: rgba(0, 0, 0, 0.4);
+  --theme-toast-loser-text: #f4caca;
+  --theme-toast-loser-bg: #54181e;
+  --theme-toast-loser-border: #e8b3b8;
+  --theme-toast-loser-shadow: rgba(0, 0, 0, 0.4);
 }
 
 /* ------------------------
@@ -618,22 +618,18 @@ body.dark-theme {
   transition: background-color var(--animation-speed-color-change) ease;
 }
 
-/* .tile.hinted {
-  border: 3px dashed var(--theme-tile-text-selected);
-} */
-
 .tile:active,
 .tile.selected {
   border: none;
   background-color: var(--theme-tile-bg-selected);
   background-image: linear-gradient(
       90deg,
-      var(--theme-tile-text-selected) 50%,
+      var(--theme-tile-border) 50%,
       transparent 50%
     ),
-    linear-gradient(90deg, var(--theme-tile-text-selected) 50%, transparent 50%),
-    linear-gradient(0deg, var(--theme-tile-text-selected) 50%, transparent 50%),
-    linear-gradient(0deg, var(--theme-tile-text-selected) 50%, transparent 50%);
+    linear-gradient(90deg, var(--theme-tile-border) 50%, transparent 50%),
+    linear-gradient(0deg, var(--theme-tile-border) 50%, transparent 50%),
+    linear-gradient(0deg, var(--theme-tile-border) 50%, transparent 50%);
   background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
   background-size: 15px 3px, 15px 3px, 3px 15px, 3px 15px;
   background-position: 0 0, 0 100%, 0 0, 100% 0;
@@ -641,7 +637,7 @@ body.dark-theme {
 }
 
 .tile.hinted {
-  border: 3px solid var(--theme-tile-text-selected);
+  border: 3px solid var(--theme-tile-border);
   background-image: none;
   background-repeat: none;
   background-size: none;
