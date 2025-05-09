@@ -402,16 +402,33 @@ export const clearToasts = () => {
 
 /* --- Settings Panel --- */
 
-export const closeSettingsPanel = (settingsPanel, blurOverlay) => {
-  blurOverlay.classList.remove(CLASS_BLURRED);
-  settingsPanel.classList.remove(CLASS_BLURRED);
+export const toggleSettingsPanel = () => {
+  const settingsPanel = document.getElementById("settings-panel");
+  settingsPanel.classList.toggle(CLASS_BLURRED);
+};
+
+export const settingsPanelIsOpen = () => {
+  const settingsPanel = document.getElementById("settings-panel");
+  return settingsPanel.classList.contains(CLASS_BLURRED);
 };
 
 /* --- How To --- */
 
-export const closeHowToPopup = (howToPopup, blurOverlay) => {
-  blurOverlay.classList.remove(CLASS_BLURRED);
-  howToPopup.classList.remove(CLASS_BLURRED);
+export const toggleHowToPopup = () => {
+  const howToPopup = document.getElementById("how-to-popup");
+  howToPopup.classList.toggle(CLASS_BLURRED);
+};
+
+export const howToPopupIsOpen = () => {
+  const howToPopup = document.getElementById("how-to-popup");
+  return howToPopup.classList.contains(CLASS_BLURRED);
+};
+
+/* --- Blur --- */
+
+export const toggleBlurOverlay = () => {
+  const blurOverlay = document.getElementById("blur-overlay");
+  blurOverlay.classList.toggle(CLASS_BLURRED);
 };
 
 /* --- Error Screen --- */
@@ -610,6 +627,10 @@ export const updateSubtitle = (groups, solvedGroups) => {
 
 /* --- Game control buttons --- */
 
+/**
+ * Adjusts the font size of all game control buttons to fit the longest text
+ * within the buttons' width.
+ */
 function adjustButtonFontSize() {
   const buttons = document.querySelectorAll(".game-controls .game-button");
 
@@ -666,15 +687,18 @@ export function initializeGameUI(config) {
   /* --- Initialize settings panel --- */
 
   const blurOverlay = document.getElementById("blur-overlay");
-  const settingsPanel = document.getElementById("settings-panel");
-  const howToPopup = document.getElementById("how-to-popup");
 
   /* --- Initialize hwo to play popup --- */
 
   // Close settings panel when clicking the blur overlay
   blurOverlay.addEventListener("click", () => {
-    closeSettingsPanel(settingsPanel, blurOverlay);
-    closeHowToPopup(howToPopup, blurOverlay);
+    if (settingsPanelIsOpen()) {
+      toggleSettingsPanel();
+    } else {
+      toggleHowToPopup();
+    }
+
+    toggleBlurOverlay();
   });
 
   adjustButtonFontSize();

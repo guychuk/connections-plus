@@ -295,19 +295,21 @@ export function initializeGameControls(
 /* --- Settings --- */
 
 /**
- * Event handler for the settings button.
- * Toggles the blur effect and visibility of the settings panel.
+ * Toggles the settings panel, and closes the how-to popup if open.
  * @param {MouseEvent} event The event when the user clicks the settings button.
  */
 export const clickSettings = (event) => {
   UI.spin(event);
 
-  const settingsPanel = document.getElementById("settings-panel");
   const selectLayout = document.getElementById("select-layout");
-  const blurOverlay = document.getElementById("blur-overlay");
 
-  blurOverlay.classList.toggle(UI.CLASS_BLURRED);
-  settingsPanel.classList.toggle(UI.CLASS_BLURRED);
+  if (UI.howToPopupIsOpen()) {
+    UI.toggleHowToPopup();
+  } else {
+    UI.toggleBlurOverlay();
+  }
+
+  UI.toggleSettingsPanel();
 
   selectLayout.value = UI.getLayout();
 };
@@ -320,13 +322,7 @@ export const clickSettings = (event) => {
  * @param {Object} gameState The game state object.
  * @param {Object} boardConfig The board configuration object.
  */
-const clickApply = (
-  settingsPanel,
-  blurOverlay,
-  positions,
-  gameState,
-  boardConfig
-) => {
+const clickApply = (positions, gameState, boardConfig) => {
   const selectLayout = document.getElementById("select-layout");
   const layout = selectLayout.value;
   const oldLayout = UI.getLayout();
@@ -348,27 +344,31 @@ const clickApply = (
     clickShuffle(positions, gameState, boardConfig);
   }
 
-  UI.closeSettingsPanel(settingsPanel, blurOverlay);
+  UI.toggleSettingsPanel();
+  UI.toggleBlurOverlay();
 };
 
 export function initializeSettings(positions, gameState, boardConfig) {
-  const settingsPanel = document.getElementById("settings-panel");
-  const blurOverlay = document.getElementById("blur-overlay");
   const applyButton = document.getElementById("apply-button");
 
   applyButton.addEventListener("click", () => {
-    clickApply(settingsPanel, blurOverlay, positions, gameState, boardConfig);
+    clickApply(positions, gameState, boardConfig);
   });
 }
 
 /* --- How To --- */
 
+/**
+ * Toggles the how-to popup, and close the settings panel if open.
+ */
 export const clickHowTo = () => {
-  const howToPopup = document.getElementById("how-to-popup");
-  const blurOverlay = document.getElementById("blur-overlay");
+  if (UI.settingsPanelIsOpen()) {
+    UI.toggleSettingsPanel();
+  } else {
+    UI.toggleBlurOverlay();
+  }
 
-  blurOverlay.classList.toggle(UI.CLASS_BLURRED);
-  howToPopup.classList.toggle(UI.CLASS_BLURRED);
+  UI.toggleHowToPopup();
 };
 
 /* --- Big Screens --- */
