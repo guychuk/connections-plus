@@ -30,6 +30,7 @@ body {
 :root {
   /* Z-indexes */
   --z-index-toggle-theme: 4; /* Highest - Always on top */
+  --z-index-loading: 4;
   --z-index-popups: 3;
   --z-index-blur-overlay: 2;
   --z-index-toast: 1;
@@ -157,6 +158,9 @@ body {
   --theme-toast-loser-bg: #f8d7da;
   --theme-toast-loser-border: #f5c6cb;
   --theme-toast-loser-shadow: rgba(0, 0, 0, 0.1);
+
+  /* Loading */
+  --theme-loading-border-top-color: #c5a9cf;
 }
 
 /* ------------------------
@@ -277,6 +281,9 @@ body.dark-theme {
   --theme-toast-loser-bg: #54181e;
   --theme-toast-loser-border: #e8b3b8;
   --theme-toast-loser-shadow: rgba(0, 0, 0, 0.4);
+
+  /* Loading */
+  --theme-loading-border-top-color: #c5a9cf;
 }
 
 /* ------------------------
@@ -382,6 +389,28 @@ body.dark-theme {
 .blurred {
   backdrop-filter: blur(12px);
   pointer-events: auto; /* Prohibit click-through when active */
+}
+
+/* ------------------------
+   LOADING
+------------------------ */
+.loading-container {
+  text-align: center;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: var(--z-index-loading);
+}
+
+.spinner {
+  width: 60px;
+  height: 60px;
+  border: 5px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top-color: var(--theme-loading-border-top-color);
+  animation: spin 1s ease-in-out infinite;
+  margin: 0 auto 20px;
 }
 
 /* ------------------------

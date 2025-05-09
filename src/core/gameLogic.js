@@ -12,6 +12,8 @@ import {
   resetMistakes,
   updateSubtitle,
   adjustButtonFontSizeWithLineBreaks,
+  hideLoadingScreen,
+  showLoadingScreen,
 } from "../components/ui";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { clickDeselect, clickSolve } from "../events/events";
@@ -224,6 +226,8 @@ export async function initializeGame(
     cols: cols,
   };
 
+  hideLoadingScreen();
+
   createButtons(positions, gameState, boardConfig);
 
   const tileButtons = [...tileSet].map((tile) => tile.button);
@@ -270,6 +274,8 @@ export async function resetGame(
 
   updateSubtitle(groups, gameState.solvedGroups);
 
+  showLoadingScreen();
+
   // Get new tiles
   const newTiles = await getNewTiles(supabaseClient, groups, difficulty);
 
@@ -280,6 +286,8 @@ export async function resetGame(
 
   positions.length = 0;
   positions.push(...makePositions(rows, cols));
+
+  hideLoadingScreen();
 
   // Keep the same tiles set as before, but replace the contents
   updateTiles(gameState.tileSet, newTiles);
