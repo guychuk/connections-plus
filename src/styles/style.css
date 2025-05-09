@@ -326,10 +326,10 @@ body.dark-theme {
 .utility-bar {
   position: absolute;
   top: 20px;
-  right: 20px;
+  right: 15px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 5px;
 }
 
 .utility-bar button {
@@ -906,7 +906,7 @@ body.dark-theme {
   .utility-bar {
     top: 10px;
     right: 5px;
-    gap: 5px;
+    gap: 2px;
   }
 
   .utility-bar button {
@@ -915,15 +915,15 @@ body.dark-theme {
 
   .game-controls {
     max-width: 90vw;
-    /* flex-wrap: wrap; */
+    flex-wrap: wrap;
   }
 
   .game-controls .game-button {
     /* font-size: 0.6em; */
     padding: 4px 8px;
     margin: 2px;
-    /* flex: 1 1 calc(30%);
-    max-width: calc(30%); */
+    flex: 1 1 calc(30%);
+    max-width: calc(30%);
   }
 
   .game-board {
