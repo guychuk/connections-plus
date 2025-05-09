@@ -4,13 +4,15 @@ import os
 import re
 from tqdm import tqdm
 
-DATA_PATH = "data/gemini"
-ERRORS_PATH = "data/errors"
+DATA_PATH = "categories_heb.txt"
+LANGUAGE = "Hebrew"
+ERRORS_PATH = "errors.txt"
 
 load_dotenv()
 
 SUPABASE_URL = os.getenv("VITE_SUPABASE_URL")
 SUPABASE_KEY = os.getenv("VITE_SUPABASE_KEY")
+
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
@@ -53,7 +55,7 @@ def insert_data(line: str):
             j += 1
             response = (
                 supabase.table("tags")
-                .insert({"tag": tag, "category_id": category_id})
+                .insert({"tag": tag, "category_id": category_id, "language": LANGUAGE})
                 .execute()
             )
     except Exception as e:
@@ -92,7 +94,9 @@ def parse_line(line: str):
 def main():
     bad_lines = 0
 
-    with open(DATA_PATH, "r") as data_file, open(ERRORS_PATH, "w") as errors_file:
+    with open(DATA_PATH, "r", encoding="utf-8") as data_file, open(
+        ERRORS_PATH, "w", encoding="utf-8"
+    ) as errors_file:
         bar = tqdm(data_file.readlines())
         bar.set_postfix(bad_lines=bad_lines)
 

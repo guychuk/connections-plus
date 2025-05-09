@@ -4,9 +4,10 @@
  * @param {number} numTags The number of tags to retrieve.
  * @returns {Array} An array of tags.
  */
-export const getTags = async (client, numTags) => {
+export const getTags = async (client, numTags, language) => {
   let { data, error } = await client.rpc("get_random_distinct_tags", {
     n: numTags,
+    lang: language,
   });
 
   return error ? [] : data;

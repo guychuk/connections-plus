@@ -78,7 +78,7 @@ async function getNewTiles(client, groups, difficulty) {
   var iterations = 0;
 
   while (iterations < 25) {
-    const tags = (await supabase.getTags(client, numTags)).map(
+    const tags = (await supabase.getTags(client, numTags, "English")).map(
       (tag) => tag.tag
     );
 
