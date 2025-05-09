@@ -919,7 +919,6 @@ body.dark-theme {
   }
 
   .game-controls .game-button {
-    /* font-size: 0.6em; */
     padding: 4px 8px;
     margin: 2px;
     flex: 1 1 calc(30%);
@@ -957,7 +956,7 @@ body.dark-theme {
   }
 
   .tile {
-    font-size: 0.6em;
+    font-size: 0.7em;
     padding: 4px 8px;
     margin: 2px;
   }
