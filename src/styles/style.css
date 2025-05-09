@@ -471,6 +471,17 @@ body.dark-theme {
   background-color: var(--theme-apply-button-active-bg);
 }
 
+.close-popup {
+  position: absolute;
+  top: 15px;
+  right: 8px;
+  background: transparent;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  line-height: 1;
+}
+
 /* ------------------------
    SETTINGS PANEL
 ------------------------ */
@@ -876,15 +887,15 @@ body.dark-theme {
 
   .game-controls {
     max-width: 90vw;
-    flex-wrap: wrap;
+    /* flex-wrap: wrap; */
   }
 
   .game-controls .game-button {
-    font-size: 0.6em;
+    /* font-size: 0.6em; */
     padding: 4px 8px;
     margin: 2px;
-    flex: 1 1 calc(30%);
-    max-width: calc(30%);
+    /* flex: 1 1 calc(30%);
+    max-width: calc(30%); */
   }
 
   .game-board {

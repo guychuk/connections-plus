@@ -361,6 +361,16 @@ export function initializeSettings(positions, gameState, boardConfig) {
   });
 }
 
+/* --- How To --- */
+
+export const clickHowTo = () => {
+  const howToPopup = document.getElementById("how-to-popup");
+  const blurOverlay = document.getElementById("blur-overlay");
+
+  blurOverlay.classList.toggle(UI.CLASS_BLURRED);
+  howToPopup.classList.toggle(UI.CLASS_BLURRED);
+};
+
 /* --- Big Screens --- */
 
 /**

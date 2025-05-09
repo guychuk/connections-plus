@@ -2,7 +2,11 @@ import * as utils from "../core/utils.js";
 import * as toasts from "./toasts.js";
 import confetti from "canvas-confetti";
 import { confettiDuration } from "../config/config.json";
-import { clickScreenButton, clickSettings } from "../events/events.js";
+import {
+  clickScreenButton,
+  clickSettings,
+  clickHowTo,
+} from "../events/events.js";
 
 export const CLASS_BLURRED = "blurred";
 export const CLASS_DARK_THEME = "dark-theme";
@@ -360,11 +364,11 @@ export function createButtons(positions, gameState, boardConfig) {
  */
 export const getTextForDifficultyButton = (difficulty) => {
   if (difficulty === "easy") {
-    return "Easy 🥚";
+    return "EASY 🥚";
   } else if (difficulty === "medium") {
-    return "Medium 🐤";
+    return "MEDIUM 🐤";
   } else if (difficulty === "hard") {
-    return "Hard 🐔";
+    return "HARD 🐔";
   }
 
   throw new Error("Invalid difficulty");
@@ -399,8 +403,15 @@ export const clearToasts = () => {
 /* --- Settings Panel --- */
 
 export const closeSettingsPanel = (settingsPanel, blurOverlay) => {
-  blurOverlay.classList.remove("blurred");
-  settingsPanel.classList.remove("blurred");
+  blurOverlay.classList.remove(CLASS_BLURRED);
+  settingsPanel.classList.remove(CLASS_BLURRED);
+};
+
+/* --- How To --- */
+
+export const closeHowToPopup = (howToPopup, blurOverlay) => {
+  blurOverlay.classList.remove(CLASS_BLURRED);
+  howToPopup.classList.remove(CLASS_BLURRED);
 };
 
 /* --- Error Screen --- */
@@ -597,6 +608,32 @@ export const updateSubtitle = (groups, solvedGroups) => {
   subtitle.innerHTML = `Group sizes are ${groupTexts.join(", ")}`;
 };
 
+/* --- Game control buttons --- */
+
+function adjustButtonFontSize() {
+  const buttons = document.querySelectorAll(".game-controls .game-button");
+
+  let maxLength = 0;
+
+  // Find the longest text length
+  buttons.forEach((button) => {
+    const textLength = button.innerText.length;
+
+    if (textLength > maxLength) {
+      maxLength = textLength;
+    }
+  });
+
+  // Calculate an optimal font size based on the max length
+  const baseWidth = parseFloat(getComputedStyle(buttons[0]).width); // Width of each button
+  const maxFontSize = baseWidth / maxLength;
+
+  // Set the font size to fit the longest text
+  buttons.forEach((button) => {
+    button.style.fontSize = `${maxFontSize}px`; // Limit font size to 20px max
+  });
+}
+
 /* --- General --- */
 
 /**
@@ -620,19 +657,27 @@ export function initializeGameUI(config) {
 
   const errorEmojiButton = document.getElementById("error-button");
   const settingsButton = document.getElementById("settings-button");
+  const howToButton = document.getElementById("how-to-button");
 
   errorEmojiButton.addEventListener("click", clickScreenButton);
   settingsButton.addEventListener("click", clickSettings);
+  howToButton.addEventListener("click", clickHowTo);
 
   /* --- Initialize settings panel --- */
 
   const blurOverlay = document.getElementById("blur-overlay");
   const settingsPanel = document.getElementById("settings-panel");
+  const howToPopup = document.getElementById("how-to-popup");
+
+  /* --- Initialize hwo to play popup --- */
 
   // Close settings panel when clicking the blur overlay
   blurOverlay.addEventListener("click", () => {
     closeSettingsPanel(settingsPanel, blurOverlay);
+    closeHowToPopup(howToPopup, blurOverlay);
   });
+
+  adjustButtonFontSize();
 
   /* --- Initialize board --- */
   const groups = config["groups"].sort((a, b) => a - b);
