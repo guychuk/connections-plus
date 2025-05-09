@@ -390,7 +390,6 @@ body.dark-theme {
 
 .game-button {
   font-family: Inter, sans-serif;
-  font-size: 1em;
   word-wrap: break-word;
   overflow-wrap: break-word;
   white-space: normal;
@@ -639,7 +638,6 @@ body.dark-theme {
 ------------------------ */
 .tile {
   font-family: Inter, sans-serif;
-  font-size: 1vw;
   word-wrap: break-word;
   overflow-wrap: break-word;
   white-space: normal;
@@ -956,7 +954,6 @@ body.dark-theme {
   }
 
   .tile {
-    font-size: 0.7em;
     padding: 4px 8px;
     margin: 2px;
   }

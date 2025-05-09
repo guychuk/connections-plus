@@ -11,6 +11,7 @@ import {
   addMistake,
   resetMistakes,
   updateSubtitle,
+  adjustButtonFontSizeWithLineBreaks,
 } from "../components/ui";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { clickDeselect, clickSolve } from "../events/events";
@@ -225,6 +226,10 @@ export async function initializeGame(
 
   createButtons(positions, gameState, boardConfig);
 
+  const tileButtons = [...tileSet].map((tile) => tile.button);
+
+  adjustButtonFontSizeWithLineBreaks(tileButtons);
+
   // Shuffle board
   shuffleBoard(tileSet, positions, getLayout());
 
@@ -278,6 +283,10 @@ export async function resetGame(
 
   // Keep the same tiles set as before, but replace the contents
   updateTiles(gameState.tileSet, newTiles);
+
+  const tileButtons = [...gameState.tileSet].map((tile) => tile.button);
+
+  adjustButtonFontSizeWithLineBreaks(tileButtons);
 
   for (const tile of gameState.tileSet) {
     gameState.unsolvedTiles.add(tile);

@@ -630,10 +630,9 @@ export const updateSubtitle = (groups, solvedGroups) => {
 /**
  * Adjusts the font size of all game control buttons to fit the longest text
  * within the buttons' width.
+ * @param {Array<HTMLElement>} buttons The buttons to set the font size for.
  */
-function adjustButtonFontSize() {
-  const buttons = document.querySelectorAll(".game-controls .game-button");
-
+export function adjustButtonFontSize(buttons) {
   let maxLength = 0;
 
   // Find the longest text length
@@ -653,6 +652,61 @@ function adjustButtonFontSize() {
   buttons.forEach((button) => {
     button.style.fontSize = `${maxFontSize}px`; // Limit font size to 20px max
   });
+}
+
+/**
+ * Adjusts the font size of all game tiles to fit the longest text
+ * within the buttons' width, taking into account text that may wrap to
+ * multiple lines.
+ *
+ * @param {Array<HTMLElement>} buttons The buttons to set the font size for.
+ */
+export function adjustButtonFontSizeWithLineBreaks(buttons) {
+  const sizes = buttons.map((button) => getMaxFittingFontSize(button));
+  const minOfThem = Math.min(...sizes);
+
+  buttons.forEach((button) => {
+    button.style.fontSize = `${minOfThem}px`;
+  });
+}
+
+/**
+ * Finds the maximum font size that can fit in the given button's width while not
+ * exceeding its height, by performing a binary search. This function is useful for buttons
+ * that contain text that may wrap to multiple lines.
+ *
+ * @param {HTMLElement} button The button element to set the font size for.
+ * @return {number} The maximum fitting font size in pixels.
+ */
+function getMaxFittingFontSize(button) {
+  const clone = button.cloneNode(true);
+  clone.style.position = "absolute";
+  clone.style.visibility = "hidden";
+  clone.style.height = "auto";
+  clone.style.width = button.clientWidth + "px";
+  clone.style.whiteSpace = "normal"; // Enable line breaks
+  clone.style.lineHeight = getComputedStyle(button).lineHeight;
+
+  document.body.appendChild(clone);
+
+  let min = 1;
+  let max = 24;
+  let bestFit = min;
+
+  while (min <= max) {
+    const mid = Math.floor((min + max) / 2);
+    clone.style.fontSize = `${mid}px`;
+
+    if (clone.scrollHeight <= button.clientHeight) {
+      bestFit = mid;
+      min = mid + 1;
+    } else {
+      max = mid - 1;
+    }
+  }
+
+  document.body.removeChild(clone);
+  return bestFit;
 }
 
 /* --- General --- */
@@ -701,7 +755,10 @@ export function initializeGameUI(config) {
     toggleBlurOverlay();
   });
 
-  adjustButtonFontSize();
+  const gameControlButtons = document.querySelectorAll(
+    ".game-controls .game-button"
+  );
+  adjustButtonFontSize(gameControlButtons);
 
   /* --- Initialize board --- */
   const groups = config["groups"].sort((a, b) => a - b);
@@ -710,7 +767,6 @@ export function initializeGameUI(config) {
   // Update groups paragraph/subtitle
   const groupsParagraph = document.getElementById("subtitle");
   groupsParagraph.textContent = `Group Sizes are `;
-  // groupsParagraph.textContent = `Group Sizes are ${groups.join(", ")}`;
 
   /* --- Initialize board --- */
 
