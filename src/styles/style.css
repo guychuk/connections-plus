@@ -30,8 +30,7 @@ body {
 :root {
   /* Z-indexes */
   --z-index-toggle-theme: 4; /* Highest - Always on top */
-  --z-index-settings-panel: 3;
-  --z-index-big-screen: 3;
+  --z-index-popups: 3;
   --z-index-blur-overlay: 2;
   --z-index-toast: 1;
 
@@ -40,7 +39,7 @@ body {
   --animation-speed-color-change: 0.5s;
   --animation-speed-blur: 0.3s;
   --animation-speed-spin: 0.6s;
-  --animation-speed-settings-panel: 0.5s;
+  --animation-speed-popups: 0.5s;
 }
 
 /* ------------------------
@@ -52,18 +51,20 @@ body {
   --theme-text-color: #333333;
   --theme-toggle-theme-emoji: "🌜";
 
-  /* Settings Panel */
-  --theme-settings-panel-bg: #ffffff;
-  --theme-settings-panel-text-color: #333333;
-  --theme-settings-panel-border: #cccccc;
-  --theme-settings-panel-header-bg: #f2f2f2;
-  --theme-settings-panel-header-text-color: #333333;
-  --theme-settings-panel-box-shadow: rgba(0, 0, 0, 0.1);
-  --theme-settings-button-bg: #f9f9f9;
-  --theme-settings-button-text-color: #222222;
-  --theme-settings-button-hover-bg: #eeeeee;
-  --theme-settings-button-active-bg: #dddddd;
-  --theme-settings-button-border: #cccccc;
+  /* Panels/Pop-ups */
+  --theme-popups-bg: #ffffff;
+  --theme-popups-text-color: #333333;
+  --theme-popups-border: #cccccc;
+  --theme-popups-header-bg: #f2f2f2;
+  --theme-popups-header-text-color: #333333;
+  --theme-popups-box-shadow: rgba(0, 0, 0, 0.1);
+
+  /* Apply Button in Settings */
+  --theme-apply-button-bg: #f9f9f9;
+  --theme-apply-button-text-color: #222222;
+  --theme-apply-button-hover-bg: #eeeeee;
+  --theme-apply-button-active-bg: #dddddd;
+  --theme-apply-button-border: #cccccc;
 
   /* Error Screen */
   --theme-error-screen-bg: #8b0000;
@@ -167,17 +168,19 @@ body.dark-theme {
   --theme-toggle-theme-emoji: "🌞";
 
   /* Settings Panel */
-  --theme-settings-panel-bg: #0d0d0d;
-  --theme-settings-panel-text-color: #999999;
-  --theme-settings-panel-border: #333333;
-  --theme-settings-panel-header-bg: #1a1a1a;
-  --theme-settings-panel-header-text-color: #999999;
-  --theme-settings-panel-box-shadow: rgba(0, 0, 0, 0.5);
-  --theme-settings-button-bg: #1e1e1e;
-  --theme-settings-button-text-color: #d0d0d0;
-  --theme-settings-button-hover-bg: #2e2e2e;
-  --theme-settings-button-active-bg: #3e3e3e;
-  --theme-settings-button-border: #333333;
+  --theme-popups-bg: #0d0d0d;
+  --theme-popups-text-color: #999999;
+  --theme-popups-border: #333333;
+  --theme-popups-header-bg: #1a1a1a;
+  --theme-popups-header-text-color: #999999;
+  --theme-popups-box-shadow: rgba(0, 0, 0, 0.5);
+
+  /* Apply Button in Settings */
+  --theme-apply-button-bg: #1e1e1e;
+  --theme-apply-button-text-color: #d0d0d0;
+  --theme-apply-button-hover-bg: #2e2e2e;
+  --theme-apply-button-active-bg: #3e3e3e;
+  --theme-apply-button-border: #333333;
 
   /* Error Screen */
   --theme-error-screen-bg: #330000;
@@ -401,10 +404,10 @@ body.dark-theme {
 }
 
 /* ------------------------
-   SETTINGS PANEL
+   POP-UPS/PANELS
 ------------------------ */
 
-.settings-panel {
+.popup {
   position: fixed;
   display: flex;
   flex-direction: column;
@@ -412,72 +415,76 @@ body.dark-theme {
   left: 50%;
   transform: translate(-50%, -50%) scale(0.9);
   opacity: 0;
-  background: var(--theme-settings-panel-bg);
-  color: var(--theme-settings-panel-text-color);
+  background: var(--theme-popups-bg);
+  color: var(--theme-popups-text-color);
   font-family: Inter, sans-serif;
   padding: 2rem;
   gap: 1.5rem;
-  border: 2px solid var(--theme-settings-panel-border);
+  border: 2px solid var(--theme-popups-border);
   border-radius: 12px;
-  box-shadow: 0 0 20px var(--theme-settings-panel-box-shadow);
-  transition: opacity var(--animation-settings-panel) ease,
-    transform var(--animation-settings-panel) ease,
+  box-shadow: 0 0 20px var(--theme-popups-box-shadow);
+  transition: opacity var(--animation-speed-popups) ease,
+    transform var(--animation-speed-popups) ease,
     background-color var(--animation-speed-color-change) ease,
     color var(--animation-speed-color-change) ease,
     border var(--animation-speed-color-change) ease;
-  z-index: var(--z-index-settings-panel);
+  z-index: var(--z-index-popups);
   pointer-events: none;
 }
 
-.settings-panel.blurred {
+.popup.blurred {
   opacity: 1;
   transform: translate(-50%, -50%) scale(1);
   pointer-events: auto;
 }
 
-.settings-panel h2 {
+.popup h2 {
   text-align: center;
   font-size: 1.5rem;
   margin-bottom: 1rem;
   margin: 0;
 }
 
-.settings-group-layout {
+.popup label {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.popup-layout {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   justify-content: flex-start;
 }
 
-.settings-panel label {
-  font-size: 1rem;
-  margin-bottom: 0.5rem;
+.popup .game-button {
+  color: var(--theme-apply-button-text-color);
+  background-color: var(--theme-apply-button-bg);
+  border-color: var(--theme-apply-button-border);
 }
 
-.settings-panel select {
+.popup .game-button:hover {
+  background-color: var(--theme-apply-button-hover-bg);
+}
+
+.popup .game-button:active {
+  background-color: var(--theme-apply-button-active-bg);
+}
+
+/* ------------------------
+   SETTINGS PANEL
+------------------------ */
+
+#select-layout {
   font-size: 1rem;
   padding: 0.5rem;
-  border: 1px solid var(--theme-settings-panel-border);
+  border: 1px solid var(--theme-popups-border);
   border-radius: 4px;
-  background-color: var(--theme-settings-panel-bg);
-  color: var(--theme-settings-panel-text-color);
+  background-color: var(--theme-popups-bg);
+  color: var(--theme-popups-text-color);
   transition: border-color var(--animation-speed-color-change) ease,
     background-color var(--animation-speed-color-change) ease,
     color var(--animation-speed-color-change) ease;
-}
-
-.settings-panel .game-button {
-  color: var(--theme-settings-button-text-color);
-  background-color: var(--theme-settings-button-bg);
-  border-color: var(--theme-settings-button-border);
-}
-
-.settings-panel .game-button:hover {
-  background-color: var(--theme-settings-button-hover-bg);
-}
-
-.settings-panel .game-button:active {
-  background-color: var(--theme-settings-button-active-bg);
 }
 
 /* ------------------------

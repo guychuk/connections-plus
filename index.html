@@ -140,9 +140,9 @@
 
     <div id="blur-overlay" class="blur-overlay"></div>
 
-    <div id="settings-panel" class="settings-panel">
-      <h2 class="settings-panel-header">Settings</h2>
-      <div class="settings-group-layout">
+    <div id="settings-panel" class="popup">
+      <h2>Settings</h2>
+      <div class="popup-layout">
         <label for="select-layout">Layout:</label>
         <select id="select-layout" aria-label="Select layout style">
           <option value="compact">Compact</option>
@@ -150,6 +150,18 @@
         </select>
       </div>
       <button id="apply-button" class="game-button">Apply ✅</button>
+    </div>
+
+    <div id="how-to-popup" class="popup">
+      <h2>How To Play?</h2>
+      <div class="popup-layout">
+        <p>
+          This is how to play: <br />
+          1. Click on any tile to select it. <br />
+          2. Click on another tile to select it. <br />
+          3. Click on "Submit" to confirm your selection. <br />
+        </p>
+      </div>
     </div>
 
     <!-- Scripts -->
