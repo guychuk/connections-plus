@@ -57,6 +57,7 @@ body {
   --theme-popups-border: #cccccc;
   --theme-popups-header-bg: #f2f2f2;
   --theme-popups-header-text-color: #333333;
+  --theme-popups-line-border: #cccccc80;
   --theme-popups-box-shadow: rgba(0, 0, 0, 0.1);
 
   /* Apply Button in Settings */
@@ -96,7 +97,7 @@ body {
   /* Game Tiles - Base */
   --theme-tile-bg: #ffffff;
   --theme-tile-text: #333333;
-  --theme-tile-border: #d9d9d9;
+  --theme-tile-border: #d0d0d0;
   --theme-tile-bg-hover: #f0f0f0;
   --theme-tile-bg-selected: #e0e0e0;
   --theme-tile-text-selected: #bdbdbd;
@@ -167,12 +168,13 @@ body.dark-theme {
   --theme-text-color: #e0e0e0;
   --theme-toggle-theme-emoji: "🌞";
 
-  /* Settings Panel */
+  /* Panels/Pop-ups */
   --theme-popups-bg: #0d0d0d;
   --theme-popups-text-color: #999999;
   --theme-popups-border: #333333;
   --theme-popups-header-bg: #1a1a1a;
   --theme-popups-header-text-color: #999999;
+  --theme-popups-line-border: #99999980;
   --theme-popups-box-shadow: rgba(0, 0, 0, 0.5);
 
   /* Apply Button in Settings */
@@ -450,6 +452,10 @@ body.dark-theme {
   margin-bottom: 0.5rem;
 }
 
+.popup p {
+  font-size: 1rem;
+}
+
 .popup-layout {
   display: flex;
   align-items: center;
@@ -471,17 +477,6 @@ body.dark-theme {
   background-color: var(--theme-apply-button-active-bg);
 }
 
-.close-popup {
-  position: absolute;
-  top: 15px;
-  right: 8px;
-  background: transparent;
-  border: none;
-  font-size: 14px;
-  cursor: pointer;
-  line-height: 1;
-}
-
 /* ------------------------
    SETTINGS PANEL
 ------------------------ */
@@ -496,6 +491,39 @@ body.dark-theme {
   transition: border-color var(--animation-speed-color-change) ease,
     background-color var(--animation-speed-color-change) ease,
     color var(--animation-speed-color-change) ease;
+}
+
+/* ------------------------
+   HOW TO PLAY
+------------------------ */
+
+#how-to-popup {
+  overflow-y: scroll;
+  width: 60vw;
+  max-height: 70vh;
+}
+
+#how-to-table {
+  border-collapse: collapse;
+  font-family: Inter, sans-serif;
+}
+
+#how-to-table td,
+#how-to-table th {
+  text-align: left;
+  vertical-align: middle;
+}
+
+#how-to-table tr {
+  border-bottom: 1px solid var(--theme-popups-line-border);
+}
+
+#how-to-table tr:last-child {
+  border-bottom: none;
+}
+
+.column-title {
+  font-weight: bold;
 }
 
 /* ------------------------
@@ -611,7 +639,7 @@ body.dark-theme {
 ------------------------ */
 .tile {
   font-family: Inter, sans-serif;
-  font-size: 1em;
+  font-size: 1vw;
   word-wrap: break-word;
   overflow-wrap: break-word;
   white-space: normal;
@@ -882,7 +910,7 @@ body.dark-theme {
   }
 
   .utility-bar button {
-    font-size: 24px;
+    font-size: 20px;
   }
 
   .game-controls {
@@ -916,12 +944,16 @@ body.dark-theme {
     margin-top: 5px;
   }
 
-  .settings-panel h2 {
+  .popup h2 {
     font-size: 1.25rem;
   }
 
-  .settings-panel label {
+  .popup label {
     font-size: 1rem;
+  }
+
+  #how-to-popup {
+    font-size: 12px;
   }
 
   .tile {

@@ -39,12 +39,13 @@ Group the words by their hidden connections. Each word fits into one—and only 
 
 ### Controls
 
-- Click a tile to **select** or unselect it.
-- Use **Submit** to check your current group.
-- **Deselect All** clears your selection.
-- **Shuffle** mixes up the tiles.
-- **New Game** starts over with a new puzzle.
-- **Difficulty Toggle** switches between Easy, Medium, and Hard modes.
+- **🎮 New Game:** Start over with a new puzzle.
+- **🧹 Clear:** Clear your selection.
+- **🎲 Shuffle:** Mix up the tiles.
+- **🎯 Solve:** Solve the puzzle
+- **💡 Hint:** Get a hint - selects half the tiles of the largest unsolved group. Once shown, you cannot deselect those tiles!
+- **✔️ Submit:** Submit your selection.
+- **🐤 Difficulty:** Switch between Easy, Medium, and Hard modes.
 
 ### Feedback System
 
@@ -60,7 +61,7 @@ To help (but not spoil):
 ## Game Features
 
 - **Variable group sizes** for increased challenge (and fun) compared to the original game 🚀
-- **Multiple difficulty levels** 🐤
+- **Multiple difficulty levels** you can switch between: Easy, Medium, and Hard 🐤
 - **Customizable interface** with theme and layout options 🌗
 - **Responsive design** that works on desktop and mobile devices 📱
 - **Confetti showers** when you win 🎊
