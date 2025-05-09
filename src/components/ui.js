@@ -77,6 +77,22 @@ const getPositionOnCanvasCentered = (pos, group, boardConfig) => {
   };
 };
 
+/**
+ * Adjusts the font size of all game tiles to fit the longest text
+ * within the buttons' width, taking into account text that may wrap to
+ * multiple lines.
+ *
+ * @param {Array<HTMLElement>} buttons The buttons to set the font size for.
+ */
+export function adjustButtonFontSizeWithLineBreaks(buttons) {
+  const sizes = buttons.map((button) => getMaxFittingFontSize(button));
+  const minOfThem = Math.min(...sizes);
+
+  buttons.forEach((button) => {
+    button.style.fontSize = `${minOfThem}px`;
+  });
+}
+
 /* --- Layout --- */
 
 /**
@@ -431,6 +447,16 @@ export const toggleBlurOverlay = () => {
   blurOverlay.classList.toggle(CLASS_BLURRED);
 };
 
+export const showBlurOverlay = () => {
+  const blurOverlay = document.getElementById("blur-overlay");
+  blurOverlay.classList.add(CLASS_BLURRED);
+};
+
+export const hideBlurOverlay = () => {
+  const blurOverlay = document.getElementById("blur-overlay");
+  blurOverlay.classList.remove(CLASS_BLURRED);
+};
+
 /* --- Error Screen --- */
 
 /**
@@ -655,22 +681,6 @@ export function adjustButtonFontSize(buttons) {
 }
 
 /**
- * Adjusts the font size of all game tiles to fit the longest text
- * within the buttons' width, taking into account text that may wrap to
- * multiple lines.
- *
- * @param {Array<HTMLElement>} buttons The buttons to set the font size for.
- */
-export function adjustButtonFontSizeWithLineBreaks(buttons) {
-  const sizes = buttons.map((button) => getMaxFittingFontSize(button));
-  const minOfThem = Math.min(...sizes);
-
-  buttons.forEach((button) => {
-    button.style.fontSize = `${minOfThem}px`;
-  });
-}
-
-/**
  * Finds the maximum font size that can fit in the given button's width while not
  * exceeding its height, by performing a binary search. This function is useful for buttons
  * that contain text that may wrap to multiple lines.
@@ -708,6 +718,32 @@ function getMaxFittingFontSize(button) {
   document.body.removeChild(clone);
   return bestFit;
 }
+
+/* --- Loading --- */
+
+export const hideLoadingScreen = () => {
+  const loadingContainer = document.querySelector(".loading-container");
+  loadingContainer.style.display = "none";
+  hideBlurOverlay();
+
+  // Show settings and how-to
+  const settingsButton = document.getElementById("settings-button");
+  const howToButton = document.getElementById("how-to-button");
+  settingsButton.style.display = "block";
+  howToButton.style.display = "block";
+};
+
+export const showLoadingScreen = () => {
+  const loadingContainer = document.querySelector(".loading-container");
+  showBlurOverlay();
+  loadingContainer.style.display = "flex";
+
+  // Hide settings and how-to
+  const settingsButton = document.getElementById("settings-button");
+  const howToButton = document.getElementById("how-to-button");
+  settingsButton.style.display = "none";
+  howToButton.style.display = "none";
+};
 
 /* --- General --- */
 
