@@ -334,16 +334,18 @@ body.dark-theme {
   position: absolute;
   top: 20px;
   right: 15px;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, auto);
+  width: max-content;
+  margin: 0 auto;
 }
 
 .utility-bar button {
   background-color: transparent;
   border: none;
   cursor: pointer;
-  padding: 8px 12px;
+  padding: 8px 8px;
   font-size: 36px;
   z-index: var(--z-index-toggle-theme);
 }
@@ -945,11 +947,11 @@ body.dark-theme {
   .utility-bar {
     top: 10px;
     right: 5px;
-    gap: 2px;
   }
 
   .utility-bar button {
-    font-size: 20px;
+    font-size: 14px;
+    padding: 4px 4px;
   }
 
   .game-controls {
