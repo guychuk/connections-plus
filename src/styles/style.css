@@ -29,9 +29,9 @@ body {
 ------------------------ */
 :root {
   /* Z-indexes */
-  --z-index-toggle-theme: 4; /* Highest - Always on top */
-  --z-index-loading: 4;
-  --z-index-popups: 3;
+  --z-index-toggle-theme: 5; /* Highest - Always on top */
+  --z-index-popups: 4;
+  --z-index-loading: 3;
   --z-index-blur-overlay: 2;
   --z-index-toast: 1;
 
@@ -339,6 +339,7 @@ body.dark-theme {
   grid-template-rows: repeat(2, auto);
   width: max-content;
   margin: 0 auto;
+  direction: ltr;
 }
 
 .utility-bar button {
@@ -359,7 +360,7 @@ body.dark-theme {
 .game-board {
   position: relative;
   width: 70vw;
-  height: 70vh;
+  height: 65vh;
   row-gap: 10px;
   column-gap: 10px;
 }
@@ -950,7 +951,7 @@ body.dark-theme {
   }
 
   .utility-bar button {
-    font-size: 14px;
+    font-size: 16px;
     padding: 4px 4px;
   }
 
@@ -968,7 +969,7 @@ body.dark-theme {
 
   .game-board {
     width: 90vw;
-    height: 50vh;
+    height: 45vh;
   }
 
   #error-message {

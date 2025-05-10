@@ -878,7 +878,10 @@ function getMaxFittingFontSize(button) {
 export const hideLoadingScreen = () => {
   const loadingContainer = document.querySelector(".loading-container");
   loadingContainer.style.display = "none";
-  hideBlurOverlay();
+
+  if (!howToPopupIsOpen() && !settingsPanelIsOpen()) {
+    hideBlurOverlay();
+  }
 
   // Show settings and how-to
   const settingsButton = document.getElementById("settings-button");
