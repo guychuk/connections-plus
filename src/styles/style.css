@@ -1,17 +1,6 @@
 /* ------------------------
    BASE & TYPOGRAPHY
 ------------------------ */
-/* Use Inter font from Google Fonts */
-:root {
-  font-family: Inter, sans-serif;
-  font-feature-settings: "liga" 1, "calt" 1; /* fix for Chrome */
-}
-
-@supports (font-variation-settings: normal) {
-  :root {
-    font-family: InterVariable, sans-serif;
-  }
-}
 
 body {
   display: flex;
@@ -22,6 +11,15 @@ body {
   margin: 0;
   background-color: var(--theme-bg);
   transition: background-color var(--animation-speed-color-change) ease;
+}
+/* Font settings for English */
+:lang(en) {
+  font-family: "Inter", system-ui, sans-serif;
+}
+
+/* Font settings for Hebrew */
+:lang(he) {
+  font-family: "Heebo", "Assistant", system-ui, sans-serif;
 }
 
 /* ------------------------
@@ -325,7 +323,6 @@ body.dark-theme {
 
 .game-header {
   color: var(--theme-text-color);
-  font-family: Inter, sans-serif;
   text-align: center;
   transition: color var(--animation-speed-color-change) ease;
 }
@@ -421,7 +418,6 @@ body.dark-theme {
 ------------------------ */
 
 .game-button {
-  font-family: Inter, sans-serif;
   word-wrap: break-word;
   overflow-wrap: break-word;
   white-space: normal;
@@ -450,7 +446,6 @@ body.dark-theme {
   opacity: 0;
   background: var(--theme-popups-bg);
   color: var(--theme-popups-text-color);
-  font-family: Inter, sans-serif;
   padding: 2rem;
   gap: 1.5rem;
   border: 2px solid var(--theme-popups-border);
@@ -536,7 +531,6 @@ body.dark-theme {
 
 #how-to-table {
   border-collapse: collapse;
-  font-family: Inter, sans-serif;
 }
 
 #how-to-table td,
@@ -567,6 +561,7 @@ body.dark-theme {
 .game-subtitle {
   display: flex;
   flex-direction: row;
+  align-items: baseline;
 }
 
 /* ------------------------
@@ -580,7 +575,6 @@ body.dark-theme {
   align-items: center;
   width: 100%;
   height: 100%;
-  font-family: Inter, sans-serif;
   opacity: 1;
   transition: background-color var(--animation-speed-color-change) ease,
     opacity var(--animation-speed-color-change) ease,
@@ -597,7 +591,6 @@ body.dark-theme {
 }
 
 .screen-button {
-  font-family: Inter, sans-serif;
   font-size: 15rem;
   margin-top: 10px;
   cursor: pointer;
@@ -681,7 +674,6 @@ body.dark-theme {
    GAME TILES
 ------------------------ */
 .tile {
-  font-family: Inter, sans-serif;
   word-wrap: break-word;
   overflow-wrap: break-word;
   white-space: normal;
@@ -830,7 +822,6 @@ body.dark-theme {
   text-decoration: none;
   max-width: calc(50% - 20px);
   z-index: var(--z-index-toast);
-  font-family: Inter, sans-serif;
 }
 
 .toastify.on {
