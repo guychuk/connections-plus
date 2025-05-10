@@ -14,6 +14,7 @@ import {
   adjustButtonFontSizeWithLineBreaks,
   hideLoadingScreen,
   showLoadingScreen,
+  getLanguage,
 } from "../components/ui";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { clickDeselect, clickSolve } from "../events/events";
@@ -77,8 +78,8 @@ async function getNewTiles(client, groups, difficulty) {
 
   var iterations = 0;
 
-  while (iterations < 25) {
-    const tags = (await supabase.getTags(client, numTags)).map(
+  while (iterations < 30) {
+    const tags = (await supabase.getTags(client, numTags, getLanguage())).map(
       (tag) => tag.tag
     );
 
