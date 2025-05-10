@@ -690,7 +690,7 @@ export const updateTexts = () => {
   objectiveTitle.textContent = texts.howTo.objective.title;
 
   const objectiveText = document.getElementById("how-to-objective-text");
-  objectiveText.textContent = texts.howTo.objective.text;
+  objectiveText.innerHTML = texts.howTo.objective.text.join("<br />");
 
   const gameplayTitle = document.getElementById("how-to-gameplay-title");
   gameplayTitle.textContent = texts.howTo.gameplay.title;
