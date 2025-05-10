@@ -690,7 +690,7 @@ export const updateTexts = () => {
   objectiveTitle.textContent = texts.howTo.objective.title;
 
   const objectiveText = document.getElementById("how-to-objective-text");
-  objectiveText.textContent = texts.howTo.objective.text;
+  objectiveText.innerHTML = texts.howTo.objective.text.join("<br />");
 
   const gameplayTitle = document.getElementById("how-to-gameplay-title");
   gameplayTitle.textContent = texts.howTo.gameplay.title;
@@ -854,7 +854,7 @@ function getMaxFittingFontSize(button) {
   document.body.appendChild(clone);
 
   let min = 1;
-  let max = 24;
+  let max = window.innerHeight <= 768 ? 16 : 24;
   let bestFit = min;
 
   while (min <= max) {
@@ -878,7 +878,10 @@ function getMaxFittingFontSize(button) {
 export const hideLoadingScreen = () => {
   const loadingContainer = document.querySelector(".loading-container");
   loadingContainer.style.display = "none";
-  hideBlurOverlay();
+
+  if (!howToPopupIsOpen() && !settingsPanelIsOpen()) {
+    hideBlurOverlay();
+  }
 
   // Show settings and how-to
   const settingsButton = document.getElementById("settings-button");
