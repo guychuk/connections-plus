@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" dir="ltr">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -42,13 +42,25 @@
         >
           ❓
         </button>
+
+        <button
+          id="language-button"
+          aria-label="Change language"
+          title="Change language"
+        >
+          🇬🇧
+        </button>
       </div>
     </header>
 
     <main id="game-container">
       <div class="game-header">
         <h1 id="title">Connections+</h1>
-        <p id="subtitle"></p>
+        <div class="game-subtitle">
+          <p id="subtitle"></p>
+          <p>&nbsp;</p>
+          <p id="subtitle-groups">GROUPS</p>
+        </div>
       </div>
 
       <div id="board" class="game-board" aria-label="Game board"></div>
@@ -59,7 +71,7 @@
 
       <div class="game-controls">
         <button
-          id="new-game-button"
+          id="newGame-button"
           aria-label="Start a new game"
           title="Start a new game"
           class="game-button"
@@ -68,7 +80,7 @@
         </button>
 
         <button
-          id="deselect-all-button"
+          id="clear-button"
           aria-label="Deselect all tiles"
           title="Deselect all tiles"
           class="game-button"
@@ -145,24 +157,24 @@
     <div id="blur-overlay" class="blur-overlay"></div>
 
     <div id="settings-panel" class="popup">
-      <h2>Settings ⚙️</h2>
+      <h2 id="settings-title">Settings ⚙️</h2>
       <div class="popup-layout">
-        <label for="select-layout">Layout:</label>
+        <label for="select-layout" id="select-layout-label">Layout:</label>
         <select id="select-layout" aria-label="Select layout style">
-          <option value="compact">Compact</option>
-          <option value="spacious">Spacious</option>
+          <option value="compact" id="compact-option">Compact</option>
+          <option value="spacious" id="spacious-option">Spacious</option>
         </select>
       </div>
       <button id="apply-button" class="game-button">Apply ✅</button>
     </div>
 
     <div id="how-to-popup" class="popup">
-      <h2>How To Play? 🤔</h2>
+      <h2 id="how-to-title">How To Play? 🤔</h2>
       <div class="popup-layout">
         <table id="how-to-table">
           <tr>
-            <td class="column-title">Objective</td>
-            <td>
+            <td class="column-title" id="how-to-objective-title">Objective</td>
+            <td id="how-to-objective-text">
               Group the words by their hidden connections. Each word fits into
               one—and only one—group. <br />
               The catch? You don’t know how many words are in each group. 😉
@@ -170,31 +182,47 @@
           </tr>
 
           <tr>
-            <td class="column-title">Gameplay</td>
+            <td class="column-title" id="how-to-gameplay-title">Gameplay</td>
             <td>
               <ol>
-                <li>Click on the words you think belong together.</li>
-                <li>Hit <i>SUBMIT</i> to check your guess.</li>
-                <li>Keep going until all groups are found.</li>
+                <li id="how-to-gameplay-step-1">
+                  Click on the words you think belong together.
+                </li>
+                <li id="how-to-gameplay-step-2">
+                  Hit <i>SUBMIT</i> to check your guess.
+                </li>
+                <li id="how-to-gameplay-step-3">
+                  Keep going until all groups are found.
+                </li>
               </ol>
             </td>
           </tr>
 
           <tr>
-            <td class="column-title">Controls</td>
+            <td class="column-title" id="how-to-controls-title">Controls</td>
             <td>
               <ul>
-                <li><b>🎮 NEW:</b> Start over with a new puzzle.</li>
-                <li><b>🧹 CLEAR:</b> Clear your selection.</li>
-                <li><b>🎲 SHUFFLE:</b> Mix up the tiles.</li>
-                <li><b>🎯 SOLVE:</b> Solve the puzzle.</li>
-                <li>
+                <li id="how-to-controls-new">
+                  <b>🎮 NEW:</b> Start over with a new puzzle.
+                </li>
+                <li id="how-to-controls-clear">
+                  <b>🧹 CLEAR:</b> Clear your selection.
+                </li>
+                <li id="how-to-controls-shuffle">
+                  <b>🎲 SHUFFLE:</b> Mix up the tiles.
+                </li>
+                <li id="how-to-controls-solve">
+                  <b>🎯 SOLVE:</b> Solve the puzzle.
+                </li>
+                <li id="how-to-controls-hint">
                   <b>💡 HINT:</b>
                   Get a hint - selects half the tiles of the largest unsolved
                   group. Once shown, you cannot deselect those tiles!
                 </li>
-                <li><b>✔️ SUBMIT:</b> Submit your selection.</li>
-                <li>
+                <li id="how-to-controls-submit">
+                  <b>✔️ SUBMIT:</b> Submit your selection.
+                </li>
+                <li id="how-to-controls-difficulty">
                   <b>🐤 DIFFICULTY:</b> Switch between Easy, Medium, and Hard
                   modes.
                 </li>
@@ -203,21 +231,21 @@
           </tr>
 
           <tr>
-            <td class="column-title">Feedback System</td>
+            <td class="column-title" id="how-to-feedback-title">Feedback System</td>
             <td>
               <ul>
-                <li>
+                <li id="how-to-feedback-correct">
                   ✅ Correct selections: You'll get praised and the tile will
                   move to the solution area with their connection revealed.
                 </li>
-                <li>
+                <li id="how-to-feedback-partial">
                   ℹ️ Partially correct submissions (more than half right):
                   Reveal how many tiles are correct.
                 </li>
-                <li>
+                <li id="how-to-feedback-incorrect">
                   ❌ Mostly incorrect: You'll get a generic "nope" message.
                 </li>
-                <li>
+                <li id="how-to-feedback-repeated">
                   🔄 Repeated submissions: The game will nudge you to try
                   something new.
                 </li>
@@ -226,15 +254,19 @@
           </tr>
 
           <tr>
-            <td class="column-title">Utility Bar</td>
+            <td class="column-title" id="how-to-utility-title">Utility Bar</td>
             <td>
               <ul>
-                <li>
+                <li id="how-to-utility-theme">
                   <b>🌞/🌜 Theme Toggle:</b> Switch between light and dark
                   themes.
                 </li>
-                <li><b>⚙️ Settings:</b> Open the settings panel.</li>
-                <li><b>❓ How To Play:</b> Open this how-to popup.</li>
+                <li id="how-to-utility-settings">
+                  <b>⚙️ Settings:</b> Open the settings panel.
+                </li>
+                <li id="how-to-utility-howTo">
+                  <b>❓ How To Play:</b> Open this how-to popup.
+                </li>
               </ul>
             </td>
           </tr>

@@ -1,5 +1,9 @@
 import Toastify from "toastify-js";
-import { toastsDuration as TOAST_DURATION } from "../config/config.json";
+import {
+  toastsDuration as TOAST_DURATION,
+  UIText,
+} from "../config/config.json";
+import { getLanguage } from "./ui";
 
 /**
  * Creates a Toastify message.
@@ -26,22 +30,26 @@ export const makeToast = (classes, text, duration = TOAST_DURATION) => {
  * @param {number} minChoice The minimum number of tiles that can be selected.
  * @returns {Object} A Toastify message object.
  */
-export const makeTooFewToast = (minChoice) =>
-  makeToast(
-    ["toastify-rounded", "toastify-invalid-choice"],
-    `🚫 You need to select at least ${minChoice} tiles to submit`
-  );
+export const makeTooFewToast = (minChoice) => {
+  const language = getLanguage();
+
+  const text = UIText[language].toasts.tooFew.replace("XXX", minChoice);
+
+  return makeToast(["toastify-rounded", "toastify-invalid-choice"], text);
+};
 
 /**
  * Creates a Toastify message for when the user has too many tiles selected.
  * @param {number} maxChoice The maximum number of tiles that can be selected.
  * @returns {Object} A Toastify message object.
  */
-export const makeTooManyToast = (maxChoice) =>
-  makeToast(
-    ["toastify-rounded", "toastify-invalid-choice"],
-    `🚫 You need to select at most ${maxChoice} tiles to submit`
-  );
+export const makeTooManyToast = (maxChoice) => {
+  const language = getLanguage();
+
+  const text = UIText[language].toasts.tooMany.replace("XXX", maxChoice);
+
+  return makeToast(["toastify-rounded", "toastify-invalid-choice"], text);
+};
 
 /**
  * Creates a Toastify message for when the user has submitted a partially correct set of tiles.
@@ -49,29 +57,68 @@ export const makeTooManyToast = (maxChoice) =>
  * @param {number} group The group size of the tiles.
  * @returns {Object} A Toastify message object.
  */
-export const makePartialToast = (correct, group) =>
-  makeToast(
-    ["toastify-rounded", "toastify-partial"],
-    `🚀 You got ${correct} out of ${group} correct!`
+export const makePartialToast = (correct, group) => {
+  const language = getLanguage();
+
+  const text = UIText[language].toasts.partial
+    .replace("XXX", correct)
+    .replace("YYY", group);
+
+  return makeToast(["toastify-rounded", "toastify-partial"], text);
+};
+
+export const makeErrorToast = () => {
+  const language = getLanguage();
+
+  return makeToast(
+    ["toastify-rounded", "toastify-error"],
+    UIText[language].toasts.error
   );
+};
 
-export const makeErrorToast = () =>
-  makeToast(["toastify-rounded", "toastify-error"], "🫠 Something went wrong");
+export const makeDuplicateToast = () => {
+  const language = getLanguage();
 
-export const makeDuplicateToast = () =>
-  makeToast(
-    ["toastify-rounded", "toastify-duplicate"],
-    `🚫 You already submitted that`
+  return makeToast(
+    ["toastify-rounded", "toastify-error"],
+    UIText[language].toasts.duplicate
   );
+};
 
-export const makeCorrectToast = () =>
-  makeToast(["toastify-rounded", "toastify-correct"], "🎉 You got it!");
+export const makeCorrectToast = () => {
+  const language = getLanguage();
 
-export const makeIncorrectToast = () =>
-  makeToast(["toastify-rounded", "toastify-incorrect"], "❌ That's not it...");
+  return makeToast(
+    ["toastify-rounded", "toastify-correct"],
+    UIText[language].toasts.correct
+  );
+};
 
-export const makeWinnerToast = () =>
-  makeToast(["toastify-rounded", "toastify-winner"], "🎉 You won!", -1);
+export const makeIncorrectToast = () => {
+  const language = getLanguage();
 
-export const makeLoserToast = () =>
-  makeToast(["toastify-rounded", "toastify-loser"], "👎 You lost!", -1);
+  return makeToast(
+    ["toastify-rounded", "toastify-incorrect"],
+    UIText[language].toasts.incorrect
+  );
+};
+
+export const makeWinnerToast = () => {
+  const language = getLanguage();
+
+  return makeToast(
+    ["toastify-rounded", "toastify-winner"],
+    UIText[language].toasts.winner,
+    -1
+  );
+};
+
+export const makeLoserToast = () => {
+  const language = getLanguage();
+
+  return makeToast(
+    ["toastify-rounded", "toastify-loser"],
+    UIText[language].toasts.loser,
+    -1
+  );
+};

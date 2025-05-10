@@ -239,8 +239,8 @@ export function initializeGameControls(
   supabaseClient
 ) {
   const controlButtons = {
-    newGame: document.getElementById("new-game-button"),
-    deselect: document.getElementById("deselect-all-button"),
+    newGame: document.getElementById("newGame-button"),
+    deselect: document.getElementById("clear-button"),
     shuffle: document.getElementById("shuffle-button"),
     hint: document.getElementById("hint-button"),
     solve: document.getElementById("solve-button"),
@@ -389,4 +389,20 @@ export const clickScreenButton = (event) => {
   setTimeout(() => {
     location.reload();
   }, parseFloat(spinDuration) * 1000);
+};
+
+/* --- Language --- */
+
+/**
+ * Changes the language to the next one in the list of languages, and
+ * restarts the game.
+ */
+export const clickLanguageButton = () => {
+  const nextLanguage = UI.getNextLanguage();
+  UI.setLanguage(nextLanguage);
+
+  const newGameButton = document.getElementById("newGame-button");
+  newGameButton.click();
+
+  UI.updateTexts();
 };

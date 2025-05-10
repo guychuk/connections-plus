@@ -538,7 +538,6 @@ body.dark-theme {
 
 #how-to-table td,
 #how-to-table th {
-  text-align: left;
   vertical-align: middle;
 }
 
@@ -552,6 +551,19 @@ body.dark-theme {
 
 .column-title {
   font-weight: bold;
+}
+
+/* ------------------------
+   TITLE & SUBTITLE
+------------------------ */
+
+#title {
+  direction: ltr;
+}
+
+.game-subtitle {
+  display: flex;
+  flex-direction: row;
 }
 
 /* ------------------------

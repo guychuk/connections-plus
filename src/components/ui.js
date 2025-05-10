@@ -1,11 +1,17 @@
 import * as utils from "../core/utils.js";
 import * as toasts from "./toasts.js";
 import confetti from "canvas-confetti";
-import { confettiDuration } from "../config/config.json";
+import {
+  confettiDuration,
+  languages,
+  UIText,
+  defaultDifficulty,
+} from "../config/config.json";
 import {
   clickScreenButton,
   clickSettings,
   clickHowTo,
+  clickLanguageButton,
 } from "../events/events.js";
 
 export const CLASS_BLURRED = "blurred";
@@ -379,13 +385,11 @@ export function createButtons(positions, gameState, boardConfig) {
  * @returns {string} The text for the difficulty button.
  */
 export const getTextForDifficultyButton = (difficulty) => {
-  if (difficulty === "easy") {
-    return "EASY 🥚";
-  } else if (difficulty === "medium") {
-    return "MEDIUM 🐤";
-  } else if (difficulty === "hard") {
-    return "HARD 🐔";
-  }
+  const language = getLanguage();
+
+  const text = UIText[language].difficulties[difficulty];
+
+  if (text) return text;
 
   throw new Error("Invalid difficulty");
 };
@@ -473,6 +477,10 @@ export function showErrorScreen() {
   // Hide Settings button
   const settingsButton = document.getElementById("settings-button");
   settingsButton.style.display = "none";
+
+  // Hide how-to button
+  const howToButton = document.getElementById("how-to-button");
+  howToButton.style.display = "none";
 
   // Show error screen
   const errorScreen = document.getElementById("error-screen");
@@ -590,6 +598,152 @@ function setInitialTheme() {
     .addEventListener("change", setThemeBasedOnPreference);
 }
 
+export const setLanguage = (language) => {
+  localStorage.setItem("language", language);
+
+  if (language === "he") {
+    document.body.dir = "rtl";
+  } else {
+    document.body.dir = "ltr";
+  }
+};
+
+export const getLanguage = () => {
+  const language = localStorage.getItem("language");
+
+  if (!language) {
+    setLanguage(languages[0]);
+    return languages[0];
+  } else {
+    return language;
+  }
+};
+
+function setInitialLanguage() {
+  const language = localStorage.getItem("language");
+
+  if (!language) {
+    setLanguage(languages[0]);
+  }
+
+  if (language === "he") {
+    document.body.dir = "rtl";
+  } else {
+    document.body.dir = "ltr";
+  }
+}
+
+export const getNextLanguage = () => {
+  const currentLanguage = getLanguage();
+  const index = languages.indexOf(currentLanguage);
+  return languages[(index + 1) % languages.length];
+};
+
+export const updateTexts = () => {
+  const language = getLanguage();
+
+  const texts = UIText[language];
+
+  const buttonsText = texts.buttons;
+
+  for (const [key, value] of Object.entries(buttonsText)) {
+    const buttonName = `${key}-button`;
+    const button = document.getElementById(buttonName);
+    button.textContent = value;
+  }
+
+  const difficultyButton = document.getElementById("difficulty-button");
+  const currentDifficulty = difficultyButton.dataset.difficulty;
+
+  if (currentDifficulty) {
+    difficultyButton.textContent =
+      getTextForDifficultyButton(currentDifficulty);
+  }
+
+  // Update groups paragraph/subtitle
+  const subtitle = document.getElementById("subtitle");
+  subtitle.textContent = texts.subtitle;
+
+  // Settings
+  const settingsTitle = document.getElementById("settings-title");
+  settingsTitle.textContent = texts.settings.title;
+
+  const selectLayoutLabel = document.getElementById("select-layout-label");
+  selectLayoutLabel.textContent = texts.settings.layout;
+
+  const layoutOptions = texts.settings.layoutOptions;
+
+  for (const [key, value] of Object.entries(layoutOptions)) {
+    const optionName = `${key}-option`;
+    const option = document.getElementById(optionName);
+    option.textContent = value;
+  }
+
+  const applyButton = document.getElementById("apply-button");
+  applyButton.textContent = texts.settings.apply;
+
+  // How To
+  const howToTitle = document.getElementById("how-to-title");
+  howToTitle.textContent = texts.howTo.title;
+
+  const objectiveTitle = document.getElementById("how-to-objective-title");
+  objectiveTitle.textContent = texts.howTo.objective.title;
+
+  const objectiveText = document.getElementById("how-to-objective-text");
+  objectiveText.textContent = texts.howTo.objective.text;
+
+  const gameplayTitle = document.getElementById("how-to-gameplay-title");
+  gameplayTitle.textContent = texts.howTo.gameplay.title;
+
+  const gameplayStepsText = texts.howTo.gameplay.steps;
+
+  for (let i = 0; i < gameplayStepsText.length; i++) {
+    const stepName = `how-to-gameplay-step-${i + 1}`;
+    const step = document.getElementById(stepName);
+    step.textContent = gameplayStepsText[i];
+  }
+
+  const controlsTitle = document.getElementById("how-to-controls-title");
+  controlsTitle.textContent = texts.howTo.controls.title;
+
+  const controlsButtonsText = texts.howTo.controls.buttons;
+
+  for (const [key, value] of Object.entries(controlsButtonsText)) {
+    const buttonName = `how-to-controls-${key}`;
+    const button = document.getElementById(buttonName);
+    const [title, description] = value;
+    button.innerHTML = `<b>${title}</b> ${description}`;
+  }
+
+  const feedbackTitle = document.getElementById("how-to-feedback-title");
+  feedbackTitle.textContent = texts.howTo.feedback.title;
+
+  const feedbackToasts = texts.howTo.feedback.toasts;
+
+  for (const [key, value] of Object.entries(feedbackToasts)) {
+    const toastName = `how-to-feedback-${key}`;
+    const toast = document.getElementById(toastName);
+    toast.textContent = value;
+  }
+
+  const utilityTitle = document.getElementById("how-to-utility-title");
+  utilityTitle.textContent = texts.howTo.utility.title;
+
+  const utilityButtonsText = texts.howTo.utility.buttons;
+
+  for (const [key, value] of Object.entries(utilityButtonsText)) {
+    const buttonName = `how-to-utility-${key}`;
+    const button = document.getElementById(buttonName);
+    button.textContent = value;
+  }
+
+  const errorMessage = document.getElementById("error-message");
+  errorMessage.textContent = texts.errorScreen.message;
+
+  const errorMessageRefresh = document.getElementById("error-message-refresh");
+  errorMessageRefresh.textContent = texts.errorScreen.messageRefresh;
+};
+
 /* --- Mistakes --- */
 
 /**
@@ -636,7 +790,7 @@ export function resetMistakes(mistakesAllowed) {
  * @param {Array} solvedGroups The array of solved groups.
  */
 export const updateSubtitle = (groups, solvedGroups) => {
-  const subtitle = document.getElementById("subtitle");
+  const subtitleGroups = document.getElementById("subtitle-groups");
 
   const groupTexts = [];
 
@@ -648,7 +802,7 @@ export const updateSubtitle = (groups, solvedGroups) => {
     }
   }
 
-  subtitle.innerHTML = `Group sizes are ${groupTexts.join(", ")}`;
+  subtitleGroups.innerHTML = `${groupTexts.join(", ")}`;
 };
 
 /* --- Game control buttons --- */
@@ -764,6 +918,16 @@ export function initializeGameUI(config) {
   // Set the theme based on the user's preference
   setInitialTheme();
 
+  /* --- Initialize language button --- */
+
+  const languageButton = document.getElementById("language-button");
+  languageButton.addEventListener("click", clickLanguageButton);
+
+  // Set the language based on the user's preference
+  setInitialLanguage();
+
+  updateTexts();
+
   /* --- Initialize error and settings buttons --- */
 
   const errorEmojiButton = document.getElementById("error-button");
@@ -799,10 +963,6 @@ export function initializeGameUI(config) {
   /* --- Initialize board --- */
   const groups = config["groups"].sort((a, b) => a - b);
   utils.assert(!utils.containsDulpicates(groups), "Groups contain duplicates");
-
-  // Update groups paragraph/subtitle
-  const groupsParagraph = document.getElementById("subtitle");
-  groupsParagraph.textContent = `Group Sizes are `;
 
   /* --- Initialize board --- */
 
