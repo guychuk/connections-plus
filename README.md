@@ -1,7 +1,9 @@
 # Connectons+
 
 <p align="center">
-  <img src="public/icon.png" alt="Logo" width="100" height="100">
+  <a href="https://connections-plus.vercel.app/">
+    <img src="public/icon.png" alt="Logo" width="100" height="100">
+  </a>
 </p>
 
 <p align="center">
@@ -62,6 +64,7 @@ To help (but not spoil):
 
 - **Variable group sizes** for increased challenge (and fun) compared to the original game 🚀
 - **Multiple difficulty levels** you can switch between: Easy, Medium, and Hard 🐤
+- **Two languages are supported:** English, and Hebrew 🌐
 - **Customizable interface** with theme and layout options 🌗
 - **Responsive design** that works on desktop and mobile devices 📱
 - **Confetti showers** when you win 🎊
