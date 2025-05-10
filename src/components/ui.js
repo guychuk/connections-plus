@@ -854,7 +854,7 @@ function getMaxFittingFontSize(button) {
   document.body.appendChild(clone);
 
   let min = 1;
-  let max = 24;
+  let max = window.innerHeight <= 768 ? 18 : 24;
   let bestFit = min;
 
   while (min <= max) {
