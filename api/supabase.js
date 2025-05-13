@@ -37,7 +37,7 @@ export default async function handler(req, res) {
             .json({ message: "Missing minTerms parameter" });
         }
 
-        parsedTags = JSON.parse(decodeURIComponent(tags));
+        const parsedTags = JSON.parse(decodeURIComponent(tags));
 
         const categories = await getCategories(supabase, parsedTags, minTerms);
         return res.status(200).json(categories);
