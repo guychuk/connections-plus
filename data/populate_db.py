@@ -11,7 +11,7 @@ ERRORS_PATH = "errors.txt"
 load_dotenv()
 
 SUPABASE_URL = os.getenv("VITE_SUPABASE_URL")
-SUPABASE_KEY = os.getenv("VITE_SUPABASE_KEY")
+SUPABASE_KEY = os.getenv("VITE_SUPABASE_SR_KEY")
 
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
