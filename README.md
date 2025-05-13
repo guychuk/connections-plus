@@ -137,6 +137,11 @@ You can play it right here:
    http://localhost:5173
    ```
 
+## Deployment
+
+This project can be deployed using [GitHub Pages](https://pages.github.com/) for the frontend and [Vercel](https://vercel.com/) for the backend.  
+Set environment variables as described in [Local Development](#local-development). For full deployment, configure CORS and connect to Supabase.
+
 ## Technologies
 
 - **Frontend**:
