@@ -8,6 +8,14 @@ const MAX_ITERATIONS = 30;
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 export default async function handler(req, res) {
+  res.setHeader("Access-Control-Allow-Origin", "https://guychuk.github.io");
+  res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+
   const { method } = req;
 
   if (method === "GET") {
@@ -34,7 +42,6 @@ export default async function handler(req, res) {
     }
 
     const parsedGroupsSizes = JSON.parse(decodeURIComponent(groupsSizes));
-
     const tiles = await getTiles(parsedGroupsSizes, numTags, language);
 
     if (!tiles) return res.status(500).json({ message: "Failed to get tiles" });
