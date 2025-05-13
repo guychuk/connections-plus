@@ -97,7 +97,6 @@ const clickDifficulty = (event) => {
  * Event handler for the new game button.
  * @param {Object} gameControlButtons The game control buttons object.
  * @param {Object} gameState The game state object.
- * @param {SupabaseClient} supabaseClient The Supabase client.
  * @param {Array} groups The array of group sizes.
  * @param {Array} positions The array of positions for the tiles.
  * @param {Object} boardConfig The board configuration object.
@@ -105,7 +104,6 @@ const clickDifficulty = (event) => {
 const clickNewGame = async (
   gameControlButtons,
   gameState,
-  supabaseClient,
   groups,
   positions,
   boardConfig
@@ -120,7 +118,6 @@ const clickNewGame = async (
   const difficultyButton = gameControlButtons.difficulty;
 
   await resetGame(
-    supabaseClient,
     difficultyButton.dataset.difficulty,
     groups,
     gameState,
@@ -235,8 +232,7 @@ export function initializeGameControls(
   gameState,
   boardConfig,
   positions,
-  groups,
-  supabaseClient
+  groups
 ) {
   const controlButtons = {
     newGame: document.getElementById("newGame-button"),
@@ -261,14 +257,7 @@ export function initializeGameControls(
 
   // New Game Button
   controlButtons.newGame.addEventListener("click", async () => {
-    clickNewGame(
-      controlButtons,
-      gameState,
-      supabaseClient,
-      groups,
-      positions,
-      boardConfig
-    );
+    clickNewGame(controlButtons, gameState, groups, positions, boardConfig);
   });
 
   // Deselect Button

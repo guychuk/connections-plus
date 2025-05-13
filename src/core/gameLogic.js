@@ -1,4 +1,3 @@
-import * as supabase from "../services/supabase";
 import { makePositions, hashTilesSet } from "../core/utils";
 import {
   calculateTileSize,
@@ -16,7 +15,6 @@ import {
   showLoadingScreen,
   getLanguage,
 } from "../components/ui";
-import { SupabaseClient } from "@supabase/supabase-js";
 import { clickDeselect, clickSolve } from "../events/events";
 import * as toasts from "../components/toasts";
 
@@ -42,124 +40,28 @@ const getNumOfTags = (difficulty, numGroups) => {
 /* --- Tiles --- */
 
 /**
- * Make a tile object.
- * @param {string} id The ID of the tile.
- * @param {string} term The term of the tile.
- * @param {string} category The category of the tile.
- * @param {number} groupSize The group size of the tile.
- * @param {number} groupIndex The group index of the tile.
- * @param {HTMLButtonElement} button The button element for the tile.
- * @returns {Object} The tile object.
- */
-const makeTile = (id, term, category, groupSize, groupIndex, button) => {
-  return {
-    id,
-    term,
-    category,
-    groupSize,
-    groupIndex,
-    button,
-  };
-};
-
-/**
  * Create tiles for a new game.
- * @param {SupabaseClient} client Supabase client.
- * @param {Array} groups array of group sizes.
+ * @param {Array} groupsSizes array of group sizes.
  * @param {string} difficulty difficulty
  * @returns {Set} set of tiles.
  */
-async function getNewTiles(client, groups, difficulty) {
-  const numGroups = groups.length;
-  const numTags = getNumOfTags(difficulty, numGroups);
+async function getNewTiles(groupsSizes, difficulty) {
+  const language = getLanguage();
+  const numTags = getNumOfTags(difficulty, groupsSizes.length);
 
-  var categories;
-  const categoriesSet = new Set();
+  const groupsSizesParam = encodeURIComponent(JSON.stringify(groupsSizes));
 
-  var iterations = 0;
+  const response = await fetch(
+    `/api/get-tiles?groupsSizes=${groupsSizesParam}&numTags=${numTags}&language=${language}`
+  );
 
-  while (iterations < 30) {
-    const tags = (await supabase.getTags(client, numTags, getLanguage())).map(
-      (tag) => tag.tag
-    );
-
-    let i = groups.length;
-
-    categories = Array.from({ length: numGroups }, () => null);
-    categoriesSet.clear();
-
-    // Test this choice of Tags
-    while (0 < i) {
-      const newCategories = (
-        await supabase.getCategories(client, tags, groups[i - 1])
-      ).filter((category) => !categoriesSet.has(category.cat_id));
-
-      // If no categories were found, try again with different tags
-      if (newCategories.length === 0) {
-        console.error(
-          "Did not find new categories, trying again with different tags"
-        );
-        break;
-      }
-
-      for (let j = 0; j < newCategories.length && i > 0; j++) {
-        categories[i - 1] = newCategories[j];
-        categoriesSet.add(newCategories[j].cat_id);
-        i--;
-      }
-    }
-
-    if (i > 0) {
-      iterations++;
-      continue;
-    }
-
-    // Get categories names
-
-    const categoriesNamesPromises = categories.map((category) =>
-      supabase.getCategoryName(client, category.cat_id)
-    );
-
-    const categoriesNames = await Promise.all(categoriesNamesPromises);
-
-    // Get terms
-
-    const fetchTermsPromises = groups.map((groupSize, index) =>
-      supabase
-        .getTerms(client, categories[index].cat_id, groupSize)
-        .then((terms) => {
-          return terms.map((term) => term.term);
-        })
-    );
-
-    const allTerms = await Promise.all(fetchTermsPromises);
-
-    // Check for duplicate terms
-    if (new Set(allTerms.flat()).size !== allTerms.flat().length) {
-      console.error("Duplicate terms found, trying again");
-      iterations++;
-      continue;
-    }
-
-    const tiles = new Set();
-
-    for (let i = 0; i < groups.length; i++) {
-      for (let j = 0; j < groups[i]; j++) {
-        tiles.add(
-          makeTile(
-            tiles.length, // id
-            allTerms[i][j], // term
-            categoriesNames[i], // category
-            groups[i], // groupSize
-            i, // groupIndex
-            null // button (not yet created)
-          )
-        );
-      }
-    }
-
-    return tiles;
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(`Failed to fetch tiles: ${error.message}`);
   }
+
+  const tiles = await response.json();
+  return new Set(tiles);
 }
 
 /* --- Game Initialization --- */
@@ -167,21 +69,13 @@ async function getNewTiles(client, groups, difficulty) {
 /**
  * Initialize the game board with tiles.
  * @param {Object} config The config object.
- * @param {SupabaseClient} client The Supabase client.
  * @param {string} difficulty The difficulty.
  * @param {Array} groups An array of group sizes.
  * @param {HTMLCanvasElement} board The board element.
  * @param {Object} gaps The gaps object containing horizontal and vertical gaps.
  * @returns {Object} An object containing the game state, positions array and tile size object.
  */
-export async function initializeGame(
-  config,
-  client,
-  difficulty,
-  groups,
-  board,
-  gaps
-) {
+export async function initializeGame(config, difficulty, groups, board, gaps) {
   // Get board grid layout
   const rows = groups.length;
   const cols = groups[groups.length - 1];
@@ -203,7 +97,7 @@ export async function initializeGame(
 
   updateSubtitle(groups, solvedGroups);
 
-  const tileSet = await getNewTiles(client, groups, difficulty);
+  const tileSet = await getNewTiles(groups, difficulty);
 
   // Game state
   const gameState = {
@@ -247,20 +141,13 @@ export async function initializeGame(
 
 /**
  * Reset the game state and fetch new tiles.
- * @param {SupabaseClient} client The Supabase client.
  * @param {string} difficulty The difficulty.
  * @param {Array} groups The group sizes.
  * @param {Set} tiles The set of tiles to replace.
  * @param {Object} gameState The game state object.
  * @param {Array} positions The array of positions for the tiles.
  */
-export async function resetGame(
-  supabaseClient,
-  difficulty,
-  groups,
-  gameState,
-  positions
-) {
+export async function resetGame(difficulty, groups, gameState, positions) {
   clearToasts();
 
   // Reset game state
@@ -278,7 +165,7 @@ export async function resetGame(
   showLoadingScreen();
 
   // Get new tiles
-  const newTiles = await getNewTiles(supabaseClient, groups, difficulty);
+  const newTiles = await getNewTiles(groups, difficulty);
 
   // Get new list of positions
 
