@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Fonts -->
+    <!-- <link rel="preconnect" href="https://rsms.me/" />
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css" /> -->
+
+    <!-- Link to Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Heebo:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Styles -->
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="./assets/icon-BE7GOA7g.png" sizes="16x16" />
+
+    <title>Connections+</title>
+    <script type="module" crossorigin src="./assets/index-DvIqsyUq.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-B_wmmyup.css">
+  </head>
+
+  <body>
+    <header>
+      <div class="utility-bar">
+        <button
+          id="theme-toggle-button"
+          aria-label="Toggle light/dark modes"
+          title="Toggle light/dark modes"
+        ></button>
+
+        <button
+          id="settings-button"
+          aria-label="Open settings"
+          title="Open settings"
+        >
+          ⚙️
+        </button>
+
+        <button
+          id="how-to-button"
+          aria-label="How to play?"
+          title="How to play?"
+        >
+          ❓
+        </button>
+
+        <button
+          id="language-button"
+          aria-label="Change language"
+          title="Change language"
+        >
+          🌐
+        </button>
+      </div>
+    </header>
+
+    <main id="game-container">
+      <div class="game-header">
+        <h1 id="title">Connections+</h1>
+        <div class="game-subtitle">
+          <p id="subtitle"></p>
+          <p>&nbsp;</p>
+          <p id="subtitle-groups">GROUPS</p>
+        </div>
+        <div class="game-mistakes">
+          <p id="mistakes"></p>
+        </div>
+      </div>
+
+      <div id="board" class="game-board" aria-label="Game board"></div>
+
+      <div class="loading-container">
+        <div class="spinner"></div>
+      </div>
+
+      <div class="game-controls">
+        <button
+          id="newGame-button"
+          aria-label="Start a new game"
+          title="Start a new game"
+          class="game-button"
+        >
+          NEW 🎮
+        </button>
+
+        <button
+          id="clear-button"
+          aria-label="Deselect all tiles"
+          title="Deselect all tiles"
+          class="game-button"
+        >
+          CLEAR 🧹
+        </button>
+
+        <button
+          id="shuffle-button"
+          aria-label="Shuffle the tiles"
+          title="Shuffle the tiles"
+          class="game-button"
+        >
+          SHUFFLE 🎲
+        </button>
+
+        <button
+          id="solve-button"
+          aria-label="solve the puzzle"
+          title="Solve the puzzle"
+          class="game-button"
+        >
+          SOLVE 🎯
+        </button>
+
+        <button
+          id="hint-button"
+          aria-label="get a hint"
+          title="Hint"
+          class="game-button"
+        >
+          HINT 💡
+        </button>
+
+        <button
+          id="submit-button"
+          aria-label="Submit your selection"
+          title="Submit your selection"
+          class="game-button"
+        >
+          SUBMIT ✔️
+        </button>
+
+        <button
+          id="difficulty-button"
+          aria-label="Change difficulty level"
+          title="Change difficulty level"
+          class="game-button"
+        ></button>
+      </div>
+    </main>
+
+    <div id="error-screen" class="screen-container">
+      <p id="error-message" class="screen-message">
+        An unexpected error occurred.
+      </p>
+      <p
+        id="error-button"
+        aria-label="Refresh"
+        title="Refresh"
+        class="screen-button"
+      >
+        🫣
+      </p>
+      <p id="error-message-refresh" class="screen-message-refresh">
+        Click the emoji to refresh
+      </p>
+    </div>
+
+    <div id="blur-overlay" class="blur-overlay"></div>
+
+    <div id="settings-panel" class="popup">
+      <h2 id="settings-title">Settings ⚙️</h2>
+      <div class="popup-layout">
+        <label for="select-layout" id="select-layout-label">Layout:</label>
+        <select id="select-layout" aria-label="Select layout style">
+          <option value="compact" id="compact-option">Compact</option>
+          <option value="spacious" id="spacious-option">Spacious</option>
+        </select>
+      </div>
+      <button id="apply-button" class="game-button">Apply ✅</button>
+    </div>
+
+    <div id="how-to-popup" class="popup">
+      <h2 id="how-to-title">How To Play? 🤔</h2>
+      <div class="popup-layout">
+        <table id="how-to-table">
+          <tr>
+            <td class="column-title" id="how-to-objective-title">Objective</td>
+            <td id="how-to-objective-text">
+              Group the words by their hidden connections. Each word fits into
+              one—and only one—group. <br />
+              The catch? You don’t know how many words are in each group. 😉
+            </td>
+          </tr>
+
+          <tr>
+            <td class="column-title" id="how-to-gameplay-title">Gameplay</td>
+            <td>
+              <ol>
+                <li id="how-to-gameplay-step-1">
+                  Click on the words you think belong together.
+                </li>
+                <li id="how-to-gameplay-step-2">
+                  Hit <i>SUBMIT</i> to check your guess.
+                </li>
+                <li id="how-to-gameplay-step-3">
+                  Keep going until all groups are found.
+                </li>
+              </ol>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="column-title" id="how-to-controls-title">Controls</td>
+            <td>
+              <ul>
+                <li id="how-to-controls-new">
+                  <b>🎮 NEW:</b> Start over with a new puzzle.
+                </li>
+                <li id="how-to-controls-clear">
+                  <b>🧹 CLEAR:</b> Clear your selection.
+                </li>
+                <li id="how-to-controls-shuffle">
+                  <b>🎲 SHUFFLE:</b> Mix up the tiles.
+                </li>
+                <li id="how-to-controls-solve">
+                  <b>🎯 SOLVE:</b> Solve the puzzle.
+                </li>
+                <li id="how-to-controls-hint">
+                  <b>💡 HINT:</b>
+                  Get a hint - selects half the tiles of the largest unsolved
+                  group. Once shown, you cannot deselect those tiles!
+                </li>
+                <li id="how-to-controls-submit">
+                  <b>✔️ SUBMIT:</b> Submit your selection.
+                </li>
+                <li id="how-to-controls-difficulty">
+                  <b>🐤 DIFFICULTY:</b> Switch between Easy, Medium, and Hard
+                  modes.
+                </li>
+              </ul>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="column-title" id="how-to-feedback-title">
+              Feedback System
+            </td>
+            <td>
+              <ul>
+                <li id="how-to-feedback-correct">
+                  ✅ Correct selections: You'll get praised and the tile will
+                  move to the solution area with their connection revealed.
+                </li>
+                <li id="how-to-feedback-partial">
+                  ℹ️ Partially correct submissions (more than half right):
+                  Reveal how many tiles are correct.
+                </li>
+                <li id="how-to-feedback-incorrect">
+                  ❌ Mostly incorrect: You'll get a generic "nope" message.
+                </li>
+                <li id="how-to-feedback-repeated">
+                  🔄 Repeated submissions: The game will nudge you to try
+                  something new.
+                </li>
+              </ul>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="column-title" id="how-to-utility-title">Utility Bar</td>
+            <td>
+              <ul>
+                <li id="how-to-utility-theme">
+                  <b>🌞/🌜 Theme Toggle:</b> Switch between light and dark
+                  themes.
+                </li>
+                <li id="how-to-utility-settings">
+                  <b>⚙️ Settings:</b> Open the settings panel.
+                </li>
+                <li id="how-to-utility-howTo">
+                  <b>❓ How To Play:</b> Open this how-to popup.
+                </li>
+              </ul>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script
+      type="text/javascript"
+      src="https://cdn.jsdelivr.net/npm/toastify-js"
+    ></script>
+  </body>
+</html>
