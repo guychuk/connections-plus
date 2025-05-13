@@ -1,62 +1,77 @@
 /**
  * Get a given number of distinct tags.
- * @param {SupabaseClient} client The Supabase client.
  * @param {number} numTags The number of tags to retrieve.
  * @returns {Array} An array of tags.
  */
-export const getTags = async (client, numTags, language) => {
-  let { data, error } = await client.rpc("get_random_distinct_tags", {
-    n: numTags,
-    lang: language,
-  });
+export const getTags = async (numTags, language) => {
+  const response = await fetch(
+    `/api/supabase?action=getTags&numTags=${numTags}&language=${language}`
+  );
 
-  return error ? [] : data;
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(`Failed to fetch tags: ${error.message}`);
+  }
+
+  const tags = await response.json();
+  return tags;
 };
 
 /**
  * Retrieve categories that match a given set of tags and have at least a minimum number of terms.
- * @param {SupabaseClient} client The Supabase client.
  * @param {Array} tags An array of tags to filter categories.
  * @param {number} minTerms The minimum number of terms a category must have.
  * @returns {Array} An array of categories matching the criteria.
  */
-export const getCategories = async (client, tags, minTerms) => {
-  let { data, error } = await client.rpc("get_categories", {
-    tag_filter: tags,
-    min_terms: minTerms,
-  });
+export const getCategories = async (tags, minTerms) => {
+  const response = await fetch(
+    `/api/supabase?action=getCategories&tags=${tags}&minTerms=${minTerms}`
+  );
 
-  return error ? [] : data;
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(`Failed to fetch categories: ${error.message}`);
+  }
+
+  const categories = await response.json();
+  return categories;
 };
 
 /**
  * Get the name of a category given its id.
- * @param {SupabaseClient} client The Supabase client.
  * @param {number} categoryID The id of the category.
  * @returns {string} The name of the category, or an empty string on error.
  */
-export const getCategoryName = async (client, categoryID) => {
-  let { data, error } = await client
-    .from("categories")
-    .select("*")
-    .eq("id", categoryID);
+export const getCategoryName = async (categoryID) => {
+  const response = await fetch(
+    `/api/supabase?action=getCategoryName&categoryID=${categoryID}`
+  );
 
-  return error ? "" : data[0].category;
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(`Failed to fetch category name: ${error.message}`);
+  }
+
+  const category = await response.json();
+  return category;
 };
 
 /**
  * Retrieve a specified number of terms for a given category.
- * @param {SupabaseClient} client The Supabase client.
- * @param {number} categoryID The ID of the category whose terms are to be retrieved.
+= * @param {number} categoryID The ID of the category whose terms are to be retrieved.
  * @param {number} num The maximum number of terms to retrieve.
  * @returns {Array} An array of terms, or an empty array on error.
  */
-export const getTerms = async (client, categoryID, num) => {
-  let { data, error } = await client
-    .from("terms")
-    .select("*")
-    .eq("category_id", categoryID)
-    .limit(num);
+export const getTerms = async (categoryID, num) => {
+  const response = await fetch(
+    `/api/supabase?action=getTerms&categoryID=${categoryID}&num=${num}`
+  );
 
-  return error ? [] : data;
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(`Failed to fetch terms: ${error.message}`);
+  }
+
+  const terms = await response.json();
+  return terms;
 };
