@@ -18,6 +18,8 @@ import {
 import { clickDeselect, clickSolve } from "../events/events";
 import * as toasts from "../components/toasts";
 
+const VERCEL_URL = "https://connections-plus.vercel.app";
+
 /* --- Game Properties --- */
 
 /**
@@ -52,7 +54,7 @@ async function getNewTiles(groupsSizes, difficulty) {
   const groupsSizesParam = encodeURIComponent(JSON.stringify(groupsSizes));
 
   const response = await fetch(
-    `/api/get-tiles?groupsSizes=${groupsSizesParam}&numTags=${numTags}&language=${language}`
+    `${VERCEL_URL}/api/get-tiles?groupsSizes=${groupsSizesParam}&numTags=${numTags}&language=${language}`
   );
 
   if (!response.ok) {
