@@ -24,8 +24,10 @@ export const getTags = async (numTags, language) => {
  * @returns {Array} An array of categories matching the criteria.
  */
 export const getCategories = async (tags, minTerms) => {
+  const tagsParam = encodeURIComponent(JSON.stringify(tags));
+
   const response = await fetch(
-    `/api/supabase?action=getCategories&tags=${tags}&minTerms=${minTerms}`
+    `/api/supabase?action=getCategories&tags=${tagsParam}&minTerms=${minTerms}`
   );
 
   if (!response.ok) {
