@@ -1,7 +1,7 @@
 # Connectons+
 
 <p align="center">
-  <a href="https://connections-plus.vercel.app/">
+  <a href="https://guychuk.github.io/connections-plus/">
     <img src="public/icon.png" alt="Logo" width="100" height="100">
   </a>
 </p>
@@ -73,7 +73,7 @@ To help (but not spoil):
 ## Live Demo
 
 You can play it right here:  
-👉  [https://connections-plus.vercel.app/](https://connections-plus.vercel.app/)
+👉  [https://guychuk.github.io/connections-plus/](https://guychuk.github.io/connections-plus/)
 
 ## Installation & Setup
 
@@ -87,8 +87,8 @@ You can play it right here:
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/guychuk/connections_plus.git
-   cd connections_plus
+   git clone https://github.com/guychuk/connections-plus.git
+   cd connections-plus
    ```
 
 2. **Set up a Python virtual environment (for the DB scripts)**
