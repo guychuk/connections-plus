@@ -1,4 +1,3 @@
-import * as supabase from "../services/supabase";
 import { makePositions, hashTilesSet } from "../core/utils";
 import {
   calculateTileSize,
