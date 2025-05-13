@@ -102,7 +102,6 @@ export default async function handler(req, res) {
 
 /**
  * Get a given number of distinct tags.
- * @param {SupabaseClient} client The Supabase client.
  * @param {number} numTags The number of tags to retrieve.
  * @returns {Array} An array of tags.
  */
@@ -117,7 +116,6 @@ export const getTags = async (numTags, language) => {
 
 /**
  * Retrieve categories that match a given set of tags and have at least a minimum number of terms.
- * @param {SupabaseClient} client The Supabase client.
  * @param {Array} tags An array of tags to filter categories.
  * @param {number} minTerms The minimum number of terms a category must have.
  * @returns {Array} An array of categories matching the criteria.
@@ -133,7 +131,6 @@ export const getCategories = async (tags, minTerms) => {
 
 /**
  * Get the name of a category given its id.
- * @param {SupabaseClient} client The Supabase client.
  * @param {number} categoryID The id of the category.
  * @returns {string} The name of the category, or an empty string on error.
  */
@@ -148,7 +145,6 @@ export const getCategoryName = async (categoryID) => {
 
 /**
  * Retrieve a specified number of terms for a given category.
- * @param {SupabaseClient} client The Supabase client.
  * @param {number} categoryID The ID of the category whose terms are to be retrieved.
  * @param {number} num The maximum number of terms to retrieve.
  * @returns {Array} An array of terms, or an empty array on error.
@@ -240,7 +236,7 @@ export const getTiles = async (groupsSizes, numTags, language) => {
     // Get terms
 
     const fetchTermsPromises = groupsSizes.map((groupSize, index) =>
-      supabase.getTerms(categories[index].cat_id, groupSize).then((terms) => {
+      getTerms(categories[index].cat_id, groupSize).then((terms) => {
         return terms.map((term) => term.term);
       })
     );
