@@ -69,8 +69,9 @@ const makeTile = (id, term, category, groupSize, groupIndex, button) => {
  */
 async function getNewTiles(groups, difficulty) {
   const language = getLanguage();
+  const numTags = getNumOfTags(difficulty, groups.length);
 
-  const tiles = await supabase.getTiles(groups, difficulty, language);
+  const tiles = await supabase.getTiles(groups, numTags, language);
 
   return new Set(tiles);
 }

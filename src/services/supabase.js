@@ -78,11 +78,11 @@ export const getTerms = async (categoryID, num) => {
   return terms;
 };
 
-export const getTiles = async (groupsSizes, difficulty, language) => {
+export const getTiles = async (groupsSizes, numTags, language) => {
   const groupsSizesParam = encodeURIComponent(JSON.stringify(groupsSizes));
 
   const response = await fetch(
-    `/api/supabase?action=tiles&groupsSizes=${groupsSizesParam}&difficulty=${difficulty}&language=${language}`
+    `/api/supabase?action=tiles&groupsSizes=${groupsSizesParam}&numTags=${numTags}&language=${language}`
   );
 
   if (!response.ok) {

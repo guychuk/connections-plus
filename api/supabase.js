@@ -189,12 +189,11 @@ const makeTile = (id, term, category, groupSize, groupIndex, button) => {
 /**
  * Get tiles for a new game.
  * @param {Array} groups array of group sizes.
- * @param {string} difficulty difficulty
+ * @param {number} numTags The number of tags to retrieve.
  * @returns {Set} set of tiles.
  */
-export const getTiles = async (groupsSizes, difficulty, language) => {
+export const getTiles = async (groupsSizes, numTags, language) => {
   const numGroups = groupsSizes.length;
-  const numTags = getNumOfTags(difficulty, numGroups);
 
   var categories;
   const categoriesSet = new Set();
