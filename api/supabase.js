@@ -3,6 +3,8 @@ import { createClient } from "@supabase/supabase-js";
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY;
 
+const MAX_ITERATIONS = 30;
+
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 export default async function handler(req, res) {
@@ -11,89 +13,29 @@ export default async function handler(req, res) {
   if (method === "GET") {
     const { action, ...params } = req.query;
 
-    switch (action) {
-      case "getTags": {
-        const { numTags, language } = params;
+    if (action === "tiles") {
+      const { groupsSizes, numTags, language } = params;
 
-        if (!numTags) {
-          return res.status(400).json({ message: "Missing numTags parameter" });
-        } else if (!language) {
-          return res
-            .status(400)
-            .json({ message: "Missing language parameter" });
-        }
-
-        const tags = await getTags(numTags, language);
-        return res.status(200).json(tags);
+      if (!groupsSizes) {
+        return res
+          .status(400)
+          .json({ message: "Missing groupsSizes parameter" });
+      } else if (!numTags) {
+        return res.status(400).json({ message: "Missing numTags parameter" });
+      } else if (!language) {
+        return res.status(400).json({ message: "Missing language parameter" });
       }
-      case "getCategories": {
-        const { tags, minTerms } = params;
 
-        if (!tags) {
-          return res.status(400).json({ message: "Missing tags parameter" });
-        } else if (!minTerms) {
-          return res
-            .status(400)
-            .json({ message: "Missing minTerms parameter" });
-        }
+      const parsedGroupsSizes = JSON.parse(decodeURIComponent(groupsSizes));
 
-        const parsedTags = JSON.parse(decodeURIComponent(tags));
+      const tiles = await getTiles(parsedGroupsSizes, numTags, language);
 
-        const categories = await getCategories(parsedTags, minTerms);
-        return res.status(200).json(categories);
-      }
-      case "getCategoryName": {
-        const { categoryID } = params;
+      if (!tiles)
+        return res.status(500).json({ message: "Failed to get tiles" });
 
-        if (!categoryID) {
-          return res
-            .status(400)
-            .json({ message: "Missing categoryID parameter" });
-        }
-
-        const categoryName = await getCategoryName(categoryID);
-        return res.status(200).json(categoryName);
-      }
-      case "getTerms": {
-        const { categoryID, num } = params;
-
-        if (!categoryID) {
-          return res
-            .status(400)
-            .json({ message: "Missing categoryID parameter" });
-        } else if (!num) {
-          return res.status(400).json({ message: "Missing num parameter" });
-        }
-
-        const terms = await getTerms(categoryID, num);
-        return res.status(200).json(terms);
-      }
-      case "tiles": {
-        const { groupsSizes, numTags, language } = params;
-
-        if (!groupsSizes) {
-          return res
-            .status(400)
-            .json({ message: "Missing groupsSizes parameter" });
-        } else if (!numTags) {
-          return res.status(400).json({ message: "Missing numTags parameter" });
-        } else if (!language) {
-          return res
-            .status(400)
-            .json({ message: "Missing language parameter" });
-        }
-
-        const parsedGroupsSizes = JSON.parse(decodeURIComponent(groupsSizes));
-
-        const tiles = await getTiles(parsedGroupsSizes, numTags, language);
-
-        if (!tiles)
-          return res.status(500).json({ message: "Failed to get tiles" });
-
-        return res.status(200).json(tiles);
-      }
-      default:
-        return res.status(400).json({ message: "Invalid action parameter" });
+      return res.status(200).json(tiles);
+    } else {
+      return res.status(400).json({ message: "Invalid action parameter" });
     }
   } else {
     res.status(405).json({ message: "Invalid request method" });
@@ -105,7 +47,7 @@ export default async function handler(req, res) {
  * @param {number} numTags The number of tags to retrieve.
  * @returns {Array} An array of tags.
  */
-export const getTags = async (numTags, language) => {
+const getTags = async (numTags, language) => {
   let { data, error } = await supabase.rpc("get_random_distinct_tags", {
     n: numTags,
     lang: language,
@@ -120,7 +62,7 @@ export const getTags = async (numTags, language) => {
  * @param {number} minTerms The minimum number of terms a category must have.
  * @returns {Array} An array of categories matching the criteria.
  */
-export const getCategories = async (tags, minTerms) => {
+const getCategories = async (tags, minTerms) => {
   let { data, error } = await supabase.rpc("get_categories", {
     tag_filter: tags,
     min_terms: minTerms,
@@ -134,7 +76,7 @@ export const getCategories = async (tags, minTerms) => {
  * @param {number} categoryID The id of the category.
  * @returns {string} The name of the category, or an empty string on error.
  */
-export const getCategoryName = async (categoryID) => {
+const getCategoryName = async (categoryID) => {
   let { data, error } = await supabase
     .from("categories")
     .select("*")
@@ -149,7 +91,7 @@ export const getCategoryName = async (categoryID) => {
  * @param {number} num The maximum number of terms to retrieve.
  * @returns {Array} An array of terms, or an empty array on error.
  */
-export const getTerms = async (categoryID, num) => {
+const getTerms = async (categoryID, num) => {
   let { data, error } = await supabase
     .from("terms")
     .select("*")
@@ -186,7 +128,7 @@ const makeTile = (id, term, category, groupSize, groupIndex, button) => {
  * @param {number} numTags The number of tags to retrieve.
  * @returns {Set} set of tiles.
  */
-export const getTiles = async (groupsSizes, numTags, language) => {
+const getTiles = async (groupsSizes, numTags, language) => {
   const numGroups = groupsSizes.length;
 
   var categories;
@@ -194,7 +136,7 @@ export const getTiles = async (groupsSizes, numTags, language) => {
 
   var iterations = 0;
 
-  while (iterations < 30) {
+  while (iterations < MAX_ITERATIONS) {
     const tags = (await getTags(numTags, language)).map((tag) => tag.tag);
 
     let i = numGroups;

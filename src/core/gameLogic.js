@@ -41,38 +41,27 @@ const getNumOfTags = (difficulty, numGroups) => {
 /* --- Tiles --- */
 
 /**
- * Make a tile object.
- * @param {string} id The ID of the tile.
- * @param {string} term The term of the tile.
- * @param {string} category The category of the tile.
- * @param {number} groupSize The group size of the tile.
- * @param {number} groupIndex The group index of the tile.
- * @param {HTMLButtonElement} button The button element for the tile.
- * @returns {Object} The tile object.
- */
-const makeTile = (id, term, category, groupSize, groupIndex, button) => {
-  return {
-    id,
-    term,
-    category,
-    groupSize,
-    groupIndex,
-    button,
-  };
-};
-
-/**
  * Create tiles for a new game.
- * @param {Array} groups array of group sizes.
+ * @param {Array} groupsSizes array of group sizes.
  * @param {string} difficulty difficulty
  * @returns {Set} set of tiles.
  */
-async function getNewTiles(groups, difficulty) {
+async function getNewTiles(groupsSizes, difficulty) {
   const language = getLanguage();
-  const numTags = getNumOfTags(difficulty, groups.length);
+  const numTags = getNumOfTags(difficulty, groupsSizes.length);
 
-  const tiles = await supabase.getTiles(groups, numTags, language);
+  const groupsSizesParam = encodeURIComponent(JSON.stringify(groupsSizes));
 
+  const response = await fetch(
+    `/api/supabase?action=tiles&groupsSizes=${groupsSizesParam}&numTags=${numTags}&language=${language}`
+  );
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(`Failed to fetch tiles: ${error.message}`);
+  }
+
+  const tiles = await response.json();
   return new Set(tiles);
 }
 
