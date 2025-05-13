@@ -69,16 +69,14 @@ export default async function handler(req, res) {
         return res.status(200).json(terms);
       }
       case "tiles": {
-        const { groupsSizes, difficulty, language } = params;
+        const { groupsSizes, numTags, language } = params;
 
         if (!groupsSizes) {
           return res
             .status(400)
             .json({ message: "Missing groupsSizes parameter" });
-        } else if (!difficulty) {
-          return res
-            .status(400)
-            .json({ message: "Missing difficulty parameter" });
+        } else if (!numTags) {
+          return res.status(400).json({ message: "Missing numTags parameter" });
         } else if (!language) {
           return res
             .status(400)
@@ -87,7 +85,7 @@ export default async function handler(req, res) {
 
         const parsedGroupsSizes = JSON.parse(decodeURIComponent(groupsSizes));
 
-        const tiles = await getTiles(parsedGroupsSizes, difficulty, language);
+        const tiles = await getTiles(parsedGroupsSizes, numTags, language);
 
         if (!tiles)
           return res.status(500).json({ message: "Failed to get tiles" });
