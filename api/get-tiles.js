@@ -23,7 +23,7 @@ export default async function handler(req, res) {
       });
     }
 
-    const { groupsSizes, numTags, language } = params;
+    const { groupsSizes, numTags, language } = req.query;
 
     if (!groupsSizes) {
       return res.status(400).json({ message: "Missing groupsSizes parameter" });
