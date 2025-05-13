@@ -52,7 +52,7 @@ async function getNewTiles(groupsSizes, difficulty) {
   const groupsSizesParam = encodeURIComponent(JSON.stringify(groupsSizes));
 
   const response = await fetch(
-    `/api/supabase?action=tiles&groupsSizes=${groupsSizesParam}&numTags=${numTags}&language=${language}`
+    `/api/get-tiles?groupsSizes=${groupsSizesParam}&numTags=${numTags}&language=${language}`
   );
 
   if (!response.ok) {

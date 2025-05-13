@@ -11,32 +11,35 @@ export default async function handler(req, res) {
   const { method } = req;
 
   if (method === "GET") {
-    const { action, ...params } = req.query;
+    const allowedParams = ["groupsSizes", "numTags", "language"];
+    const receivedParams = Object.keys(req.query);
+    const extraParams = receivedParams.filter(
+      (key) => !allowedParams.includes(key)
+    );
 
-    if (action === "tiles") {
-      const { groupsSizes, numTags, language } = params;
-
-      if (!groupsSizes) {
-        return res
-          .status(400)
-          .json({ message: "Missing groupsSizes parameter" });
-      } else if (!numTags) {
-        return res.status(400).json({ message: "Missing numTags parameter" });
-      } else if (!language) {
-        return res.status(400).json({ message: "Missing language parameter" });
-      }
-
-      const parsedGroupsSizes = JSON.parse(decodeURIComponent(groupsSizes));
-
-      const tiles = await getTiles(parsedGroupsSizes, numTags, language);
-
-      if (!tiles)
-        return res.status(500).json({ message: "Failed to get tiles" });
-
-      return res.status(200).json(tiles);
-    } else {
-      return res.status(400).json({ message: "Invalid action parameter" });
+    if (extraParams.length > 0) {
+      return res.status(400).json({
+        message: `Unexpected parameter(s): ${extraParams.join(", ")}`,
+      });
     }
+
+    const { groupsSizes, numTags, language } = params;
+
+    if (!groupsSizes) {
+      return res.status(400).json({ message: "Missing groupsSizes parameter" });
+    } else if (!numTags) {
+      return res.status(400).json({ message: "Missing numTags parameter" });
+    } else if (!language) {
+      return res.status(400).json({ message: "Missing language parameter" });
+    }
+
+    const parsedGroupsSizes = JSON.parse(decodeURIComponent(groupsSizes));
+
+    const tiles = await getTiles(parsedGroupsSizes, numTags, language);
+
+    if (!tiles) return res.status(500).json({ message: "Failed to get tiles" });
+
+    return res.status(200).json(tiles);
   } else {
     res.status(405).json({ message: "Invalid request method" });
   }
