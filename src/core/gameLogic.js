@@ -68,94 +68,11 @@ const makeTile = (id, term, category, groupSize, groupIndex, button) => {
  * @returns {Set} set of tiles.
  */
 async function getNewTiles(groups, difficulty) {
-  const numGroups = groups.length;
-  const numTags = getNumOfTags(difficulty, numGroups);
+  const language = getLanguage();
 
-  var categories;
-  const categoriesSet = new Set();
+  const tiles = await supabase.getTiles(groups, difficulty, language);
 
-  var iterations = 0;
-
-  while (iterations < 30) {
-    const tags = (await supabase.getTags(numTags, getLanguage())).map(
-      (tag) => tag.tag
-    );
-
-    let i = groups.length;
-
-    categories = Array.from({ length: numGroups }, () => null);
-    categoriesSet.clear();
-
-    // Test this choice of Tags
-    while (0 < i) {
-      const newCategories = (
-        await supabase.getCategories(tags, groups[i - 1])
-      ).filter((category) => !categoriesSet.has(category.cat_id));
-
-      // If no categories were found, try again with different tags
-      if (newCategories.length === 0) {
-        console.error(
-          "Did not find new categories, trying again with different tags"
-        );
-        break;
-      }
-
-      for (let j = 0; j < newCategories.length && i > 0; j++) {
-        categories[i - 1] = newCategories[j];
-        categoriesSet.add(newCategories[j].cat_id);
-        i--;
-      }
-    }
-
-    if (i > 0) {
-      iterations++;
-      continue;
-    }
-
-    // Get categories names
-
-    const categoriesNamesPromises = categories.map((category) =>
-      supabase.getCategoryName(category.cat_id)
-    );
-
-    const categoriesNames = await Promise.all(categoriesNamesPromises);
-
-    // Get terms
-
-    const fetchTermsPromises = groups.map((groupSize, index) =>
-      supabase.getTerms(categories[index].cat_id, groupSize).then((terms) => {
-        return terms.map((term) => term.term);
-      })
-    );
-
-    const allTerms = await Promise.all(fetchTermsPromises);
-
-    // Check for duplicate terms
-    if (new Set(allTerms.flat()).size !== allTerms.flat().length) {
-      console.error("Duplicate terms found, trying again");
-      iterations++;
-      continue;
-    }
-
-    const tiles = new Set();
-
-    for (let i = 0; i < groups.length; i++) {
-      for (let j = 0; j < groups[i]; j++) {
-        tiles.add(
-          makeTile(
-            tiles.length, // id
-            allTerms[i][j], // term
-            categoriesNames[i], // category
-            groups[i], // groupSize
-            i, // groupIndex
-            null // button (not yet created)
-          )
-        );
-      }
-    }
-
-    return tiles;
-  }
+  return new Set(tiles);
 }
 
 /* --- Game Initialization --- */

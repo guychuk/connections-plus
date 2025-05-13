@@ -23,7 +23,7 @@ export default async function handler(req, res) {
             .json({ message: "Missing language parameter" });
         }
 
-        const tags = await getTags(supabase, numTags, language);
+        const tags = await getTags(numTags, language);
         return res.status(200).json(tags);
       }
       case "getCategories": {
@@ -39,7 +39,7 @@ export default async function handler(req, res) {
 
         const parsedTags = JSON.parse(decodeURIComponent(tags));
 
-        const categories = await getCategories(supabase, parsedTags, minTerms);
+        const categories = await getCategories(parsedTags, minTerms);
         return res.status(200).json(categories);
       }
       case "getCategoryName": {
@@ -51,7 +51,7 @@ export default async function handler(req, res) {
             .json({ message: "Missing categoryID parameter" });
         }
 
-        const categoryName = await getCategoryName(supabase, categoryID);
+        const categoryName = await getCategoryName(categoryID);
         return res.status(200).json(categoryName);
       }
       case "getTerms": {
@@ -65,8 +65,34 @@ export default async function handler(req, res) {
           return res.status(400).json({ message: "Missing num parameter" });
         }
 
-        const terms = await getTerms(supabase, categoryID, num);
+        const terms = await getTerms(categoryID, num);
         return res.status(200).json(terms);
+      }
+      case "tiles": {
+        const { groupsSizes, difficulty, language } = params;
+
+        if (!groupsSizes) {
+          return res
+            .status(400)
+            .json({ message: "Missing groupsSizes parameter" });
+        } else if (!difficulty) {
+          return res
+            .status(400)
+            .json({ message: "Missing difficulty parameter" });
+        } else if (!language) {
+          return res
+            .status(400)
+            .json({ message: "Missing language parameter" });
+        }
+
+        const parsedGroupsSizes = JSON.parse(decodeURIComponent(groupsSizes));
+
+        const tiles = await getTiles(parsedGroupsSizes, difficulty, language);
+
+        if (!tiles)
+          return res.status(500).json({ message: "Failed to get tiles" });
+
+        return res.status(200).json(tiles);
       }
       default:
         return res.status(400).json({ message: "Invalid action parameter" });
@@ -82,8 +108,8 @@ export default async function handler(req, res) {
  * @param {number} numTags The number of tags to retrieve.
  * @returns {Array} An array of tags.
  */
-export const getTags = async (client, numTags, language) => {
-  let { data, error } = await client.rpc("get_random_distinct_tags", {
+export const getTags = async (numTags, language) => {
+  let { data, error } = await supabase.rpc("get_random_distinct_tags", {
     n: numTags,
     lang: language,
   });
@@ -98,8 +124,8 @@ export const getTags = async (client, numTags, language) => {
  * @param {number} minTerms The minimum number of terms a category must have.
  * @returns {Array} An array of categories matching the criteria.
  */
-export const getCategories = async (client, tags, minTerms) => {
-  let { data, error } = await client.rpc("get_categories", {
+export const getCategories = async (tags, minTerms) => {
+  let { data, error } = await supabase.rpc("get_categories", {
     tag_filter: tags,
     min_terms: minTerms,
   });
@@ -113,8 +139,8 @@ export const getCategories = async (client, tags, minTerms) => {
  * @param {number} categoryID The id of the category.
  * @returns {string} The name of the category, or an empty string on error.
  */
-export const getCategoryName = async (client, categoryID) => {
-  let { data, error } = await client
+export const getCategoryName = async (categoryID) => {
+  let { data, error } = await supabase
     .from("categories")
     .select("*")
     .eq("id", categoryID);
@@ -129,12 +155,124 @@ export const getCategoryName = async (client, categoryID) => {
  * @param {number} num The maximum number of terms to retrieve.
  * @returns {Array} An array of terms, or an empty array on error.
  */
-export const getTerms = async (client, categoryID, num) => {
-  let { data, error } = await client
+export const getTerms = async (categoryID, num) => {
+  let { data, error } = await supabase
     .from("terms")
     .select("*")
     .eq("category_id", categoryID)
     .limit(num);
 
   return error ? [] : data;
+};
+
+/**
+ * Make a tile object.
+ * @param {string} id The ID of the tile.
+ * @param {string} term The term of the tile.
+ * @param {string} category The category of the tile.
+ * @param {number} groupSize The group size of the tile.
+ * @param {number} groupIndex The group index of the tile.
+ * @param {HTMLButtonElement} button The button element for the tile.
+ * @returns {Object} The tile object.
+ */
+const makeTile = (id, term, category, groupSize, groupIndex, button) => {
+  return {
+    id,
+    term,
+    category,
+    groupSize,
+    groupIndex,
+    button,
+  };
+};
+
+/**
+ * Get tiles for a new game.
+ * @param {Array} groups array of group sizes.
+ * @param {string} difficulty difficulty
+ * @returns {Set} set of tiles.
+ */
+export const getTiles = async (groupsSizes, difficulty, language) => {
+  const numGroups = groupsSizes.length;
+  const numTags = getNumOfTags(difficulty, numGroups);
+
+  var categories;
+  const categoriesSet = new Set();
+
+  var iterations = 0;
+
+  while (iterations < 30) {
+    const tags = (await getTags(numTags, language)).map((tag) => tag.tag);
+
+    let i = numGroups;
+
+    categories = Array.from({ length: numGroups }, () => null);
+    categoriesSet.clear();
+
+    // Test this choice of Tags
+    while (0 < i) {
+      const newCategories = (
+        await getCategories(tags, groupsSizes[i - 1])
+      ).filter((category) => !categoriesSet.has(category.cat_id));
+
+      // If no categories were found, try again with different tags
+      if (newCategories.length === 0) {
+        break;
+      }
+
+      for (let j = 0; j < newCategories.length && i > 0; j++) {
+        categories[i - 1] = newCategories[j];
+        categoriesSet.add(newCategories[j].cat_id);
+        i--;
+      }
+    }
+
+    if (i > 0) {
+      iterations++;
+      continue;
+    }
+
+    // Get categories names
+
+    const categoriesNamesPromises = categories.map((category) =>
+      getCategoryName(category.cat_id)
+    );
+
+    const categoriesNames = await Promise.all(categoriesNamesPromises);
+
+    // Get terms
+
+    const fetchTermsPromises = groupsSizes.map((groupSize, index) =>
+      supabase.getTerms(categories[index].cat_id, groupSize).then((terms) => {
+        return terms.map((term) => term.term);
+      })
+    );
+
+    const allTerms = await Promise.all(fetchTermsPromises);
+
+    // Check for duplicate terms
+    if (new Set(allTerms.flat()).size !== allTerms.flat().length) {
+      iterations++;
+      continue;
+    }
+
+    const tiles = [];
+
+    for (let i = 0; i < groupsSizes.length; i++) {
+      for (let j = 0; j < groupsSizes[i]; j++) {
+        tiles.push(
+          makeTile(
+            tiles.length, // id
+            allTerms[i][j], // term
+            categoriesNames[i], // category
+            groupsSizes[i], // groupSize
+            i, // groupIndex
+            null // button (not yet created)
+          )
+        );
+      }
+    }
+
+    return tiles;
+  }
 };

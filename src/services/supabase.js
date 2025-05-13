@@ -77,3 +77,19 @@ export const getTerms = async (categoryID, num) => {
   const terms = await response.json();
   return terms;
 };
+
+export const getTiles = async (groupsSizes, difficulty, language) => {
+  const groupsSizesParam = encodeURIComponent(JSON.stringify(groupsSizes));
+
+  const response = await fetch(
+    `/api/supabase?action=tiles&groupsSizes=${groupsSizesParam}&difficulty=${difficulty}&language=${language}`
+  );
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(`Failed to fetch tiles: ${error.message}`);
+  }
+
+  const tiles = await response.json();
+  return tiles;
+};
